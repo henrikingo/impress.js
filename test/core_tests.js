@@ -1,3 +1,9 @@
+/*
+ * Copyright 2016 Henrik Ingo (@henrikingo)
+ *
+ * Released under the MIT license. See LICENSE file.
+ */
+
 QUnit.begin(function( details ) {
   // In case tests didn't complete, we are left with a hash/anchor pointing somewhere. But we want to start from scratch:
   window.location.hash = "";    
