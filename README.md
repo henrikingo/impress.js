@@ -46,6 +46,37 @@ on the wiki, too.
 There is also a book available about [Building impressive presentations with impress.js](http://www.packtpub.com/building-impressive-presentations-with-impressjs/book) by Rakhitha Nimesh Ratnayake.
 
 
+REPOSITORY STRUCTURE
+--------------------
+
+* [index.html](index.html): This is the official impress.js demo, showcasing all of the features 
+  of the original impress.js, as well as some new plugins as we add them.
+  * As already mentioned, this file is well commented and acts as the canonical documentation.
+* [src/](src/): The main file is [src/impress.js](src/impress.js). Additional
+  functionality is implemented as plugins in [src/plugins/](src/plugins/).
+  * See [src/plugins/README.md](src/plugins/README.md) for information about
+    the plugin API and how to write plugins.
+* [test/](test/): Contains QUnit and Syn libraries that we use for writing tests,
+  as well as some test coverage for core functionality. (Yes, more tests are
+  much welcome.) Tests for plugins are in the directory of each plugin.
+* [js/](js/): Contains [js/impress.js](js/impress.js), which contains a 
+  concatenation of the core `src/impress.js` and all the plugins. Traditionally
+  this is the file that you'll link to in a browser. In fact both the demo and
+  test files do exactly that.
+* [css/](css/]: Contains a CSS file used by the demo. This file is 
+  **not required for using impress.js** in your own presentations. Impress.js
+  creates the CSS it needs dynamically.
+* [build.js](build.js): Simple build file that creates `js/impress.js`. It also
+  creates a minified version `impress.min.js`, but that one is not included in the
+  github repository.
+* [package.json](build.js): An NPM package specification. This was mainly added
+  so you can easily install [buildify](https://www.npmjs.com/package/buildify)
+  and run `npm build`. Other than the build process (which is really just
+  doing roughly `cat src/impress.js src/plugins/*/*.js > js/impress.js`) 
+  `impress.js` itself doesn't depend on Node or any NPM modules.
+* [bower.json](bower.json): A Bower package file. We also don't depend on Bower,
+  but provide this file if you want to use it.
+
 WANT TO CONTRIBUTE?
 ---------------------
 
