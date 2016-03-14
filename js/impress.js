@@ -642,17 +642,41 @@
     
     // flag that can be used in JS to check if browser have passed the support test
     impress.supported = impressSupported;
-    
+
 })(document, window);
 
-// NAVIGATION EVENTS
 
-// As you can see this part is separate from the impress.js core code.
-// It's because these navigation actions only need what impress.js provides with
-// its simple API.
+// THAT'S ALL FOLKS!
 //
-// In future I think about moving it to make them optional, move to separate files
-// and treat more like a 'plugins'.
+// Thanks for reading it all.
+// Or thanks for scrolling down and reading the last part.
+//
+// I've learnt a lot when building impress.js and I hope this code and comments
+// will help somebody learn at least some part of it.
+
+/**
+ * Navigation events plugin
+ *
+ * As you can see this part is separate from the impress.js core code.
+ * It's because these navigation actions only need what impress.js provides with
+ * its simple API.
+ *
+ * This plugin is what we call an _init plugin_. It's a simple kind of
+ * impress.js plugin. When loaded, it starts listening to the `impress:init`
+ * event. That event listener initializes the plugin functionality - in this
+ * case we listen to some keypress and mouse events. The only dependencies on
+ * core impress.js functionality is the `impress:init` method, as well as using
+ * the public api `next(), prev(),` etc when keys are pressed.
+ *
+ * Copyright 2011-2012 Bartek Szopka (@bartaz)
+ * Released under the MIT license.
+ * ------------------------------------------------
+ *  author:  Bartek Szopka
+ *  version: 0.5.3
+ *  url:     http://bartaz.github.com/impress.js/
+ *  source:  http://github.com/bartaz/impress.js/
+ *
+ */
 (function ( document, window ) {
     'use strict';
     
@@ -786,6 +810,10 @@
             }
         }, false);
         
+        // TODO: This was originally defined here, when impress.js was a single file.
+        // It has nothing to do with key navigation events, but it depends on the 
+        // throttle function defined above. Leaving here for now.
+        
         // rescale presentation when window is resized
         window.addEventListener("resize", throttle(function () {
             // force going to active step again, to trigger rescaling
@@ -796,10 +824,56 @@
         
 })(document, window);
 
-// THAT'S ALL FOLKS!
-//
-// Thanks for reading it all.
-// Or thanks for scrolling down and reading the last part.
-//
-// I've learnt a lot when building impress.js and I hope this code and comments
-// will help somebody learn at least some part of it.
+
+/**
+ * Autoplay plugin - Automatically advance slideshow after N seconds
+ *
+ * Copyright 2016 Henrik Ingo, henrik.ingo@avoinelama.fi
+ * Released under the MIT license.
+ */
+(function ( document, window ) {
+    'use strict';
+
+    // Copied from core impress.js. Good candidate for moving to a utilities collection.
+    var toNumber = function (numeric, fallback) {
+        return isNaN(numeric) ? (fallback || 0) : Number(numeric);
+    };
+
+    var autoplayDefault=0;
+    var api = null;
+
+    // On impress:init, check whether there is a default setting, as well as 
+    // handle step-1.
+    document.addEventListener("impress:init", function (event) {
+        // Getting API from event data instead of global impress().init().
+        // You don't even need to know what is the id of the root element
+        // or anything. `impress:init` event data gives you everything you 
+        // need to control the presentation that was just initialized.
+        api = event.detail.api;
+        var root = event.target;
+        // Element attributes starting with 'data-', become available under
+        // element.dataset. In addition hyphenized words become camelCased.
+        var data = root.dataset;
+        
+        if ( data.autoplay ){
+            autoplayDefault = toNumber(data.autoplay, 0);
+        }
+        // Note that right after impress:init event, also impress:stepenter is
+        // triggered for the first slide, so that's where code flow continues.
+    }, false);
+        
+    // If default autoplay time was defined in the presentation root, or
+    // in this step, set timeout.
+    document.addEventListener("impress:stepenter", function (event) {
+        var step = event.target;
+        var timeout = toNumber( step.dataset.autoplay, autoplayDefault );
+        if ( timeout > 0) {
+            setTimeout( function() { api.next(); }, timeout*1000 );
+        }
+    }, false);
+
+})(document, window);
+
+// TODO: It could sometimes be convenient to be able to turn off the autoplay
+// ie to enable/disable this plugin completely. We envision a general framework
+// for such runtime changes to plugin settings. Stay tuned.
