@@ -7,7 +7,7 @@
 <head>
   <meta charset="utf-8">
   <title>QUnit tests for impress.js</title>
-  <link rel="stylesheet" href="qunit/qunit.css">
+  <link rel="stylesheet" href="../../../test/qunit/qunit.css">
 </head>
 
 
@@ -38,12 +38,15 @@
 
   <div id="qunit"></div>
 
-  <script src="../js/impress.js"></script>
-  <script src="qunit/qunit.js"></script>
-  <script src="helpers.js"></script>
+  <script src="../../../js/impress.js"></script>
+  <script src="../../../test/qunit/qunit.js"></script>
+  <!-- This is a copy of dist/syn.js from bower install syn. (The one in npm install doesn't work in a browser.) -->
+  <!-- See http://bitovi.com/blog/2010/07/syn-a-standalone-synthetic-event-library.html for simple usage guide. -->
+  <script src="../../../test/syn/syn.js"></script>
+
 
   <!-- The QUnit tests. -->
-  <script src="core_tests.js"></script>
+  <script src="navigation_tests.js"></script>
 
 </body>
 </html>
