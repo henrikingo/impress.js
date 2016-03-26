@@ -14,6 +14,7 @@
 
     var autoplayDefault=0;
     var api = null;
+    var timeoutHandle = null;
 
     // On impress:init, check whether there is a default setting, as well as 
     // handle step-1.
@@ -38,15 +39,21 @@
     // If default autoplay time was defined in the presentation root, or
     // in this step, set timeout.
     document.addEventListener("impress:stepenter", function (event) {
+        // If a new step was entered, start by canceling the timeout that was 
+        // set for a previous one.
+        if ( timeoutHandle ) {
+            clearTimeout(timeoutHandle);
+        }
+   
         var step = event.target;
         var timeout = toNumber( step.dataset.autoplay, autoplayDefault );
         if ( timeout > 0) {
-            setTimeout( function() { api.next(); }, timeout*1000 );
+            timeoutHandle = setTimeout( function() { api.next(); }, timeout*1000 );
         }
     }, false);
 
 })(document, window);
 
 // TODO: It could sometimes be convenient to be able to turn off the autoplay
-// ie to enable/disable this plugin completely. We envision a general framework
-// for such runtime changes to plugin settings. Stay tuned.
+// during a presentation, even if non-zero timeouts have been set. We envision 
+// a general framework for such runtime changes to plugin settings. Stay tuned.
