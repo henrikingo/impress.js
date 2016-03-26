@@ -4,7 +4,9 @@ var buildify = require('buildify');
  
 buildify()
   .load('src/impress.js')
-  .concat(['src/plugins/navigation/navigation.js', 'src/plugins/autoplay/autoplay.js'])
+  .concat(['src/plugins/navigation/navigation.js',
+           'src/plugins/navigation-ui/navigation-ui.js',
+           'src/plugins/autoplay/autoplay.js'])
   .save('js/impress.js')
   .uglify()
   .save('js/impress.min.js');

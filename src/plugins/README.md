@@ -150,10 +150,21 @@ GUI plugins
 
 A *GUI plugin* is actually just an init plugin, but is a special category that
 exposes visible widgets or effects in the presentation. For example, it might
-provide clickable buttons to go to the next and previous slide.
+provide clickable buttons to go to the next and previous slide. 
 
-GUI plugins are currently fully supported, but the repository doesn't yet
-contain any example. Stay tuned.
+Note that all plugins shipped in the default set **must not** produce any visible
+html elements unless the user asks for it. A recommended best practice is to let 
+the user add a div element, with an id equaling the plugin's namespace, in the 
+place where he wants to see whatever visual UI elements the plugin is providing:
+
+    <div id="impress-plugina-ui"></div>
+
+Another way to show the elements of a UI plugin might be by allowing the user
+to explicitly press a key, like "H" for a help dialog.
+
+[Navigation-ui](navigation-ui/README.md) is an example of a GUI plugin. It adds
+clickable back / forward buttons, as well as a select element from which you
+can jump to any step in the presentation.
 
 Remember that for default plugins, even GUI plugins, no html files, css files
 or images are allowed. Everything must be generated from javascript. The idea

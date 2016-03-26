@@ -527,6 +527,22 @@ a:focus {
     cursor: pointer;
 }
 
+/*
+  This version of impress.js supports plugins, and in particular, a UI plugin
+  that allows easy navigation between steps.
+*/
+.impress-enabled #impress-navigation-ui {
+    position: fixed;
+    right: 1px;
+    bottom: 1px;
+    opacity: 0.6;
+}
+.impress-enabled #impress-navigation-ui.impress-navigation-ui-show {
+    display: block;
+}
+.impress-enabled #impress-navigation-ui.impress-navigation-ui-hide {
+    display: none;
+}
 
 /*
     Now, when we have all the steps styled let's give users a hint how to navigate
@@ -682,9 +698,9 @@ a:focus {
 
     So use it wisely ... or don't use at all.
 */
-.impress-enabled          { pointer-events: none }
-.impress-enabled #impress { pointer-events: auto }
-
+.impress-enabled                          { pointer-events: none }
+.impress-enabled #impress                 { pointer-events: auto }
+.impress-enabled #impress-navigation-ui   { pointer-events: auto }
 /*
     There is one funny thing I just realized.
 
