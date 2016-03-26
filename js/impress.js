@@ -196,6 +196,8 @@
     // sure if it makes any sense in practice ;)
     var roots = {};
     
+    var preInitPlugins = [];
+    
     // some default config values.
     var defaults = {
         width: 1024,
@@ -227,7 +229,8 @@
                 init: empty,
                 goto: empty,
                 prev: empty,
-                next: empty
+                next: empty,
+                addPreInitPlugin: empty
             };
         }
         
@@ -293,6 +296,29 @@
             }
         };
         
+        // `addPreInitPlugin` allows plugins to register a function that should
+        // be run (synchronously) at the beginning of init, before 
+        // impress().init() itself executes.
+        var addPreInitPlugin = function( plugin, weight ) {
+            weight = toNumber(weight,10);
+            if ( preInitPlugins[weight] === undefined ) {
+                preInitPlugins[weight] = [];
+            }
+            preInitPlugins[weight].push( plugin );
+        };
+        
+        // Called at beginning of init, to execute all pre-init plugins.
+        var execPreInitPlugins = function() {
+            for( var i = 0; i < preInitPlugins.length; i++ ) {
+                var thisLevel = preInitPlugins[i];
+                if( thisLevel !== undefined ) {
+                    for( var j = 0; j < thisLevel.length; j++ ) {
+                        thisLevel[j]();
+                    }
+                }
+            }
+        };
+        
         // `initStep` initializes given step element by reading data from its
         // data attributes and setting correct styles.
         var initStep = function ( el, idx ) {
@@ -331,6 +357,7 @@
         // `init` API function that initializes (and runs) the presentation.
         var init = function () {
             if (initialized) { return; }
+            execPreInitPlugins();
             
             // First we set up the viewport for mobile devices.
             // For some reason iPad goes nuts when it is not done properly.
@@ -635,7 +662,8 @@
             init: init,
             goto: goto,
             next: next,
-            prev: prev
+            prev: prev,
+            addPreInitPlugin: addPreInitPlugin
         });
 
     };
@@ -653,6 +681,66 @@
 //
 // I've learnt a lot when building impress.js and I hope this code and comments
 // will help somebody learn at least some part of it.
+
+/**
+ * Autoplay plugin - Automatically advance slideshow after N seconds
+ *
+ * Copyright 2016 Henrik Ingo, henrik.ingo@avoinelama.fi
+ * Released under the MIT license.
+ */
+(function ( document, window ) {
+    'use strict';
+
+    // Copied from core impress.js. Good candidate for moving to a utilities collection.
+    var toNumber = function (numeric, fallback) {
+        return isNaN(numeric) ? (fallback || 0) : Number(numeric);
+    };
+
+    var autoplayDefault=0;
+    var api = null;
+    var timeoutHandle = null;
+
+    // On impress:init, check whether there is a default setting, as well as 
+    // handle step-1.
+    document.addEventListener("impress:init", function (event) {
+        // Getting API from event data instead of global impress().init().
+        // You don't even need to know what is the id of the root element
+        // or anything. `impress:init` event data gives you everything you 
+        // need to control the presentation that was just initialized.
+        api = event.detail.api;
+        var root = event.target;
+        // Element attributes starting with 'data-', become available under
+        // element.dataset. In addition hyphenized words become camelCased.
+        var data = root.dataset;
+        
+        if ( data.autoplay ){
+            autoplayDefault = toNumber(data.autoplay, 0);
+        }
+        // Note that right after impress:init event, also impress:stepenter is
+        // triggered for the first slide, so that's where code flow continues.
+    }, false);
+        
+    // If default autoplay time was defined in the presentation root, or
+    // in this step, set timeout.
+    document.addEventListener("impress:stepenter", function (event) {
+        // If a new step was entered, start by canceling the timeout that was 
+        // set for a previous one.
+        if ( timeoutHandle ) {
+            clearTimeout(timeoutHandle);
+        }
+   
+        var step = event.target;
+        var timeout = toNumber( step.dataset.autoplay, autoplayDefault );
+        if ( timeout > 0) {
+            timeoutHandle = setTimeout( function() { api.next(); }, timeout*1000 );
+        }
+    }, false);
+
+})(document, window);
+
+// TODO: It could sometimes be convenient to be able to turn off the autoplay
+// during a presentation, even if non-zero timeouts have been set. We envision 
+// a general framework for such runtime changes to plugin settings. Stay tuned.
 
 /**
  * Navigation events plugin
@@ -937,61 +1025,97 @@
 
 
 /**
- * Autoplay plugin - Automatically advance slideshow after N seconds
+ * Relative Positioning Plugin
  *
- * Copyright 2016 Henrik Ingo, henrik.ingo@avoinelama.fi
+ * This plugin provides support for defining the coordinates of a step relative
+ * to the previous step. This is often more convenient when creating presentations,
+ * since as you add, remove or move steps, you may not need to edit the positions
+ * as much as is the case with the absolute coordinates supported by impress.js
+ * core.
+ * 
+ * Example:
+ * 
+ *         <!-- Position step 1000 px to the right and 500 px up from the previous step. -->
+ *         <div class="step" data-rel-x="1000" data-rel-y="500">
+ * 
+ * Following html attributes are supported for step elements:
+ * 
+ *     data-rel-x
+ *     data-rel-y
+ *     data-rel-z
+ * 
+ * These values are also inherited from the previous step. This makes it easy to 
+ * create a boring presentation where each slide shifts for example 1000px down 
+ * from the previous.
+ * 
+ * This plugin is a *pre-init plugin*. It is called synchronously from impress.js
+ * core at the beginning of `impress().init()`. This allows it to process its own
+ * data attributes first, and possibly alter the data-x, data-y and data-z attributes
+ * that will then be processed by `impress().init()`.
+ * 
+ * (Another name for this kind of plugin might be called a *filter plugin*, but
+ * *pre-init plugin* is more generic, as a plugin might do whatever it wants in
+ * the pre-init stage.)
+ *
+ * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
 (function ( document, window ) {
     'use strict';
 
-    // Copied from core impress.js. Good candidate for moving to a utilities collection.
     var toNumber = function (numeric, fallback) {
         return isNaN(numeric) ? (fallback || 0) : Number(numeric);
     };
 
-    var autoplayDefault=0;
-    var api = null;
-    var timeoutHandle = null;
-
-    // On impress:init, check whether there is a default setting, as well as 
-    // handle step-1.
-    document.addEventListener("impress:init", function (event) {
-        // Getting API from event data instead of global impress().init().
-        // You don't even need to know what is the id of the root element
-        // or anything. `impress:init` event data gives you everything you 
-        // need to control the presentation that was just initialized.
-        api = event.detail.api;
-        var root = event.target;
-        // Element attributes starting with 'data-', become available under
-        // element.dataset. In addition hyphenized words become camelCased.
-        var data = root.dataset;
+    var computeRelativePositions = function ( el, prev ) {
+        var data = el.dataset;
         
-        if ( data.autoplay ){
-            autoplayDefault = toNumber(data.autoplay, 0);
+        if( !prev ) {
+            // For the first step, inherit these defaults
+            var prev = { x:0, y:0, z:0, relative: {x:0, y:0, z:0} };
         }
-        // Note that right after impress:init event, also impress:stepenter is
-        // triggered for the first slide, so that's where code flow continues.
-    }, false);
-        
-    // If default autoplay time was defined in the presentation root, or
-    // in this step, set timeout.
-    document.addEventListener("impress:stepenter", function (event) {
-        // If a new step was entered, start by canceling the timeout that was 
-        // set for a previous one.
-        if ( timeoutHandle ) {
-            clearTimeout(timeoutHandle);
-        }
-   
-        var step = event.target;
-        var timeout = toNumber( step.dataset.autoplay, autoplayDefault );
-        if ( timeout > 0) {
-            timeoutHandle = setTimeout( function() { api.next(); }, timeout*1000 );
-        }
-    }, false);
 
+        var step = {
+                x: toNumber(data.x, prev.x),
+                y: toNumber(data.y, prev.y),
+                z: toNumber(data.z, prev.z),
+                relative: {
+                    x: toNumber(data.relX, prev.relative.x),
+                    y: toNumber(data.relY, prev.relative.y),
+                    z: toNumber(data.relZ, prev.relative.z)
+                }
+            };
+        // Relative position is ignored/zero if absolute is given.
+        // Note that this also has the effect of resetting any inherited relative values.
+        if(data.x !== undefined) step.relative.x = 0;
+        if(data.y !== undefined) step.relative.y = 0;
+        if(data.z !== undefined) step.relative.z = 0;
+        
+        // Apply relative position to absolute position, if non-zero
+        step.x = step.x + step.relative.x;
+        step.y = step.y + step.relative.y;
+        step.z = step.z + step.relative.z;
+        
+        return step;        
+    };
+            
+    var rel = function() {
+        var root  = document.querySelector("#impress");
+        var steps = root.querySelectorAll(".step");
+        var prev;
+        for ( var i = 0; i < steps.length; i++ ) {
+            var el = steps[i];
+            var step = computeRelativePositions( el, prev );
+            // Apply relative position (if non-zero)
+            el.setAttribute( "data-x", step.x );
+            el.setAttribute( "data-y", step.y );
+            el.setAttribute( "data-z", step.z );
+            prev = step;
+        }
+    };
+    
+    // Register the plugin to be called in pre-init phase
+    impress().addPreInitPlugin( rel );
+    
 })(document, window);
 
-// TODO: It could sometimes be convenient to be able to turn off the autoplay
-// during a presentation, even if non-zero timeouts have been set. We envision 
-// a general framework for such runtime changes to plugin settings. Stay tuned.

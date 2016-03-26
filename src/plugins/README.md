@@ -62,7 +62,12 @@ For most plugins, a single `.js` file is enough.
 
 Note that the plugin name is also used as a namespace for various things. For
 example, the *autoplay* plugin can be configured by setting the `data-autoplay="5"`
-attribute on a `div`.
+attribute on a `div`. 
+
+Generally you should use crisp and descriptive names for your plugins. But
+sometimes you might optimize for a short namespace. Hence, the
+[Relative Positioning Plugin](rel/rel.js) is called `rel` to keep html attributes
+short. You should not overuse this idea!
 
 The plugin directory should also include tests, which should use the *QUnit* and
 *Syn* libraries under [test/](../../test). You can have as many tests as you like,
@@ -141,8 +146,15 @@ Some plugins need to run before even impress().init() does anything. These
 are typically *filters*: they want to modify the html via DOM calls, before
 impress.js core parses the presentation. We call these *pre-init plugins*.
 
-Currently pre-init plugins are not possible. A hook to execute them will be
-provided shortly. Stay tuned.
+A pre-init plugin must be called synchronously, before `impress().init()` is
+executed. Plugins can register themselves to be called in the pre-init phase
+by calling:
+
+    impress().addPreInitPlugin( plugin );
+
+The argument `plugin` must be a function.
+
+The [Relative Positioning Plugin](rel/rel.js) is an example of a pre-init plugin.
 
 
 GUI plugins
