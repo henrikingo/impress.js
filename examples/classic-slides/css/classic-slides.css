@@ -292,6 +292,23 @@ img {
 }
 
 /*
+  This version of impress.js supports plugins, and in particular, a UI plugin
+  that allows easy navigation between steps.
+*/
+.impress-enabled #impress-navigation-ui {
+    position: fixed;
+    right: 1px;
+    bottom: 1px;
+    opacity: 0.6;
+}
+.impress-enabled #impress-navigation-ui.impress-navigation-ui-show {
+    display: block;
+}
+.impress-enabled #impress-navigation-ui.impress-navigation-ui-hide {
+    display: none;
+}
+
+/*
     And as the last thing there is a workaround for quite strange bug.
     It happens a lot in Chrome. I don't remember if I've seen it in Firefox.
 
@@ -312,8 +329,9 @@ img {
 
     So use it wisely ... or don't use at all.
 */
-.impress-enabled          { pointer-events: none }
-.impress-enabled #impress { pointer-events: auto }
+.impress-enabled                          { pointer-events: none }
+.impress-enabled #impress                 { pointer-events: auto }
+.impress-enabled #impress-navigation-ui   { pointer-events: auto }
 
 
 /*****************************************************************************************
