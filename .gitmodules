@@ -1,0 +1,3 @@
+[submodule "extras/impress-console"]
+	path = extras/impress-console
+	url = https://github.com/regebro/impress-console.git
