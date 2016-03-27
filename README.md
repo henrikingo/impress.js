@@ -61,6 +61,8 @@ REPOSITORY STRUCTURE
 * [index.html](index.html): This is the official impress.js demo, showcasing all of the features 
   of the original impress.js, as well as some new plugins as we add them.
   * As already mentioned, this file is well commented and acts as the canonical documentation.
+* [examples/](examples/): Contains [another demo](examples/classic-slides/index.html)
+  that you can use as template for your first simple slide shows.
 * [src/](src/): The main file is [src/impress.js](src/impress.js). Additional
   functionality is implemented as plugins in [src/plugins/](src/plugins/).
   * See [src/plugins/README.md](src/plugins/README.md) for information about
@@ -85,7 +87,7 @@ REPOSITORY STRUCTURE
   github repository.
 * [package.json](build.js): An NPM package specification. This was mainly added
   so you can easily install [buildify](https://www.npmjs.com/package/buildify)
-  and run `npm build`. Other than the build process (which is really just
+  and run `node build.js`. Other than the build process (which is really just
   doing roughly `cat src/impress.js src/plugins/*/*.js > js/impress.js`) 
   `impress.js` itself doesn't depend on Node or any NPM modules.
 * [bower.json](bower.json): A Bower package file. We also don't depend on Bower,
