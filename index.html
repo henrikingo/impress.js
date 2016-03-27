@@ -351,7 +351,8 @@
     
 -->
 <div class="hint">
-    <p>Use a spacebar or arrow keys to navigate</p>
+    <p>Use a spacebar or arrow keys to navigate. <br/>
+       Press 'P' to launch speaker console.</p>
 </div>
 <script>
 if ("ontouchstart" in document.documentElement) { 
@@ -401,6 +402,14 @@ if ("ontouchstart" in document.documentElement) {
     is used in event handlers.
     
 -->
+
+<script type="text/javascript" src="extras/impress-console/js/impressConsole.js"></script>
+<script>
+// Init impressConsole.js. This does not yet show the window, just activates the plugin. Press 'P' to show the console.
+// Note that we must pass the correct path to css file as well.
+impressConsole().init(cssFile='extras/impress-console/css/impressConsole.css');
+</script>
+
 
 </body>
 </html>
