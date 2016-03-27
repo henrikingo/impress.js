@@ -23,7 +23,16 @@ Sorry.
 Fortunately there are some guys on GitHub that got quite excited with the idea of building
 editing tool for impress.js. Let's hope they will manage to do it.
 
+GIT SUBMODULES
+--------------
+ 
+Some plugins under [extras/](extras/) are independent git repositories
+that are imported as git submodules. After cloning this repo, you need to
 
+    git submodule init
+    git submodule update
+
+For more info, [see this tutorial](https://git-scm.com/book/en/v2/Git-Tools-Submodules#Cloning-a-Project-with-Submodules).
 
 EXAMPLES AND OTHER LEARNING RESOURCES
 ---------------------------------------
@@ -66,6 +75,11 @@ REPOSITORY STRUCTURE
 * [css/](css/]: Contains a CSS file used by the demo. This file is 
   **not required for using impress.js** in your own presentations. Impress.js
   creates the CSS it needs dynamically.
+* [extras/](extras/) contains plugins that for various reasons aren't
+  enabled by default. You have to explicitly add them with their own <script>
+  element to use them. Some of them are also imported from other git 
+  repositories as git submodules. See [.gitmodule](.gitmodule) and also 
+  [a tutorial on managing git modules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 * [build.js](build.js): Simple build file that creates `js/impress.js`. It also
   creates a minified version `impress.min.js`, but that one is not included in the
   github repository.
