@@ -78,7 +78,7 @@ REPOSITORY STRUCTURE
   **not required for using impress.js** in your own presentations. Impress.js
   creates the CSS it needs dynamically.
 * [extras/](extras/) contains plugins that for various reasons aren't
-  enabled by default. You have to explicitly add them with their own <script>
+  enabled by default. You have to explicitly add them with their own `script`
   element to use them. Some of them are also imported from other git 
   repositories as git submodules. See [.gitmodule](.gitmodule) and also 
   [a tutorial on managing git modules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
