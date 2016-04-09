@@ -18,8 +18,7 @@ under [src/](../), you can run `node build.js` to recreate the distributable
 `js/impress.js` file. The build script also creates a minified file, but this
 is not included in the git repository.
 
-Tip: Build errors
-^^^^^^^^^^^^^^^^^
+### Tip: Build errors
 
 If your code has parse errors, the `build.js` will print a rather unhelpful
 exception like
@@ -46,8 +45,7 @@ You will be pleased to know, that the concatenation of the unminified file
 open a test in your browser, and the browser will show you the line and error.
 
 
-Structure, naming and policy
-----------------------------
+### Structure, naming and policy
 
 Each plugin is contained within its own directory. The name of the directory
 is the name of the plugin. For example, imagine a plugin called *pluginA*:
@@ -89,8 +87,7 @@ Default plugins must not add any global variables.
 HowTo write a plugin
 --------------------
 
-Encapsulation
-^^^^^^^^^^^^^
+### Encapsulation
 
 To avoid polluting the global namespace, plugins must encapsulate them in the
 standard javascript anonymous function:
@@ -110,8 +107,7 @@ standard javascript anonymous function:
     })(document, window);
 
 
-Init plugins
-^^^^^^^^^^^^
+### Init plugins
 
 We categorize plugins into various categories, based on how and when they are 
 called, and what they do.
@@ -139,8 +135,7 @@ like this:
     <div id="impress" data-plugina-foo="5" data-plugina-bar="auto" >
 
 
-Pre-init plugins
-^^^^^^^^^^^^^^^^
+### Pre-init plugins
 
 Some plugins need to run before even impress().init() does anything. These
 are typically *filters*: they want to modify the html via DOM calls, before
@@ -157,8 +152,7 @@ The argument `plugin` must be a function.
 The [Relative Positioning Plugin](rel/rel.js) is an example of a pre-init plugin.
 
 
-GUI plugins
-^^^^^^^^^^^
+### GUI plugins
 
 A *GUI plugin* is actually just an init plugin, but is a special category that
 exposes visible widgets or effects in the presentation. For example, it might
