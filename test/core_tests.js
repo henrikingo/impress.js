@@ -10,12 +10,55 @@ QUnit.begin(function( details ) {
 });
 
 QUnit.test( "Initialize Impress.js", function( assert ) {
+  // Init triggers impress:init event, which we want to catch.
+  // Note: We also *must* catch all events before exiting and continuing with next block.
+  var doneInit      = assert.async();
+  var doneStepEnter = assert.async();
+  var doneSync      = assert.async();
+
+  var root  = document.querySelector( "div#impress" );
+
+  // Test events triggered by init()
+  var assertInit = function( event ) {
+    assert.ok( true, "impress:init event triggered.");
+    // IMPORTANT: Before exiting a QUnit.test() block, we must cleanup any DOM changes, including event listeners.
+    root.removeEventListener( "impress:init", assertInit );
+    doneInit();
+  };
+  root.addEventListener( "impress:init", assertInit );
+  var assertStepEnter = function( event ) {
+    assert.ok( true, "impress:stepenter event triggered.");
+
+    var step1 = document.querySelector( "div#step-1" );
+    assert.equal( event.target, step1,
+                  event.target.id + " triggered impress:stepenter event." );
+/*
+    assert.ok( event.target.classList.contains("present"),
+               event.target.id + " set present css class." );
+    assert.ok( !event.target.classList.contains("future"),
+               event.target.id + " unset future css class." );
+    assert.ok( !event.target.classList.contains("past"),
+               event.target.id + " unset past css class." );
+    assert.equal( "#/"+event.target.id, window.location.hash,
+                  "Hash is " + "#/"+event.target.id );
+*/
+    // Cleanup self
+    root.removeEventListener( "impress:init", assertInit );
+    doneStepEnter();
+  };
+  root.addEventListener( "impress:stepenter", assertStepEnter );
+
+
+  // Synchronous code and assertions
   assert.ok( impress, 
              "impress declared in global scope" );
   assert.strictEqual( impress().init(), undefined,
                     "impress().init() called." );
   assert.strictEqual( impress().init(), undefined,
                     "It's ok to call impress().init() a second time, it's a no-op." );
+                    
+  // The asserts below are true immediately after impress().init() returns.
+  // Therefore we test them here, not in an event handler.
   var notSupportedClass = document.body.classList.contains("impress-not-supported");
   var yesSupportedClass = document.body.classList.contains("impress-supported");
   if ( !_impressSupported() ) {
@@ -76,7 +119,9 @@ QUnit.test( "Initialize Impress.js", function( assert ) {
 
     assert.ok( step1.classList.contains("active"),
                "Step 1 has active css class." );
+    
   }
+  doneSync();
 });
 
 // Note: Here we focus on testing the core functionality of moving between
@@ -100,7 +145,7 @@ QUnit.test( "Impress Core API", function( assert ) {
   // On impress:stepleave, we do some assertions on the "left" object.
   // Finally we call next() to initialize the next transition, and it starts all over again. 
   var i = 0;
-  var sequence = [ { left    : null, // impress:stepleave is not triggered when leaving step-1 the first time. 
+  var sequence = [ { left    : step1, // impress:stepleave is not triggered when leaving step-1 the first time. 
                      entered : step2,
                      next    : function(){ return impress().goto(2); },
                      text    : "goto(<number>) called and returns ok (2->3)" },
@@ -129,7 +174,7 @@ QUnit.test( "Impress Core API", function( assert ) {
                      next    : false } // false = end of sequence
   ];
   // When both assertStepEnter and assertStepLeave are done, we can go to next step in sequence.
-  var readyCount = 1; // 1 because first time impress:stepleave not happening.
+  var readyCount = 0; // 1 because first time impress:stepleave not happening.
   var readyForNext = function(){
     readyCount++;
     if( readyCount % 2 == 0 ) {
