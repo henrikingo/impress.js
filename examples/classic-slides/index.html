@@ -31,7 +31,7 @@
         them here. You can read about each extras module separately in their directory.
     -->
     <link rel="stylesheet" href="../../extras/highlight/styles/github.css">
-    <script src="../../extras/highlight/highlight.pack.js"></script>
+    <link rel="stylesheet" href="../../extras/mermaid/mermaid.forest.css">
 
         
     <!--
@@ -124,7 +124,8 @@
             <li><a href="#step-5">Blockquote &amp; image</a></li>
             <li><a href="#step-6">More basic text styles</a></li>
             <li><a href="#step-7">Motion effects 101</a></li>
-            <li><a href="#step-8">More info</a></li>
+            <li><a href="#addons">Add-ons</a></li>
+            <li><a href="#moreinfo">More info</a></li>
         </ul>
 
         <div class="notes">
@@ -228,7 +229,7 @@
         </div>
     </div>
 
-    <div class="step slide title" data-rel-x="-800" data-rel-y="800" data-rotate="150">
+    <div id="addons" class="step slide title" data-rel-x="-800" data-rel-y="800" data-rotate="150">
         <h2>Add-ons</h2>
         <div class="notes">
         <p>This version of impress.js includes several add-ons, striving to make this a
@@ -283,7 +284,31 @@
         </div>
     </div>
 
-    <div class="step slide" data-rel-x="0" data-rel-y="-2200" data-rotate="720">
+    <div class="step slide" data-rel-x="-800" data-rel-y="-800" data-rotate="240">
+        <h1>Mermaid.js</h1>
+        <div class="mermaid">
+        %% This is a comment in mermaid markup
+        graph LR
+          A(Support for<br />diagrams)
+          B[Provided by<br />mermaid.js]
+          C{Already<br />know<br />mermaid?}
+          D(<a href=&quot;http://knsv.github.io/mermaid/index.html#usage&quot;>Tutorial</a>)
+          E(Great, hope you enjoy!)
+          A-->B
+          B-->C
+          C--No-->D
+          C--Yes-->E
+          classDef startEnd fill:#fcc,stroke:#353,stroke-width:2px;
+          class A,D,E startEnd;
+        </div>
+        <div class="notes">
+          Mermaid.js, likewise in a href="https://github.com/henrikingo/impress.js/tree/myfork/extras">extras/</a>
+           directory, draws SVG diagrams from a MarkDown-like syntax. To learn
+          more about it <a href="http://knsv.github.io/mermaid/index.html#usage">read the fine manual</a>.
+        </div>
+    </div>
+
+    <div id="moreinfo" class="step slide" data-rel-x="1200" data-rel-y="-1200" data-rotate="720">
         <h1>More info</h1>
         <ul>
         <li>Official documentation
@@ -306,7 +331,11 @@
         </div>
     </div>
 
-    <div id="overview" class="step" data-x="3000" data-y="1500" data-scale="10">
+    <!-- This last "slide" is set to be very large in CSS, so that it covers all the other slides you just saw. 
+         It's a common way of zooming out at the end, to show the whole presentation.
+         In CSS, we set pointer-events:none to make this slide non-clickable. 
+         It makes a difference at least for SVG content, such as mermaid diagrams. -->
+    <div id="overview" class="step" data-x="3000" data-y="1500" data-scale="10" style="pointer-events: none;">
     </div>
 </div>
 
@@ -355,8 +384,12 @@ if (impressattrs.hasOwnProperty('auto-console') && impressattrs['auto-console'].
 
 <script type="text/javascript" src="js/impress-help-popup.js"></script>
 
-<!-- Load highlight.js (from extras) -->
+<!-- Load highlight.js and mermaid.js from extras -->
+<script src="../../extras/highlight/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
+
+<script src="../../extras/mermaid/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true});</script>
 
 </body>
 </html>
