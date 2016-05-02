@@ -12,7 +12,7 @@ impress.js may not help you if you have nothing interesting to say ;)
 HOW TO USE IT
 ---------------
 
-[Use the source](http://github.com/bartaz/impress.js/blob/master/index.html), Luke ;)
+[Use the source](http://github.com/henrikingo/impress.js/blob/master/index.html), Luke ;)
 
 If you have no idea what I mean by that, or you just clicked that link above and got 
 very confused by all these strange characters that got displayed on your screen,
@@ -39,7 +39,7 @@ EXAMPLES AND OTHER LEARNING RESOURCES
 
 ### Official demo
 
-[impress.js demo](http://impress.github.io/impress.js/) by [@bartaz](http://twitter.com/bartaz)
+[impress.js demo](http://henrikingo.github.io/impress.js/) by [@bartaz](http://twitter.com/bartaz)
 
 ### Examples and demos
 
