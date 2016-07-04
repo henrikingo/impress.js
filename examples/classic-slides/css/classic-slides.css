@@ -7,7 +7,7 @@
   http://www.webupd8.org/2011/01/automatically-install-all-google-web.html
 */
 
-/* @import url(http://fonts.googleapis.com/css?family=Open+Sans:regular,semibold,italic,italicsemibold|PT+Sans:400,700,400italic,700italic|PT+Serif:400,700,400italic,700italic); */
+/* @import url(http://fonts.googleapis.com/css?family=Open+Sans:regular,semibold,italic,italicsemibold|PT+Sans:400,700,400italic,700italic|PT+Serif:400,700,400italic,700italic|Cutive+Mono); */
 @import url(fonts.css);
 
 
@@ -145,6 +145,12 @@ body {
     font-size: 14px;
     text-shadow: 0 0 0 rgba(0, 0, 0, 0);
 }
+
+/* Inline code, no Highlight.js */
+code {
+    font-family: "Cutive mono","Courier New", monospace;
+}
+
 
 a {
     color: inherit;
