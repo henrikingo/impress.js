@@ -17,13 +17,15 @@
 
         
     <!--
-        This file contains styles specific for this example presentation. 
+        Styles specific for this example presentation. 
     -->
     <link href="css/markdown-slides.css" rel="stylesheet" />
+    <link href="css/devopsy.css" rel="stylesheet" />
+    <link href="css/effects.css" rel="stylesheet" />
     
 </head>
 
-<body class="impress-not-supported">
+<body class="impress-not-supported effects">
 <div class="fallback-message">
     <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
     <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
@@ -118,13 +120,41 @@ are converted to HTML first, then colored by Highlight.js:
   the content was written in simple Markdown.
 </div>
 
+<script type="text/javascript">
+var enableBwCss = function(){
+    disableDevopsCss();
+    disableEffectsCss();
+};
+
+var enableDevopsCss = function(){
+    document.body.classList.add("devopsy");
+    disableEffectsCss();
+};
+
+var disableDevopsCss = function(){
+    document.body.classList.remove("devopsy");
+};
+
+var enableEffectsCss = function(){
+    document.body.classList.add("effects");
+    disableDevopsCss();
+};
+
+var disableEffectsCss = function(){
+    document.body.classList.remove("effects");
+};
+</script>
+
+
 <div id="js-slide" class="step slide" data-rotate="0" data-x="4000" data-y="5000">
 <h1>CSS &amp; JavaScript magic</h1>
 
 <p>Just to emphasize my point, this last slide allows you to use a JavaScript powered menu to
 toggle the CSS style:</p>
 
-<p><a href="">Black &amp; white</a>, <a href="">Devopsy</a>, <a href="">Effects overload</a></p>
+<p><a href="#" onclick="enableBwCss();" class="css-menu-bw">Black &amp; white</a>, 
+<a href="#" onclick="enableDevopsCss();" class="css-menu-devopsy">Devopsy</a>, 
+<a href="#" onclick="enableEffectsCss();" class="css-menu-effects">Effects overload</a></p>
 
 <p>Simplicity of Markdown married with full power of Impress.js!</p>
 
