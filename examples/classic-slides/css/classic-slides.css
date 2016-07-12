@@ -307,16 +307,20 @@ img {
   This version of impress.js supports plugins, and in particular, a UI plugin
   that allows easy navigation between steps.
 */
-.impress-enabled #impress-navigation-ui {
+.impress-enabled div#impress-toolbar {
     position: fixed;
     right: 1px;
     bottom: 1px;
     opacity: 0.6;
 }
-.impress-enabled #impress-navigation-ui.impress-navigation-ui-show {
+.impress-enabled div#impress-toolbar > span {
+    margin-right: 10px;
+}
+
+.impress-enabled div#impress-toolbar.impress-toolbar-show {
     display: block;
 }
-.impress-enabled #impress-navigation-ui.impress-navigation-ui-hide {
+.impress-enabled div#impress-toolbar.impress-toolbar-hide {
     display: none;
 }
 
@@ -343,7 +347,7 @@ img {
 */
 .impress-enabled                          { pointer-events: none }
 .impress-enabled #impress                 { pointer-events: auto }
-.impress-enabled #impress-navigation-ui   { pointer-events: auto }
+.impress-enabled #impress-toolbar         { pointer-events: auto }
 
 
 /*****************************************************************************************
