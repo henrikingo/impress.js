@@ -7,14 +7,16 @@
 (function ( document, window ) {
     'use strict';
 
+    var autoplayDefault=0;
+    var currentStepTimeout=0;
+    var api = null;
+    var timeoutHandle = null;
+    var root = null;
+
     // Copied from core impress.js. Good candidate for moving to a utilities collection.
     var toNumber = function (numeric, fallback) {
         return isNaN(numeric) ? (fallback || 0) : Number(numeric);
     };
-
-    var autoplayDefault=0;
-    var api = null;
-    var timeoutHandle = null;
 
     // On impress:init, check whether there is a default setting, as well as 
     // handle step-1.
@@ -24,13 +26,19 @@
         // or anything. `impress:init` event data gives you everything you 
         // need to control the presentation that was just initialized.
         api = event.detail.api;
-        var root = event.target;
+        root = event.target;
         // Element attributes starting with 'data-', become available under
         // element.dataset. In addition hyphenized words become camelCased.
         var data = root.dataset;
         
-        if ( data.autoplay ){
+        if (data.autoplay) {
             autoplayDefault = toNumber(data.autoplay, 0);
+        }
+
+
+        var toolbar = document.querySelector("#impress-toolbar");
+        if (toolbar) {
+            addToolbarButton(toolbar);
         }
         // Note that right after impress:init event, also impress:stepenter is
         // triggered for the first slide, so that's where code flow continues.
@@ -39,21 +47,96 @@
     // If default autoplay time was defined in the presentation root, or
     // in this step, set timeout.
     document.addEventListener("impress:stepenter", function (event) {
-        // If a new step was entered, start by canceling the timeout that was 
-        // set for a previous one.
+        var step = event.target;
+        currentStepTimeout = toNumber( step.dataset.autoplay, autoplayDefault );
+        if (status=="paused") {
+            setAutoplayTimeout(0);
+        }
+        else {
+            setAutoplayTimeout(currentStepTimeout);
+        }
+    }, false);
+
+    /**
+     * Set timeout after which we move to next() step.
+     */
+    var setAutoplayTimeout = function(timeout) {
         if ( timeoutHandle ) {
             clearTimeout(timeoutHandle);
         }
    
-        var step = event.target;
-        var timeout = toNumber( step.dataset.autoplay, autoplayDefault );
         if ( timeout > 0) {
             timeoutHandle = setTimeout( function() { api.next(); }, timeout*1000 );
         }
-    }, false);
+        setButtonText();
+    };
+    
+
+    /*** Toolbar plugin integration *******************************************/
+    var status = "not clicked";
+    var toolbarButton = null;
+
+    // Copied from core impress.js. Good candidate for moving to a utilities collection.
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
+    var toggleStatus = function() {
+        if (currentStepTimeout>0 && status!="paused") {
+            status="paused";
+        }
+        else {
+            status="playing";
+        }
+    }
+
+    var getButtonText = function() {
+        if (currentStepTimeout>0 && status!="paused") {
+            return "||"; // pause
+        }
+        else {
+            return "&#9654;"; // play
+        }
+    };
+    
+    var setButtonText = function() {
+        if (toolbarButton) {
+            // Keep button size the same even if label content is changing
+            var buttonWidth = toolbarButton.offsetWidth;
+            var buttonHeight = toolbarButton.offsetHeight;
+            toolbarButton.innerHTML = getButtonText();
+            if (!toolbarButton.style.width)
+                toolbarButton.style.width = buttonWidth + "px";
+            if (!toolbarButton.style.height)
+                toolbarButton.style.height = buttonHeight + "px";
+        }
+    };
+
+    var addToolbarButton = function (toolbar) {
+        var html = '<button id="impress-autoplay-playpause" title="Autoplay" class="impress-autoplay">' + getButtonText() + '</button>';
+
+        toolbar.addEventListener("impress:toolbar:added:autoplay", function(e){
+            toolbarButton = document.getElementById("impress-autoplay-playpause");
+            toolbarButton.addEventListener( "click", function( event ) {
+                toggleStatus();
+                if (status=="playing") {
+                    if (autoplayDefault == 0) {
+                        autoplayDefault = 7;
+                    }
+                    if ( currentStepTimeout == 0 ) {
+                        currentStepTimeout = autoplayDefault;
+                    }
+                    setAutoplayTimeout(currentStepTimeout);
+                }
+                else if (status=="paused") {
+                    setAutoplayTimeout(0);
+                }
+            });
+        });
+
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 10, html : html, callback : "autoplay" } );
+    };
 
 })(document, window);
-
-// TODO: It could sometimes be convenient to be able to turn off the autoplay
-// during a presentation, even if non-zero timeouts have been set. We envision 
-// a general framework for such runtime changes to plugin settings. Stay tuned.
