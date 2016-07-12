@@ -691,14 +691,16 @@
 (function ( document, window ) {
     'use strict';
 
+    var autoplayDefault=0;
+    var currentStepTimeout=0;
+    var api = null;
+    var timeoutHandle = null;
+    var root = null;
+
     // Copied from core impress.js. Good candidate for moving to a utilities collection.
     var toNumber = function (numeric, fallback) {
         return isNaN(numeric) ? (fallback || 0) : Number(numeric);
     };
-
-    var autoplayDefault=0;
-    var api = null;
-    var timeoutHandle = null;
 
     // On impress:init, check whether there is a default setting, as well as 
     // handle step-1.
@@ -708,13 +710,19 @@
         // or anything. `impress:init` event data gives you everything you 
         // need to control the presentation that was just initialized.
         api = event.detail.api;
-        var root = event.target;
+        root = event.target;
         // Element attributes starting with 'data-', become available under
         // element.dataset. In addition hyphenized words become camelCased.
         var data = root.dataset;
         
-        if ( data.autoplay ){
+        if (data.autoplay) {
             autoplayDefault = toNumber(data.autoplay, 0);
+        }
+
+
+        var toolbar = document.querySelector("#impress-toolbar");
+        if (toolbar) {
+            addToolbarButton(toolbar);
         }
         // Note that right after impress:init event, also impress:stepenter is
         // triggered for the first slide, so that's where code flow continues.
@@ -723,24 +731,191 @@
     // If default autoplay time was defined in the presentation root, or
     // in this step, set timeout.
     document.addEventListener("impress:stepenter", function (event) {
-        // If a new step was entered, start by canceling the timeout that was 
-        // set for a previous one.
+        var step = event.target;
+        currentStepTimeout = toNumber( step.dataset.autoplay, autoplayDefault );
+        if (status=="paused") {
+            setAutoplayTimeout(0);
+        }
+        else {
+            setAutoplayTimeout(currentStepTimeout);
+        }
+    }, false);
+
+    /**
+     * Set timeout after which we move to next() step.
+     */
+    var setAutoplayTimeout = function(timeout) {
         if ( timeoutHandle ) {
             clearTimeout(timeoutHandle);
         }
    
-        var step = event.target;
-        var timeout = toNumber( step.dataset.autoplay, autoplayDefault );
         if ( timeout > 0) {
             timeoutHandle = setTimeout( function() { api.next(); }, timeout*1000 );
         }
-    }, false);
+        setButtonText();
+    };
+    
+
+    /*** Toolbar plugin integration *******************************************/
+    var status = "not clicked";
+    var toolbarButton = null;
+
+    // Copied from core impress.js. Good candidate for moving to a utilities collection.
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
+    var toggleStatus = function() {
+        if (currentStepTimeout>0 && status!="paused") {
+            status="paused";
+        }
+        else {
+            status="playing";
+        }
+    }
+
+    var getButtonText = function() {
+        if (currentStepTimeout>0 && status!="paused") {
+            return "||"; // pause
+        }
+        else {
+            return "&#9654;"; // play
+        }
+    };
+    
+    var setButtonText = function() {
+        if (toolbarButton) {
+            // Keep button size the same even if label content is changing
+            var buttonWidth = toolbarButton.offsetWidth;
+            var buttonHeight = toolbarButton.offsetHeight;
+            toolbarButton.innerHTML = getButtonText();
+            if (!toolbarButton.style.width)
+                toolbarButton.style.width = buttonWidth + "px";
+            if (!toolbarButton.style.height)
+                toolbarButton.style.height = buttonHeight + "px";
+        }
+    };
+
+    var addToolbarButton = function (toolbar) {
+        var html = '<button id="impress-autoplay-playpause" title="Autoplay" class="impress-autoplay">' + getButtonText() + '</button>';
+
+        toolbar.addEventListener("impress:toolbar:added:autoplay", function(e){
+            toolbarButton = document.getElementById("impress-autoplay-playpause");
+            toolbarButton.addEventListener( "click", function( event ) {
+                toggleStatus();
+                if (status=="playing") {
+                    if (autoplayDefault == 0) {
+                        autoplayDefault = 7;
+                    }
+                    if ( currentStepTimeout == 0 ) {
+                        currentStepTimeout = autoplayDefault;
+                    }
+                    setAutoplayTimeout(currentStepTimeout);
+                }
+                else if (status=="paused") {
+                    setAutoplayTimeout(0);
+                }
+            });
+        });
+
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 10, html : html, callback : "autoplay" } );
+    };
 
 })(document, window);
 
-// TODO: It could sometimes be convenient to be able to turn off the autoplay
-// during a presentation, even if non-zero timeouts have been set. We envision 
-// a general framework for such runtime changes to plugin settings. Stay tuned.
+/**
+ * Extras Plugin
+ *
+ * This plugin performs initialization (like calling impressConsole.init())
+ * for the extras/ plugins if they are loaded into a presentation.
+ *
+ * See README.md for details.
+ *
+ * This plugin is both a pre-init plugin and an init plugin. Markdown translation
+ * must be done before impress:init, otoh impressConsole.init() must be called
+ * after. For other plugins it doesn't matter, but we init them in the pre-init
+ * phase by default.
+ *
+ * Copyright 2016 Henrik Ingo (@henrikingo)
+ * Released under the MIT license.
+ */
+(function ( document, window ) {
+    'use strict';
+    var preInit = function() {
+        if( window.markdown ){
+            // particular. We do it ourselves here. In addition, we use "-----" as a delimiter for new slide.
+
+            // Query all .markdown elements and translate to HTML
+            var markdownDivs = document.querySelectorAll(".markdown");
+            for (var element of markdownDivs) {
+
+            // Note: unlike the previous two, markdown.js doesn't automatically find or convert anything in 
+              var slides = element.textContent.split(/^-----$/m);
+              var i = slides.length - 1;
+              element.innerHTML = markdown.toHTML(slides[i]);
+              // If there's an id, unset it for last, and all other, elements, and then set it for the first.
+              if( element.id ){
+                var id = element.id;
+                element.id = "";
+              }
+              i--;
+              while (i >= 0){
+                var newElement = element.cloneNode(false);
+                newElement.innerHTML = markdown.toHTML(slides[i]);
+                element.parentNode.insertBefore(newElement, element);
+                element = newElement;
+                i--;
+              }
+              element.id = id;
+            }
+        } // markdown
+        
+        if(window.hljs){
+            hljs.initHighlightingOnLoad();        
+        }
+        
+        if(window.mermaid){
+            mermaid.initialize({startOnLoad:true});
+        }
+    };
+
+    var postInit = function(event){
+        if(window.impressConsole){
+            // Init impressConsole.js.
+            // This does not yet show the window, just activates the plugin. 
+            // Press 'P' to show the console.
+            // Note that we must pass the correct path to css file as well.
+            // See https://github.com/regebro/impress-console/issues/19
+            if(window.impressConsoleCss){
+                impressConsole().init(window.impressConsoleCss);
+            }
+            else{
+                impressConsole().init();
+            }
+            // Legacy impressConsole attribute (that breaks our namespace
+            // convention) to open the console at start of presentation.
+            // TODO: This kind of thing would in any case be better placed
+            // inside impressConsole itself.
+            // See https://github.com/regebro/impress-console/issues/19
+            var impressattrs = document.getElementById('impress').attributes;
+            if (impressattrs.hasOwnProperty('auto-console') && impressattrs['auto-console'].value.toLowerCase() === 'true') {
+                consoleWindow = impressConsole().open();
+            }
+        }
+    };
+
+    // Register the plugin to be called in pre-init phase
+    // Note: Markdown.js should run early/first, because it creates new div elements.
+    // So add this with a lower-than-default weight.
+    impress().addPreInitPlugin( preInit, 0 );
+
+    // Register the plugin to be called on impress:init event
+    document.addEventListener("impress:init", postInit, false);
+
+})(document, window);
+
 
 /**
  * Navigation events plugin
@@ -937,10 +1112,10 @@
  */
 (function ( document, window ) {
     'use strict';
+    var toolbar;
     var api;
     var root;
     var steps;
-    var controls;
     var prev;
     var select;
     var next;
@@ -948,76 +1123,63 @@
     // How many seconds shall UI controls be visible after a touch or mousemove
     var timeout = 3;
 
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
     var addNavigationControls = function( event ) {
         api = event.detail.api;
         root = event.target;
         steps = root.querySelectorAll(".step");
 
-        controls.setAttribute( "id", "impress-navigation-ui");
-        controls.classList.add( "impress-navigation-ui");
-        // You can use CSS to hide these controls when marked with the hide class.
-        controls.classList.add( "impress-navigation-ui-hide" );
-
-       var options = "";
-       for ( var i = 0; i < steps.length; i++ ) {
-           options = options + '<option value="' + steps[i].id + '">' + steps[i].id + '</option>' + "\n";
-       }
-
-        controls.innerHTML = '<button id="impress-navigation-ui-prev" class="impress-navigation-ui">&lt;</button>' + "\n"
-                           + '<select id="impress-navigation-ui-select" class="impress-navigation-ui">' + "\n"
-                           + options
-                           + '</select>' + "\n"
-                           + '<button id="impress-navigation-ui-next" class="impress-navigation-ui">&gt;</button>' + "\n";
-
-        document.body.appendChild(controls);
-
-        prev = document.getElementById("impress-navigation-ui-prev");
-        prev.addEventListener( "click",
-            function( event ) {
-                api.prev();
-        });
-        select = document.getElementById("impress-navigation-ui-select");
-        select.addEventListener( "change",
-            function( event ) {
-                api.goto( event.target.value );
-        });
-        next = document.getElementById("impress-navigation-ui-next");
-        next.addEventListener( "click",
-            function() {
-                api.next();
-        });
-        
-    };
-    
-    /**
-     * Add a CSS class to mark that controls should be shown. Set timeout to switch to a class to hide them again.
-     */
-    var showControls = function(){
-        controls.classList.add( "impress-navigation-ui-show" );
-        controls.classList.remove( "impress-navigation-ui-hide" );
-
-        if ( timeoutHandle ) {
-            clearTimeout(timeoutHandle);
+        var options = "";
+        for ( var i = 0; i < steps.length; i++ ) {
+            options = options + '<option value="' + steps[i].id + '">' + steps[i].id + '</option>' + "\n";
         }
-        timeoutHandle = setTimeout( function() { 
-            controls.classList.add( "impress-navigation-ui-hide" );
-            controls.classList.remove( "impress-navigation-ui-show" );
-        }, timeout*1000 );
-    };
 
-    // wait for impress.js to be initialized
-    document.addEventListener("impress:init", function (event) {
-        controls = document.getElementById("impress-navigation-ui");
-        if ( controls ) {
-            addNavigationControls( event );
+        var prevHtml   = '<button id="impress-navigation-ui-prev" title="Previous" class="impress-navigation-ui">&lt;</button>';
+        var selectHtml = '<select id="impress-navigation-ui-select" title="Go to" class="impress-navigation-ui">' + "\n"
+                           + options
+                           + '</select>';
+        var nextHtml   = '<button id="impress-navigation-ui-next" title="Next" class="impress-navigation-ui">&gt;</button>';
 
-            document.addEventListener("mousemove", showControls);
-            document.addEventListener("click", showControls);
-            document.addEventListener("touch", showControls);
-            
+        toolbar.addEventListener("impress:toolbar:added:navigation-ui:prev", function(e){
+            prev = document.getElementById("impress-navigation-ui-prev");
+            prev.addEventListener( "click",
+                function( event ) {
+                    api.prev();
+            });
+        });
+        toolbar.addEventListener("impress:toolbar:added:navigation-ui:select", function(e){
+            select = document.getElementById("impress-navigation-ui-select");
+            select.addEventListener( "change",
+                function( event ) {
+                    api.goto( event.target.value );
+            });
             root.addEventListener("impress:stepenter", function(event){
                 select.value = event.target.id;
             });
+        });
+        toolbar.addEventListener("impress:toolbar:added:navigation-ui:next", function(e){
+            next = document.getElementById("impress-navigation-ui-next");
+            next.addEventListener( "click",
+                function() {
+                    api.next();
+            });
+        });
+
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : prevHtml, callback : "navigation-ui:prev" } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : selectHtml, callback : "navigation-ui:select" } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : nextHtml, callback : "navigation-ui:next" } );
+    };
+    
+    // wait for impress.js to be initialized
+    document.addEventListener("impress:init", function (event) {
+        toolbar = document.querySelector("#impress-toolbar");
+        if(toolbar) {
+            addNavigationControls( event );
         }
     }, false);
     
@@ -1121,92 +1283,202 @@
 
 
 /**
- * Extras Plugin
+ * Toolbar plugin
  *
- * This plugin performs initialization (like calling impressConsole.init())
- * for the extras/ plugins if they are loaded into a presentation.
+ * This plugin provides a generic graphical toolbar. Other plugins that
+ * want to expose a button or other widget, can add those to this toolbar.
  *
- * See README.md for details.
+ * Using a single consolidated toolbar for all GUI widgets makes it easier
+ * to position and style the toolbar rather than having to do that for lots
+ * of different divs.
  *
- * This plugin is both a pre-init plugin and an init plugin. Markdown translation
- * must be done before impress:init, otoh impressConsole.init() must be called
- * after. For other plugins it doesn't matter, but we init them in the pre-init
- * phase by default.
+ *
+ * *** For presentation authors: *****************************************
+ *
+ * To add/activate the toolbar in your presentation, add this div:
+ *
+ *     <div id="impress-toolbar"></div>
+ * 
+ * This toolbar sets CSS classes `impress-toolbar-show` on mousemove and
+ * `impress-toolbar-hide` after a few seconds of inactivity. This allows authors
+ * to use CSS to hide the toolbar when it's not used.
+ *
+ * Styling the toolbar is left to presentation author. Here's an example CSS:
+ *
+ *    .impress-enabled div#impress-toolbar {
+ *        position: fixed;
+ *        right: 1px;
+ *        bottom: 1px;
+ *        opacity: 0.6;
+ *    }
+ *    .impress-enabled div#impress-toolbar > span {
+ *        margin-right: 10px;
+ *    }
+ *    .impress-enabled div#impress-toolbar.impress-toolbar-show {
+ *        display: block;
+ *    }
+ *    .impress-enabled div#impress-toolbar.impress-toolbar-hide {
+ *        display: none;
+ *    }
+ *
+ *
+ * *** For plugin authors **********************************************
+ *
+ * To add a button to the toolbar, trigger the `impress:toolbar:appendChild`
+ * or `impress:toolbar:insertBefore` events as appropriate. The detail object
+ * should contain following parameters:
+ *
+ *    { group : 1,                       // integer. Widgets with the same group are grouped inside the same <span> element.
+ *      html : "<button>Click</button>", // The html to add.
+ *      callback : "mycallback",         // Toolbar plugin will trigger event `impress:toolbar:added:mycallback` when done.
+ *      before: element }                // The reference element for an insertBefore() call.
+ *
+ * You should also listen to the `impress:toolbar:added:mycallback` event. At 
+ * this point you can find the new widget in the DOM, and for example add an
+ * event listener to it.
+ *
+ * You are free to use any integer for the group. It's ok to leave gaps. It's
+ * ok to co-locate with widgets for another plugin, if you think they belong
+ * together.
+ *
+ * See navigation-ui for an example.
  *
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
 (function ( document, window ) {
     'use strict';
-    var preInit = function() {
-        if( window.markdown ){
-            // particular. We do it ourselves here. In addition, we use "-----" as a delimiter for new slide.
+    var toolbar = document.getElementById("impress-toolbar");
+    var groups = [];
+    var timeoutHandle;
+    // How many seconds shall UI toolbar be visible after a touch or mousemove
+    var timeout = 3;
 
-            // Query all .markdown elements and translate to HTML
-            var markdownDivs = document.querySelectorAll(".markdown");
-            for (var element of markdownDivs) {
+    /**
+     * Add a CSS class to mark that toolbar should be shown. Set timeout to switch to a class to hide them again.
+     */
+    var showToolbar = function(){
+        toolbar.classList.add( "impress-toolbar-show" );
+        toolbar.classList.remove( "impress-toolbar-hide" );
 
-            // Note: unlike the previous two, markdown.js doesn't automatically find or convert anything in 
-              var slides = element.textContent.split(/^-----$/m);
-              var i = slides.length - 1;
-              element.innerHTML = markdown.toHTML(slides[i]);
-              // If there's an id, unset it for last, and all other, elements, and then set it for the first.
-              if( element.id ){
-                var id = element.id;
-                element.id = "";
-              }
-              i--;
-              while (i >= 0){
-                var newElement = element.cloneNode(false);
-                newElement.innerHTML = markdown.toHTML(slides[i]);
-                element.parentNode.insertBefore(newElement, element);
-                element = newElement;
-                i--;
-              }
-              element.id = id;
-            }
-        } // markdown
-        
-        if(window.hljs){
-            hljs.initHighlightingOnLoad();        
+        if ( timeoutHandle ) {
+            clearTimeout(timeoutHandle);
         }
-        
-        if(window.mermaid){
-            mermaid.initialize({startOnLoad:true});
-        }
+        timeoutHandle = setTimeout( function() { 
+            toolbar.classList.add( "impress-toolbar-hide" );
+            toolbar.classList.remove( "impress-toolbar-show" );
+        }, timeout*1000 );
     };
 
-    var postInit = function(event){
-        if(window.impressConsole){
-            // Init impressConsole.js.
-            // This does not yet show the window, just activates the plugin. 
-            // Press 'P' to show the console.
-            // Note that we must pass the correct path to css file as well.
-            if(window.impressConsoleCss){
-                impressConsole().init(window.impressConsoleCss);
+    /**
+     * Start on impress.js init
+     */
+    document.addEventListener("impress:init", function (event) {
+        if ( toolbar ) {
+            document.addEventListener("mousemove", showToolbar);
+            document.addEventListener("click", showToolbar);
+            document.addEventListener("touch", showToolbar);
+            // At the beginning of presentation, also show the toolbar
+            showToolbar();
+        }
+    }, false);
+
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+    
+    /**
+     * Get the span element that is a child of toolbar, identified by index.
+     *
+     * If span element doesn't exist yet, it is created.
+     *
+     * Note: Because of Run-to-completion, this is not a race condition.
+     * https://developer.mozilla.org/en/docs/Web/JavaScript/EventLoop#Run-to-completion
+     *
+     * :param: index   Method will return the element <span id="impress-toolbar-group-{index}">
+     */
+    var getGroupElement = function(index){
+        var id = "impress-toolbar-group-" + index;
+        if(!groups[index]){
+            groups[index] = document.createElement("span");
+            groups[index].id = id;
+            var nextIndex = getNextIndex(index);
+            if ( nextIndex === undefined ){
+                toolbar.appendChild(groups[index]);
             }
             else{
-                impressConsole().init();
+                toolbar.insertBefore(groups[index], groups[nextIndex]);
             }
-            // Legacy impressConsole attribute (that breaks our namespace
-            // convention) to open the console at start of presentation.
-            // TODO: This kind of thing would in any case be better placed
-            // inside impressConsole itself.
-            // See https://github.com/regebro/impress-console/issues/19
-            var impressattrs = document.getElementById('impress').attributes;
-            if (impressattrs.hasOwnProperty('auto-console') && impressattrs['auto-console'].value.toLowerCase() === 'true') {
-                consoleWindow = impressConsole().open();
-            }
+        }
+        return groups[index];
+    };
+    
+    /**
+     * Get the node from groups[] that is immediately after given index.
+     *
+     * This can be used to find the reference node for an insertBefore() call.
+     * If no element exists at a larger index, returns undefined. (In this case,
+     * you'd use appendChild() instead.)
+     *
+     * Note that index needn't itself exist in groups[].
+     */
+    var getNextIndex = function(index){
+        var i = index+1;
+        while( ! groups[i] && i < groups.length) {
+            i++;
+        }
+        if( i < groups.length ){
+            return i;
         }
     };
 
-    // Register the plugin to be called in pre-init phase
-    // Note: Markdown.js should run early/first, because it creates new div elements.
-    // So add this with a lower-than-default weight.
-    impress().addPreInitPlugin( preInit, 0 );
+    // API
+    // Other plugins can add and remove buttons by sending them as events.
+    // In return, toolbar plugin will trigger events when button is pressed.
+    if (toolbar) {
+        /**
+         * Append a widget inside toolbar span element identified by given group index.
+         *
+         * :param: e.detail.group    integer specifying the span element where widget will be placed
+         * :param: e.detail.html     html code that is the widget to show in the toolbar
+         * :param: e.detail.callback a string used in the event triggered when new widget is added
+         */
+        toolbar.addEventListener("impress:toolbar:appendChild", function( e ){
+            var group = getGroupElement(e.detail.group);
+            var tempDiv = document.createElement("div");
+            tempDiv.innerHTML = e.detail.html;
+            var widget = tempDiv.firstChild;
+            group.appendChild(widget);
 
-    // Register the plugin to be called on impress:init event
-    document.addEventListener("impress:init", postInit, false);
+            // Once the new widget is added, send a callback event so that the caller plugin
+            // can, for example, add its event listeners to the new button.
+            var callbackEvent = "impress:toolbar:added:" + e.detail.callback;
+            triggerEvent(toolbar, callbackEvent, toolbar );
+            triggerEvent(toolbar, "impress:toolbar:added", toolbar );
+        });
+
+        toolbar.addEventListener("impress:toolbar:insertBefore", function( e ){
+            var tempDiv = document.createElement("div");
+            tempDiv.innerHTML = e.detail.html;
+            var widget = tempDiv.firstChild;
+            toolbar.insertBefore(widget, e.detail.before);
+
+            // Once the new widget is added, send a callback event so that the caller plugin
+            // can, for example, add its event listeners to the new button.
+            var callbackEvent = "impress:toolbar:added:" + e.detail.callback;
+            triggerEvent(toolbar, callbackEvent, toolbar );
+            triggerEvent(toolbar, "impress:toolbar:added", toolbar );
+        });
+
+        /**
+         * Remove the widget in e.detail.remove.
+         */
+        toolbar.addEventListener("impress:toolbar:removeWidget", function( e ){
+            toolbar.removeChild(e.detail.remove);
+            triggerEvent(toolbar, "impress:toolbar:removed", toolbar );
+        });
+    } // if toolbar
 
 })(document, window);
-

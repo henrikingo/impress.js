@@ -163,14 +163,13 @@ html elements unless the user asks for it. A recommended best practice is to let
 the user add a div element, with an id equaling the plugin's namespace, in the 
 place where he wants to see whatever visual UI elements the plugin is providing:
 
-    <div id="impress-plugina-ui"></div>
+    <div id="impress-plugina"></div>
 
 Another way to show the elements of a UI plugin might be by allowing the user
 to explicitly press a key, like "H" for a help dialog.
 
-[Navigation-ui](navigation-ui/README.md) is an example of a GUI plugin. It adds
-clickable back / forward buttons, as well as a select element from which you
-can jump to any step in the presentation.
+[Toolbar plugin](toolbar/README.md) is an example of a GUI plugin. It presents
+a toolbar where other plugins can add their buttons in a centralized fashion.
 
 Remember that for default plugins, even GUI plugins, no html files, css files
 or images are allowed. Everything must be generated from javascript. The idea

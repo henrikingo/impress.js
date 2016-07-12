@@ -22,10 +22,10 @@
  */
 (function ( document, window ) {
     'use strict';
+    var toolbar;
     var api;
     var root;
     var steps;
-    var controls;
     var prev;
     var select;
     var next;
@@ -33,76 +33,63 @@
     // How many seconds shall UI controls be visible after a touch or mousemove
     var timeout = 3;
 
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
     var addNavigationControls = function( event ) {
         api = event.detail.api;
         root = event.target;
         steps = root.querySelectorAll(".step");
 
-        controls.setAttribute( "id", "impress-navigation-ui");
-        controls.classList.add( "impress-navigation-ui");
-        // You can use CSS to hide these controls when marked with the hide class.
-        controls.classList.add( "impress-navigation-ui-hide" );
-
-       var options = "";
-       for ( var i = 0; i < steps.length; i++ ) {
-           options = options + '<option value="' + steps[i].id + '">' + steps[i].id + '</option>' + "\n";
-       }
-
-        controls.innerHTML = '<button id="impress-navigation-ui-prev" class="impress-navigation-ui">&lt;</button>' + "\n"
-                           + '<select id="impress-navigation-ui-select" class="impress-navigation-ui">' + "\n"
-                           + options
-                           + '</select>' + "\n"
-                           + '<button id="impress-navigation-ui-next" class="impress-navigation-ui">&gt;</button>' + "\n";
-
-        document.body.appendChild(controls);
-
-        prev = document.getElementById("impress-navigation-ui-prev");
-        prev.addEventListener( "click",
-            function( event ) {
-                api.prev();
-        });
-        select = document.getElementById("impress-navigation-ui-select");
-        select.addEventListener( "change",
-            function( event ) {
-                api.goto( event.target.value );
-        });
-        next = document.getElementById("impress-navigation-ui-next");
-        next.addEventListener( "click",
-            function() {
-                api.next();
-        });
-        
-    };
-    
-    /**
-     * Add a CSS class to mark that controls should be shown. Set timeout to switch to a class to hide them again.
-     */
-    var showControls = function(){
-        controls.classList.add( "impress-navigation-ui-show" );
-        controls.classList.remove( "impress-navigation-ui-hide" );
-
-        if ( timeoutHandle ) {
-            clearTimeout(timeoutHandle);
+        var options = "";
+        for ( var i = 0; i < steps.length; i++ ) {
+            options = options + '<option value="' + steps[i].id + '">' + steps[i].id + '</option>' + "\n";
         }
-        timeoutHandle = setTimeout( function() { 
-            controls.classList.add( "impress-navigation-ui-hide" );
-            controls.classList.remove( "impress-navigation-ui-show" );
-        }, timeout*1000 );
-    };
 
-    // wait for impress.js to be initialized
-    document.addEventListener("impress:init", function (event) {
-        controls = document.getElementById("impress-navigation-ui");
-        if ( controls ) {
-            addNavigationControls( event );
+        var prevHtml   = '<button id="impress-navigation-ui-prev" title="Previous" class="impress-navigation-ui">&lt;</button>';
+        var selectHtml = '<select id="impress-navigation-ui-select" title="Go to" class="impress-navigation-ui">' + "\n"
+                           + options
+                           + '</select>';
+        var nextHtml   = '<button id="impress-navigation-ui-next" title="Next" class="impress-navigation-ui">&gt;</button>';
 
-            document.addEventListener("mousemove", showControls);
-            document.addEventListener("click", showControls);
-            document.addEventListener("touch", showControls);
-            
+        toolbar.addEventListener("impress:toolbar:added:navigation-ui:prev", function(e){
+            prev = document.getElementById("impress-navigation-ui-prev");
+            prev.addEventListener( "click",
+                function( event ) {
+                    api.prev();
+            });
+        });
+        toolbar.addEventListener("impress:toolbar:added:navigation-ui:select", function(e){
+            select = document.getElementById("impress-navigation-ui-select");
+            select.addEventListener( "change",
+                function( event ) {
+                    api.goto( event.target.value );
+            });
             root.addEventListener("impress:stepenter", function(event){
                 select.value = event.target.id;
             });
+        });
+        toolbar.addEventListener("impress:toolbar:added:navigation-ui:next", function(e){
+            next = document.getElementById("impress-navigation-ui-next");
+            next.addEventListener( "click",
+                function() {
+                    api.next();
+            });
+        });
+
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : prevHtml, callback : "navigation-ui:prev" } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : selectHtml, callback : "navigation-ui:select" } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : nextHtml, callback : "navigation-ui:next" } );
+    };
+    
+    // wait for impress.js to be initialized
+    document.addEventListener("impress:init", function (event) {
+        toolbar = document.querySelector("#impress-toolbar");
+        if(toolbar) {
+            addNavigationControls( event );
         }
     }, false);
     
