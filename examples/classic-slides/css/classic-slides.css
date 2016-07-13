@@ -304,8 +304,8 @@ img {
 }
 
 /*
-  This version of impress.js supports plugins, and in particular, a UI plugin
-  that allows easy navigation between steps.
+  This version of impress.js supports plugins, and in particular, a UI toolbar
+  plugin that allows easy navigation between steps and autoplay.
 */
 .impress-enabled div#impress-toolbar {
     position: fixed;
