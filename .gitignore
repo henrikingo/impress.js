@@ -1,2 +1,3 @@
-node_modules
-js/impress.min.js
+/js/impress.min.js
+/node_modules
+/npm-debug.log

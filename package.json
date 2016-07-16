@@ -1,24 +1,43 @@
 {
   "name": "impress.js",
-  "version": "0.5.3-henrik",
-  "description": "It's a presentation framework based on the power of CSS3 transforms and transitions in modern browsers and inspired by the idea behind prezi.com. http://impress.github.io/impress.js",
-  "homepage": "http://github.com/henrikingo/impress.js",
-  "keywords": ["presentations", "client", "css3", "browser"],
+  "author": "Bartek Szopka",
   "license": "MIT",
+  "version": "0.6.0-henrikingo",
+  "description": "It's a presentation framework based on the power of CSS3 transforms and transitions in modern browsers and inspired by the idea behind prezi.com.",
+  "homepage": "http://github.com/henrikingo/impress.js",
   "main": "js/impress.js",
-  "scripts": {
-    "build": "node build.js"
-  },
   "repository" :
     { "type" : "git",
       "url" : "https://github.com/henrikingo/impress.js.git",
       "github": "https://github.com/henrikingo/impress.js"
     },
-  "author": {
-    "name": "Bartek Szopka",
-    "web": "http://bartaz.github.com"
+  "keywords": [
+    "presentation",
+    "slides",
+    "slideshow",
+    "css3",
+    "transitions",
+    "transforms",
+    "browser"
+  ],
+  "bugs": {
+    "url": "https://github.com/henrikingo/impress.js/issues"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "lint": "jshint js/impress.js *.js test/bootstrap.js && jscs js/impress.js *.js test/bootstrap.js --preset=jquery",
+    "test": "karma start --single-run",
+    "test:dev": "karma start"
   },
   "devDependencies": {
-    "buildify": "*"
+    "buildify": "*",
+    "chrome": "0.1.0",
+    "jscs": "2.11.0",
+    "jshint": "2.9.1",
+    "karma": "0.13.22",
+    "karma-chrome-launcher": "1.0.1",
+    "karma-cli": "1.0.0",
+    "karma-qunit": "1.0.0",
+    "qunitjs": "2.0.0-rc1"
   }
 }
