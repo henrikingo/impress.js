@@ -77,6 +77,16 @@ REPOSITORY STRUCTURE
 WANT TO CONTRIBUTE?
 ---------------------
 
+For developers, once you've made changes to the code, you should run these commands for testing:
+
+    npm run build
+    npm run test
+    npm run lint
+
+Note that running `firefox qunit_test_runner.html` is usually more informative than running `karma` with `npm run test`. They both run the same tests.
+
+More info about the [src/](src/) directory can be found in [src/plugins/README.md](src/plugins/README.md).
+
 [Upstream impress.js](https://github.com/impress/impress.js/) has its own bureacracy around contributing. I welcome pull requests against this fork as well, just submit a PR on github and I'll be happy to look at it :-)
 
 Note that if, for example, you want to add a new plugin, you should do it against [this fork](https://github.com/henrikingo/impress.js), since upstream impress.js doesn't have a plugin API yet. Hopefully one day the progress from this fork will trickle back to upstream repository.
