@@ -1,5 +1,110 @@
-Impress.js Plugins HowTo
-========================
+Impress.js Plugins documentation
+================================
+
+The default set of plugins
+--------------------------
+
+A lot of impress.js features are and will be implemented as plugins. Each plugin
+has user documentation in a README.md file in [its own directory](./).
+
+The plugins in this directory are called default plugins, and - unsurprisingly -
+are enabled by default. However, most of them won't do anything by default, 
+rather require the user to invoke them somehow. For example:
+
+* The *navigation* plugin waits for the user to press some keys, arrows, page
+  down, page up, space or tab.
+* The *autoplay* plugin looks for the HTML attribute `data-autoplay` to see
+  whether it should do its thing.
+* The *toolbar* plugin looks for a `<div>` element to become visible.
+
+Extra addons
+------------
+
+Yet more features are available in presentations that enable 
+[extra addons](../../extras/). Extra addons are 3rd party plugins integrated
+into impress.js to provide convenient and standardized access to them. However,
+they are not activated by default, rather must be included with a `<script>`
+tag.
+
+Note: The enabled extra addons are automatically initialized by the *extras*
+plugin.
+
+Example HTML and CSS
+--------------------
+
+Generally plugins will do something sane, or nothing, by default. Hence, no
+particular HTML or CSS is required. The README file of each plugin documents the
+HTML and CSS that you can use with that plugin.
+
+For your convenience, below is some sample HTML and CSS code covering all the
+plugins that you may want to use or adapt.
+
+### Sample HTML to enable plugins and extra addons
+
+    <head>
+      <!-- CSS files if using Highlight.js or Mermaid.js extras. -->
+      <link rel="stylesheet" href="../../extras/highlight/styles/github.css">
+      <link rel="stylesheet" href="../../extras/mermaid/mermaid.forest.css">
+    </head>
+    <body>
+      <div id="impress" data-autoplay="10">
+        <div class="step"
+             data-autoplay="15"
+             data-rel-x="1000"
+             data-rel-y="1000">
+          Slide content...
+          
+          <div class="notes">
+          Speaker notes are shown in the impressConsole.
+          </div>
+        </div>
+      </div>
+      
+      <script type="text/javascript" src="../../extras/highlight/highlight.pack.js"></script>
+      <script type="text/javascript" src="../../extras/mermaid/mermaid.min.js"></script>
+      <script type="text/javascript" src="../../extras/markdown/markdown.js"></script>
+      <script type="text/javascript" src="../../extras/impress-console/js/impressConsole.js"></script>
+      <script type="text/javascript">
+        // For impressConsole, we unfortunately must also set the path to a mandatory css file
+        // which is relative to this html file.
+        // See https://github.com/regebro/impress-console/issues/19
+        var impressConsoleCss = '../../extras/impress-console/css/impressConsole.css';
+      </script>
+    </body>
+
+### Sample CSS related to plugins and extra addons
+
+    /*
+      Speaker notes allow you to write comments within the steps, that will not 
+      be displayed as part of the presentation. However, they will be picked up
+      and displayed by impressConsole.js when integrated.
+    */
+    .notes {
+        display: none;
+    }
+
+    /* Toolbar plugin */
+    .impress-enabled div#impress-toolbar {
+        position: fixed;
+        right: 1px;
+        bottom: 1px;
+        opacity: 0.6;
+    }
+    .impress-enabled div#impress-toolbar > span {
+        margin-right: 10px;
+    }
+    .impress-enabled div#impress-toolbar.impress-toolbar-show {
+        display: block;
+    }
+    .impress-enabled div#impress-toolbar.impress-toolbar-hide {
+        display: none;
+    }
+    /* If you disable pointer-events (like in the impress.js official demo), you need to re-enable them for the toolbar. */
+    .impress-enabled #impress-toolbar         { pointer-events: auto }
+
+
+For developers
+==============
 
 The vision for impress.js is to provide a compact core library doing the
 actual presentations, with a collection of plugins that provide additional

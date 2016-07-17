@@ -191,7 +191,7 @@ It is recommended to add the class manually to the `body` element though, becaus
 
 ## Plugins
 
-Many new features are implemented as plugins. The [Plugin API README](src/plugins/README.md) is the starting place to learn about those, as well as the README.md of [each plugin](src/plugins/).
+Many new features are implemented as plugins. The [Plugins documentation](src/plugins/README.md) is the starting place to learn about those, as well as the README.md of [each plugin](src/plugins/).
 
 
 ## JavaScript
