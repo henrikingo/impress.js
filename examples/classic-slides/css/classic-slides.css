@@ -53,6 +53,7 @@ body {
     min-height: 740px;
 
     background: rgb(215, 215, 215);
+    color: rgb(102, 102, 102);
 }
 
 /*
@@ -114,7 +115,6 @@ body {
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
 
-    color: rgb(102, 102, 102);
     text-shadow: 0 2px 2px rgba(0, 0, 0, .1);
 
     font-family: 'Open Sans', Arial, sans-serif;
@@ -312,6 +312,7 @@ img {
     right: 1px;
     bottom: 1px;
     opacity: 0.6;
+    z-index: 10;
 }
 .impress-enabled div#impress-toolbar > span {
     margin-right: 10px;
@@ -323,6 +324,33 @@ img {
 .impress-enabled div#impress-toolbar.impress-toolbar-hide {
     display: none;
 }
+
+/* Progress bar */
+.progressbar {
+  position: absolute;
+  right: 118px;
+  bottom: 1px;
+  left: 118px;
+  border-radius: 7px;
+  border: 2px solid rgba(100, 100, 100, 0.2);
+}
+.progressbar DIV {
+  width: 0;
+  height: 2px;
+  border-radius: 5px;
+  background: rgba(75, 75, 75, 0.4);
+  transition: width 1s linear;
+}
+.progress {
+  position: absolute;
+  left: 59px;
+  bottom: 1px;
+  text-align: left;
+  font-size: 10pt;
+  opacity: 0.6;
+}
+
+
 
 /*
     And as the last thing there is a workaround for quite strange bug.

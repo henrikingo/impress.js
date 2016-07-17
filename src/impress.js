@@ -289,9 +289,9 @@
         // `onStepLeave` is called whenever the step element is left
         // but the event is triggered only if the step is the same as
         // last entered step.
-        var onStepLeave = function (step) {
-            if (lastEntered === step) {
-                triggerEvent(step, "impress:stepleave");
+        var onStepLeave = function (currentStep, nextStep) {
+            if (lastEntered === currentStep) {
+                triggerEvent(currentStep, "impress:stepleave", { next : nextStep } );
                 lastEntered = null;
             }
         };
@@ -510,7 +510,7 @@
             
             // trigger leave of currently active element (if it's not the same step again)
             if (activeStep && activeStep !== el) {
-                onStepLeave(activeStep);
+                onStepLeave(activeStep, el);
             }
             
             // Now we alter transforms of `root` and `canvas` to trigger transitions.

@@ -289,9 +289,9 @@
         // `onStepLeave` is called whenever the step element is left
         // but the event is triggered only if the step is the same as
         // last entered step.
-        var onStepLeave = function (step) {
-            if (lastEntered === step) {
-                triggerEvent(step, "impress:stepleave");
+        var onStepLeave = function (currentStep, nextStep) {
+            if (lastEntered === currentStep) {
+                triggerEvent(currentStep, "impress:stepleave", { next : nextStep } );
                 lastEntered = null;
             }
         };
@@ -510,7 +510,7 @@
             
             // trigger leave of currently active element (if it's not the same step again)
             if (activeStep && activeStep !== el) {
-                onStepLeave(activeStep);
+                onStepLeave(activeStep, el);
             }
             
             // Now we alter transforms of `root` and `canvas` to trigger transitions.
@@ -1185,6 +1185,43 @@
     
 })(document, window);
 
+
+(function ( document, window ) {
+    'use strict';
+    
+	var stepids = [];
+	// wait for impress.js to be initialized
+	document.addEventListener("impress:init", function (event) {
+	  var root = event.target;
+    var steps = root.querySelectorAll(".step");
+		for (var i = 0; i < steps.length; i++)
+		{
+		  stepids[i+1] = steps[i].id;
+		}
+	});
+	var progressbar = document.querySelector('div.progressbar div');
+	var progress = document.querySelector('div.progress');
+	
+	if (null !== progressbar || null !== progress) {      
+		document.addEventListener("impress:stepleave", function (event) {
+			updateProgressbar(event.detail.next.id);
+		});
+		
+		document.addEventListener("impress:stepenter", function (event) {
+			updateProgressbar(event.target.id);
+		});
+	}
+
+	function updateProgressbar(slideId) {
+		var slideNumber = stepids.indexOf(slideId);
+		if (null !== progressbar) {
+			progressbar.style.width = (100 / (stepids.length - 1) * (slideNumber)).toFixed(2) + '%';
+		}
+		if (null !== progress) {
+			progress.innerHTML = slideNumber + '/' + (stepids.length-1);
+		}
+	}
+})(document, window);
 
 /**
  * Relative Positioning Plugin

@@ -89,6 +89,7 @@ plugins that you may want to use or adapt.
         right: 1px;
         bottom: 1px;
         opacity: 0.6;
+        z-index: 10;
     }
     .impress-enabled div#impress-toolbar > span {
         margin-right: 10px;
@@ -101,6 +102,29 @@ plugins that you may want to use or adapt.
     }
     /* If you disable pointer-events (like in the impress.js official demo), you need to re-enable them for the toolbar. */
     .impress-enabled #impress-toolbar         { pointer-events: auto }
+    /* Progress bar */
+    .progressbar {
+      position: absolute;
+      right: 318px;
+      bottom: 1px;
+      left: 118px;
+      border-radius: 7px;
+      border: 2px solid rgba(100, 100, 100, 0.2);
+    }
+    .progressbar DIV {
+      width: 0;
+      height: 2px;
+      border-radius: 5px;
+      background: rgba(75, 75, 75, 0.4);
+      transition: width 1s linear;
+    }
+    .progress {
+      position: absolute;
+      left: 59px;
+      bottom: 1px;
+      text-align: left;
+      opacity: 0.6;
+    }
 
 
 For developers
