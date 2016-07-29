@@ -103,7 +103,7 @@ plugins that you may want to use or adapt.
     /* If you disable pointer-events (like in the impress.js official demo), you need to re-enable them for the toolbar. */
     .impress-enabled #impress-toolbar         { pointer-events: auto }
     /* Progress bar */
-    .progressbar {
+    .impress-progressbar {
       position: absolute;
       right: 318px;
       bottom: 1px;
@@ -111,14 +111,14 @@ plugins that you may want to use or adapt.
       border-radius: 7px;
       border: 2px solid rgba(100, 100, 100, 0.2);
     }
-    .progressbar DIV {
+    .impress-progressbar DIV {
       width: 0;
       height: 2px;
       border-radius: 5px;
       background: rgba(75, 75, 75, 0.4);
       transition: width 1s linear;
     }
-    .progress {
+    .impress-progress {
       position: absolute;
       left: 59px;
       bottom: 1px;
@@ -189,29 +189,39 @@ For most plugins, a single `.js` file is enough.
 
 Note that the plugin name is also used as a namespace for various things. For
 example, the *autoplay* plugin can be configured by setting the `data-autoplay="5"`
-attribute on a `div`. 
+attribute on a `div`.
 
-Generally you should use crisp and descriptive names for your plugins. But
+As a general rule ids, classes and attributes within the `div#impress` root
+element, may use the plugin name directly (e.g. `data-autoplay="5"`). However,
+outside of the root element, you should use `impress-pluginname` (e.g.
+`<div id="impress-toolbar">`. The latter (longer) form also applies to all
+events, they should be prefixed with `impress:pluginname`.
+
+You should use crisp and descriptive names for your plugins. But
 sometimes you might optimize for a short namespace. Hence, the
 [Relative Positioning Plugin](rel/rel.js) is called `rel` to keep html attributes
 short. You should not overuse this idea!
-
-The plugin directory should also include tests, which should use the *QUnit* and
-*Syn* libraries under [test/](../../test). You can have as many tests as you like,
-but it is suggested your first and main test file is called `plugina_tests.html`
-and `plugina_tests.js` respectively. A framework for running the tests is is out 
-of scope for this repository, at least for now. Just open the tests in all the
-browsers you have installed.
-
-You are allowed to test your plugin whatever way you like, but the general
-approach is for the test to load the [js/impress.js](../../js/impress.js) file
-produced by build.js. This way you are testing what users will actually be
-using, rather than the uncompiled source code.
 
 Note that for default plugins, which is all plugins in this directory,
 **NO css, html or image files** are allowed.
 
 Default plugins must not add any global variables.
+
+### Testing
+
+The plugin directory should also include tests, which should use the *QUnit* and
+*Syn* libraries under [test/](../../test). You can have as many tests as you like,
+but it is suggested your first and main test file is called `plugina_tests.html`
+and `plugina_tests.js` respectively. You need to add your test `.js` file into
+[/qunit_test_runner.html](../../qunit_test_runner.html), and the `.js` file 
+should start by loading the test `.html` file into the 
+`iframe#presentation-iframe`. See [navigation-ui](navigation-ui) plugin for an 
+example.
+
+You are allowed to test your plugin whatever way you like, but the general
+approach is for the test to load the [js/impress.js](../../js/impress.js) file
+produced by build.js. This way you are testing what users will actually be
+using, rather than the uncompiled source code.
 
 HowTo write a plugin
 --------------------
@@ -274,11 +284,42 @@ A pre-init plugin must be called synchronously, before `impress().init()` is
 executed. Plugins can register themselves to be called in the pre-init phase
 by calling:
 
-    impress().addPreInitPlugin( plugin );
+    impress().addPreInitPlugin( plugin, weight );
 
-The argument `plugin` must be a function.
+The argument `plugin` must be a function. `weight` is optional and defaults to
+`10`. Plugins are ordered by weight when they are executed, with lower weight
+first.
 
 The [Relative Positioning Plugin](rel/rel.js) is an example of a pre-init plugin.
+
+### Pre-StepLeave plugins
+
+A *pre-stepleave plugin* is called synchronously from impress.js core at the
+beginning of `impress().goto()`. 
+
+To register a plugin, call
+
+    impress().addPreStepLeavePlugin( plugin [, weight] );
+
+When the plugin function is executed, it will be passed an argument
+that resembles the `event` object from DOM event handlers:
+
+`event.target` contains the current step, which we are about to leave. 
+
+`event.detail.next` contains the element we are about to transition to.
+
+`event.detail.reason` contains a string, one of "next", "prev" or "goto",
+which tells you which API function was called to initiate the transition.
+
+`event.detail.transitionDuration` contains the transitionDuration for the 
+upcoming transition.
+
+A pre-stepleave plugin may alter the values in `event.detail` (except for 
+`reason`), and this can change the behavior of the upcoming transition.
+For example, the `goto` plugin will set the `event.detail.next` to point to
+some other element, causing the presentation to jump to that step instead. 
+Setting `event.detail.next` to equal `event.target` would cause the transition
+to be aborted.
 
 
 ### GUI plugins
