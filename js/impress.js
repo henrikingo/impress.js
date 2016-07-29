@@ -1199,8 +1199,8 @@
 		  stepids[i+1] = steps[i].id;
 		}
 	});
-	var progressbar = document.querySelector('div.progressbar div');
-	var progress = document.querySelector('div.progress');
+	var progressbar = document.querySelector('div.impress-progressbar div');
+	var progress = document.querySelector('div.impress-progress');
 	
 	if (null !== progressbar || null !== progress) {      
 		document.addEventListener("impress:stepleave", function (event) {

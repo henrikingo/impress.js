@@ -10,12 +10,12 @@ Add a div for progressbar and/or progress as you can see it here:
 
 ### HTML
 
-	  <div class="progressbar"><div></div></div>
-	  <div class="progress"></div>
+	  <div class="impress-progressbar"><div></div></div>
+	  <div class="impress-progress"></div>
 
 ### Sample CSS
 
-    .progressbar {
+    .impress-progressbar {
       position: absolute;
       right: 318px;
       bottom: 1px;
@@ -23,14 +23,14 @@ Add a div for progressbar and/or progress as you can see it here:
       border-radius: 7px;
       border: 2px solid rgba(100, 100, 100, 0.2);
     }
-    .progressbar DIV {
+    .impress-progressbar DIV {
       width: 0;
       height: 2px;
       border-radius: 5px;
       background: rgba(75, 75, 75, 0.4);
       transition: width 1s linear;
     }
-    .progress {
+    .impress-progress {
       position: absolute;
       left: 59px;
       bottom: 1px;
