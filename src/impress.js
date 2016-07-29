@@ -197,6 +197,7 @@
     var roots = {};
     
     var preInitPlugins = [];
+    var preStepLeavePlugins = [];
     
     // some default config values.
     var defaults = {
@@ -230,7 +231,8 @@
                 goto: empty,
                 prev: empty,
                 next: empty,
-                addPreInitPlugin: empty
+                addPreInitPlugin: empty,
+                addPreStepLeavePlugin: empty
             };
         }
         
@@ -319,6 +321,28 @@
             }
         };
         
+        // `addPreStepLeavePlugin` allows plugins to register a function that should
+        // be run (synchronously) at the beginning of goto()
+        var addPreStepLeavePlugin = function( plugin, weight ) {
+            weight = toNumber(weight,10);
+            if ( preStepLeavePlugins[weight] === undefined ) {
+                preStepLeavePlugins[weight] = [];
+            }
+            preStepLeavePlugins[weight].push( plugin );
+        };
+        
+        // Called at beginning of goto(), to execute all preStepLeave plugins.
+        var execPreStepLeavePlugins = function(event) {
+            for( var i = 0; i < preStepLeavePlugins.length; i++ ) {
+                var thisLevel = preStepLeavePlugins[i];
+                if( thisLevel !== undefined ) {
+                    for( var j = 0; j < thisLevel.length; j++ ) {
+                        thisLevel[j](event);
+                    }
+                }
+            }
+        };
+
         // `initStep` initializes given step element by reading data from its
         // data attributes and setting correct styles.
         var initStep = function ( el, idx ) {
@@ -447,7 +471,7 @@
         
         // `goto` API function that moves to step given with `el` parameter (by index, id or element),
         // with a transition `duration` optionally given as second parameter.
-        var goto = function ( el, duration ) {
+        var goto = function ( el, duration, reason = "goto" ) {
             
             if ( !initialized || !(el = getStep(el)) ) {
                 // presentation not initialized or given element is not a step
@@ -463,6 +487,18 @@
             //
             // If you are reading this and know any better way to handle it, I'll be glad to hear about it!
             window.scrollTo(0, 0);
+            
+            // Execute the registered preStepLeave plugins
+            var event = { target: activeStep, detail : {} };
+            event.detail.next = el;
+            event.detail.transitionDuration = duration;
+            event.detail.reason = reason;
+            execPreStepLeavePlugins(event);
+            // Plugins are allowed to change the detail values
+            // We assign them back to corresponding vars purely to minimize diff against upstream
+            el = event.detail.next;
+            duration = event.detail.duration;
+            
             
             var step = stepsData["impress-" + el.id];
             
@@ -580,7 +616,7 @@
             var prev = steps.indexOf( activeStep ) - 1;
             prev = prev >= 0 ? steps[ prev ] : steps[ steps.length-1 ];
             
-            return goto(prev);
+            return goto(prev, undefined, "prev");
         };
         
         // `next` API function goes to next step (in document order)
@@ -588,7 +624,7 @@
             var next = steps.indexOf( activeStep ) + 1;
             next = next < steps.length ? steps[ next ] : steps[ 0 ];
             
-            return goto(next);
+            return goto(next, undefined, "next");
         };
         
         // Adding some useful classes to step elements.
@@ -663,7 +699,8 @@
             goto: goto,
             next: next,
             prev: prev,
-            addPreInitPlugin: addPreInitPlugin
+            addPreInitPlugin: addPreInitPlugin,
+            addPreStepLeavePlugin: addPreStepLeavePlugin
         });
 
     };
