@@ -20,11 +20,21 @@ QUnit.test( "Initialize Impress.js", function( assert ) {
     var root  = iframeDoc.querySelector( "div#impress" );
 
     // Catch events triggered by init()
-    root.addEventListener( "impress:init", function( event ) {
+    root.addEventListener( "impress:init", function( event, registeredListener ) {
       assert.ok( true, "impress:init event triggered.");
+
+      var canvas = iframeDoc.querySelector( "div#impress > div" );
+      assert.equal( canvas.style.transitionDelay,
+                    "0ms",
+                    "canvas.style.transitionDelay initialized correctly" );
+      // This is generally 1000ms, but when entering the first step, there's no transition, so it's 0.
+      assert.equal( canvas.style.transitionDuration,
+                    "0ms",
+                    "canvas.style.transitionDuration initialized correctly" );
+
       doneInit();
     });
-
+    
     root.addEventListener( "impress:stepenter", function( event ) {
       assert.ok( true, "impress:stepenter event triggered.");
       var step1 = iframeDoc.querySelector( "div#step-1" );
@@ -78,13 +88,6 @@ QUnit.test( "Initialize Impress.js", function( assert ) {
       assert.equal( canvas.style.transformStyle,
                     "preserve-3d",
                     "canvas.style.transformStyle initialized correctly" );
-      assert.equal( canvas.style.transitionDelay,
-                    "0ms",
-                    "canvas.style.transitionDelay initialized correctly" );
-      // impress.js default values tries to set this to 1000ms, I'm completely confused about why that's not actually set in the browser?
-      assert.equal( canvas.style.transitionDuration,
-                    "0ms",
-                    "canvas.style.transitionDuration initialized correctly" );
       assert.equal( canvas.style.transitionProperty,
                     "all",
                     "canvas.style.transitionProperty initialized correctly" );
@@ -195,6 +198,17 @@ QUnit.test( "Impress Core API", function( assert ) {
                    event.target.id + " unset past css class." );
         assert.equal( "#/"+event.target.id, iframeWin.location.hash,
                       "Hash is " + "#/"+event.target.id );
+
+        // Just by way of comparison, check transitionDuration again, in a non-init transition
+        var canvas = iframeDoc.querySelector( "div#impress > div" );
+        assert.equal( canvas.style.transitionDelay,
+                      "0ms",
+                      "canvas.style.transitionDelay set correctly" );
+        assert.equal( canvas.style.transitionDuration,
+                      "1000ms",
+                      "canvas.style.transitionDuration set correctly" );
+
+
         readyForNext();
       };
       

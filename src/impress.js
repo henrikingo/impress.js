@@ -491,7 +491,7 @@
             // Execute the registered preStepLeave plugins
             var event = { target: activeStep, detail : {} };
             event.detail.next = el;
-            event.detail.transitionDuration = duration;
+            event.detail.transitionDuration = toNumber(duration, config.transitionDuration);
             event.detail.reason = reason;
             execPreStepLeavePlugins(event);
             // Plugins are allowed to change the detail values
