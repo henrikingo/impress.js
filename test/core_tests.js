@@ -20,28 +20,32 @@ QUnit.test( "Initialize Impress.js", function( assert ) {
     var root  = iframeDoc.querySelector( "div#impress" );
 
     // Catch events triggered by init()
-    root.addEventListener( "impress:init", function( event, registeredListener ) {
+    var assertInit = function( event, registeredListener ) {
       assert.ok( true, "impress:init event triggered.");
 
       var canvas = iframeDoc.querySelector( "div#impress > div" );
       assert.equal( canvas.style.transitionDelay,
                     "0ms",
                     "canvas.style.transitionDelay initialized correctly" );
-      // This is generally 1000ms, but when entering the first step, there's no transition, so it's 0.
       assert.equal( canvas.style.transitionDuration,
-                    "0ms",
+                    "1000ms",
                     "canvas.style.transitionDuration initialized correctly" );
 
       doneInit();
-    });
+      console.log("End init() test (async)"); 
+    };
     
+    var assertInitWrapper = function( event ) {
+      setTimeout( function() { assertInit( event ) }, 10 ); 
+    };
+    root.addEventListener( "impress:init", assertInitWrapper );
+
     root.addEventListener( "impress:stepenter", function( event ) {
       assert.ok( true, "impress:stepenter event triggered.");
       var step1 = iframeDoc.querySelector( "div#step-1" );
       assert.equal( event.target, step1,
                     event.target.id + " triggered impress:stepenter event." );
       doneStepEnter();
-      console.log("End init() test (async)"); 
     });
 
     // Synchronous code and assertions
