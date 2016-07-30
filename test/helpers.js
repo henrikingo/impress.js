@@ -30,7 +30,11 @@ var loadIframe = function (src, assert, callback) {
     console.log("End loadIframe");
     callback();
   };
-  iframe.addEventListener( "load", onLoad );
+  // FIXME: Seems to be some race in loading js files inside the iframe (in CircleCI). Needs more investigation.
+  var onLoadWrapper = function( event ) {
+    setTimeout( function() { onLoad( event ) }, 10 ); 
+  };
+  iframe.addEventListener( "load", onLoadWrapper );
 
   assert.ok( true, 
              "Setting iframe.src = " + src );
