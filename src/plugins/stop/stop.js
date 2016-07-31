@@ -18,11 +18,8 @@
         if ( (!event) || (!event.target) )
             return;
         
-        var data = event.target.dataset;
-        var reason = event.detail.reason;
-        
-        if ( data.stop == "true" ) {
-            if ( reason == "next" )
+        if ( event.target.classList.contains("stop") ) {
+            if ( event.detail.reason == "next" )
                 event.detail.next = event.target;
         }
     };

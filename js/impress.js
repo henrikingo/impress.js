@@ -1452,7 +1452,7 @@
  *    <!-- This slide is disabled in presentations, when moving with next()
  *         and prev() commands, but you can still move directly to it, for
  *         example with a url (anything using goto()). -->
- *         <div class="step" data-skip="true">
+ *         <div class="step skip">
  * 
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
@@ -1489,17 +1489,14 @@
         if ( (!event) || (!event.target) )
             return;
         
-        var data = event.detail.next.dataset;
-        var reason = event.detail.reason;
-        
-        if ( data.skip == "true" ) {
-            if ( reason == "next" ) {
+        if ( event.detail.next.classList.contains("skip") ) {
+            if ( event.detail.reason == "next" ) {
                 // Go to the next next step instead
                 event.detail.next = getNextStep( event.detail.next );
                 // Recursively call this plugin again, until there's a step not to skip
                 skip( event );
             }
-            else if ( reason == "prev" ) {
+            else if ( event.detail.reason == "prev" ) {
                 // Go to the previous previous step instead
                 event.detail.next = getPrevStep( event.detail.next );
                 skip( event );
@@ -1534,11 +1531,8 @@
         if ( (!event) || (!event.target) )
             return;
         
-        var data = event.target.dataset;
-        var reason = event.detail.reason;
-        
-        if ( data.stop == "true" ) {
-            if ( reason == "next" )
+        if ( event.target.classList.contains("stop") ) {
+            if ( event.detail.reason == "next" )
                 event.detail.next = event.target;
         }
     };
