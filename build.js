@@ -4,6 +4,7 @@ var buildify = require('buildify');
 buildify()
   .load('src/impress.js')
   .concat(['src/plugins/autoplay/autoplay.js',
+           'src/plugins/blackout/blackout.js',
            'src/plugins/extras/extras.js',
            'src/plugins/goto/goto.js',
            'src/plugins/navigation/navigation.js',
