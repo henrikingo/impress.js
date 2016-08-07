@@ -12,10 +12,6 @@ To add/activate the toolbar in your presentation, add this div:
 
     <div id="impress-toolbar"></div>
  
-This toolbar sets CSS classes `impress-toolbar-show` on mousemove and
-`impress-toolbar-hide` after a few seconds of inactivity. This allows authors
-to use CSS to hide the toolbar when it's not used.
-
 Styling the toolbar is left to presentation author. Here's an example CSS:
 
     .impress-enabled div#impress-toolbar {
@@ -27,10 +23,11 @@ Styling the toolbar is left to presentation author. Here's an example CSS:
     .impress-enabled div#impress-toolbar > span {
         margin-right: 10px;
     }
-    .impress-enabled div#impress-toolbar.impress-toolbar-show {
-        display: block;
-    }
-    .impress-enabled div#impress-toolbar.impress-toolbar-hide {
+
+The [mouse-timeout](../mouse-timeout/README.md) plugin can be leveraged to hide
+the toolbar from sight, and only make it visible when mouse is moved.
+
+    body.impress-mouse-timeout div#impress-toolbar {
         display: none;
     }
 

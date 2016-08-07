@@ -318,12 +318,22 @@ img {
     margin-right: 10px;
 }
 
-.impress-enabled div#impress-toolbar.impress-toolbar-show {
-    display: block;
-}
-.impress-enabled div#impress-toolbar.impress-toolbar-hide {
+/*
+    With help from the mouse-timeout plugin, we can hide the toolbar and
+    have it show only when you move/click/touch the mouse.
+*/
+body.impress-mouse-timeout div#impress-toolbar {
     display: none;
 }
+
+/*
+    In fact, we can hide the mouse cursor itself too, when mouse isn't used.
+*/
+body.impress-mouse-timeout {
+    cursor: none;
+}
+
+
 
 /* Progress bar */
 .impress-progressbar {

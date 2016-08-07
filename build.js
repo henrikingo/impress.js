@@ -7,6 +7,7 @@ buildify()
            'src/plugins/blackout/blackout.js',
            'src/plugins/extras/extras.js',
            'src/plugins/goto/goto.js',
+           'src/plugins/mouse-timeout/mouse-timeout.js',
            'src/plugins/navigation/navigation.js',
            'src/plugins/navigation-ui/navigation-ui.js',
            'src/plugins/progress/progress.js',

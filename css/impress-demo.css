@@ -528,8 +528,8 @@ a:focus {
 }
 
 /*
-  This version of impress.js supports plugins, and in particular, a UI toolbar
-  plugin that allows easy navigation between steps and autoplay.
+    This version of impress.js supports plugins, and in particular, a UI toolbar
+    plugin that allows easy navigation between steps and autoplay.
 */
 .impress-enabled div#impress-toolbar {
     position: fixed;
@@ -541,12 +541,21 @@ a:focus {
     margin-right: 10px;
 }
 
-.impress-enabled div#impress-toolbar.impress-toolbar-show {
-    display: block;
-}
-.impress-enabled div#impress-toolbar.impress-toolbar-hide {
+/*
+    With help from the mouse-timeout plugin, we can hide the toolbar and
+    have it show only when you move/click/touch the mouse.
+*/
+body.impress-mouse-timeout div#impress-toolbar {
     display: none;
 }
+
+/*
+    In fact, we can hide the mouse cursor itself too, when mouse isn't used.
+*/
+body.impress-mouse-timeout {
+    cursor: none;
+}
+
 
 /*
     Now, when we have all the steps styled let's give users a hint how to navigate

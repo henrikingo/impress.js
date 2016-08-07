@@ -197,13 +197,14 @@ img {
 .impress-enabled div#impress-toolbar > span {
     margin-right: 10px;
 }
-
-.impress-enabled div#impress-toolbar.impress-toolbar-show {
-    display: block;
-}
-.impress-enabled div#impress-toolbar.impress-toolbar-hide {
+body.impress-mouse-timeout div#impress-toolbar {
     display: none;
 }
+body.impress-mouse-timeout {
+    cursor: none;
+}
+
+
 
 /*
    Disable mouse clicks / focus for body

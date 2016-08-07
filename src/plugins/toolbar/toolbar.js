@@ -15,10 +15,6 @@
  *
  *     <div id="impress-toolbar"></div>
  * 
- * This toolbar sets CSS classes `impress-toolbar-show` on mousemove and
- * `impress-toolbar-hide` after a few seconds of inactivity. This allows authors
- * to use CSS to hide the toolbar when it's not used.
- *
  * Styling the toolbar is left to presentation author. Here's an example CSS:
  *
  *    .impress-enabled div#impress-toolbar {
@@ -30,10 +26,11 @@
  *    .impress-enabled div#impress-toolbar > span {
  *        margin-right: 10px;
  *    }
- *    .impress-enabled div#impress-toolbar.impress-toolbar-show {
- *        display: block;
- *    }
- *    .impress-enabled div#impress-toolbar.impress-toolbar-hide {
+ *
+ * The [mouse-timeout](../mouse-timeout/README.md) plugin can be leveraged to hide
+ * the toolbar from sight, and only make it visible when mouse is moved.
+ *
+ *    body.impress-mouse-timeout div#impress-toolbar {
  *        display: none;
  *    }
  *
@@ -66,38 +63,6 @@
     'use strict';
     var toolbar = document.getElementById("impress-toolbar");
     var groups = [];
-    var timeoutHandle;
-    // How many seconds shall UI toolbar be visible after a touch or mousemove
-    var timeout = 3;
-
-    /**
-     * Add a CSS class to mark that toolbar should be shown. Set timeout to switch to a class to hide them again.
-     */
-    var showToolbar = function(){
-        toolbar.classList.add( "impress-toolbar-show" );
-        toolbar.classList.remove( "impress-toolbar-hide" );
-
-        if ( timeoutHandle ) {
-            clearTimeout(timeoutHandle);
-        }
-        timeoutHandle = setTimeout( function() { 
-            toolbar.classList.add( "impress-toolbar-hide" );
-            toolbar.classList.remove( "impress-toolbar-show" );
-        }, timeout*1000 );
-    };
-
-    /**
-     * Start on impress.js init
-     */
-    document.addEventListener("impress:init", function (event) {
-        if ( toolbar ) {
-            document.addEventListener("mousemove", showToolbar);
-            document.addEventListener("click", showToolbar);
-            document.addEventListener("touch", showToolbar);
-            // At the beginning of presentation, also show the toolbar
-            showToolbar();
-        }
-    }, false);
 
     var triggerEvent = function (el, eventName, detail) {
         var event = document.createEvent("CustomEvent");
