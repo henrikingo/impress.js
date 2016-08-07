@@ -26,6 +26,14 @@ The above relative values are ignored, or set to zero, if the corresponding
 absolute value (`data-x` etc...) is set. Note that this also has the effect of
 resetting the inheritance functionality.
 
+In addition to plain numbers, which are pixel values, it is also possible to
+define relative positions as a multiple of screen height and width, using
+a unit of "h" and "w", respectively, appended to the number.
+
+Example:
+
+        <div class="step" data-rel-x="1.5w" data-rel-y="1.5h">
+
 About Pre-Init Plugins
 ----------------------
 

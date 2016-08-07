@@ -1557,8 +1557,32 @@
 (function ( document, window ) {
     'use strict';
 
+    /**
+     * Copied from core impress.js. We currently lack a library mechanism to
+     * to share utility functions like this.
+     */
     var toNumber = function (numeric, fallback) {
         return isNaN(numeric) ? (fallback || 0) : Number(numeric);
+    };
+
+    /**
+     * Extends toNumer() to correctly compute also relative-to-screen-size values 5w and 5h.
+     *
+     * Returns the computed value in pixels with w/h postfix removed.
+     */
+    var toNumberAdvanced = function (numeric, fallback) {
+        if (!(typeof numeric == 'string')) {
+            return toNumber(numeric, fallback);
+        }
+        var ratio = numeric.match(/^([+-]*[\d\.]+)([wh])$/);
+        if (ratio == null) {
+            return toNumber(numeric, fallback);
+        } else {
+            var value = parseFloat(ratio[1]);
+            var multiplier = ratio[2] == 'w' ? window.innerWidth : window.innerHeight;
+            console.log(value*multiplier);
+            return value * multiplier;
+        }
     };
 
     var computeRelativePositions = function ( el, prev ) {
@@ -1574,9 +1598,9 @@
                 y: toNumber(data.y, prev.y),
                 z: toNumber(data.z, prev.z),
                 relative: {
-                    x: toNumber(data.relX, prev.relative.x),
-                    y: toNumber(data.relY, prev.relative.y),
-                    z: toNumber(data.relZ, prev.relative.z)
+                    x: toNumberAdvanced(data.relX, prev.relative.x),
+                    y: toNumberAdvanced(data.relY, prev.relative.y),
+                    z: toNumberAdvanced(data.relZ, prev.relative.z)
                 }
             };
         // Relative position is ignored/zero if absolute is given.
@@ -1586,6 +1610,7 @@
         if(data.z !== undefined) step.relative.z = 0;
         
         // Apply relative position to absolute position, if non-zero
+        // Note that at this point, the relative values contain a number value of pixels.
         step.x = step.x + step.relative.x;
         step.y = step.y + step.relative.y;
         step.z = step.z + step.relative.z;
@@ -1731,10 +1756,6 @@
  *
  *     <div id="impress-toolbar"></div>
  * 
- * This toolbar sets CSS classes `impress-toolbar-show` on mousemove and
- * `impress-toolbar-hide` after a few seconds of inactivity. This allows authors
- * to use CSS to hide the toolbar when it's not used.
- *
  * Styling the toolbar is left to presentation author. Here's an example CSS:
  *
  *    .impress-enabled div#impress-toolbar {
@@ -1746,10 +1767,11 @@
  *    .impress-enabled div#impress-toolbar > span {
  *        margin-right: 10px;
  *    }
- *    .impress-enabled div#impress-toolbar.impress-toolbar-show {
- *        display: block;
- *    }
- *    .impress-enabled div#impress-toolbar.impress-toolbar-hide {
+ *
+ * The [mouse-timeout](../mouse-timeout/README.md) plugin can be leveraged to hide
+ * the toolbar from sight, and only make it visible when mouse is moved.
+ *
+ *    body.impress-mouse-timeout div#impress-toolbar {
  *        display: none;
  *    }
  *
