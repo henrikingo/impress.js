@@ -134,26 +134,6 @@
             }
         }, false);
         
-        // touch handler to detect taps on the left and right side of the screen
-        // based on awesome work of @hakimel: https://github.com/hakimel/reveal.js
-        document.addEventListener("touchstart", function ( event ) {
-            if (event.touches.length === 1) {
-                var x = event.touches[0].clientX,
-                    width = window.innerWidth * 0.3,
-                    result = null;
-                    
-                if ( x < width ) {
-                    result = api.prev();
-                } else if ( x > window.innerWidth - width ) {
-                    result = api.next();
-                }
-                
-                if (result) {
-                    event.preventDefault();
-                }
-            }
-        }, false);
-        
         // TODO: This was originally defined here, when impress.js was a single file.
         // It has nothing to do with key navigation events, but it depends on the 
         // throttle function defined above. Leaving here for now.

@@ -174,12 +174,7 @@
                            
                           // and `classList` and `dataset` APIs
                            ( body.classList ) &&
-                           ( body.dataset ) &&
-                           
-                          // but some mobile devices need to be blacklisted,
-                          // because their CSS 3D support or hardware is not
-                          // good enough to run impress.js properly, sorry...
-                           ( ua.search(/(iphone)|(ipod)|(android)/) === -1 );
+                           ( body.dataset );
     
     if (!impressSupported) {
         // we can't be sure that `classList` is supported
@@ -627,6 +622,90 @@
             return goto(next, undefined, "next");
         };
         
+        // Swipe for touch devices by @and3rson.
+        // Below we extend the api to control the animation between the currently
+        // active step and a presumed next/prev step. See touch plugin for
+        // an example of using this api.
+        
+        // Helper function
+        var interpolate = function(a, b, k) {
+            return a + (b - a) * k;
+        };
+    
+        // Animate a swipe. 
+        //
+        // pct is a value between -1.0 and +1.0, designating the current length
+        // of the swipe.
+        //
+        // If pct is negative, swipe towards the next() step, if positive, 
+        // towards the prev() step. 
+        //
+        // Note that pre-stepleave plugins such as goto can mess with what is a 
+        // next() and prev() step, so we need to trigger the pre-stepleave event 
+        // here, even if a swipe doesn't guarantee that the transition will
+        // actually happen.
+        //
+        // Calling swipe(), with any value of pct, won't in itself cause a
+        // transition to happen, this is just to animate the swipe. Once the
+        // transition is committed - such as at a touchend event - caller is
+        // responsible for also calling prev()/next() as appropriate.
+        var swipe = function(pct){
+            if( Math.abs(pct) > 1 ) return;
+            // Prepare & execute the preStepLeave event
+            var event = { target: activeStep, detail : {} };
+            // Will be ignored within swipe animation, but just in case a plugin wants to read this, humor them
+            event.detail.transitionDuration = config.transitionDuration;
+            if (pct < 0) {
+                var idx = steps.indexOf(activeStep) + 1;
+                event.detail.next = idx < steps.length ? steps[idx] : steps[0];
+                event.detail.reason = "next";
+            } else if (pct > 0) {
+                var idx = steps.indexOf(activeStep) - 1;
+                event.detail.next = idx >= 0 ? steps[idx] : steps[steps.length - 1];
+                event.detail.reason = "prev";
+            } else {
+                // No move
+                return;
+            }
+            execPreStepLeavePlugins(event);
+            var nextElement = event.detail.next;
+            
+            var nextStep = stepsData['impress-' + nextElement.id];
+            var zoomin = nextStep.scale >= currentState.scale;
+            // if the same step is re-selected, force computing window scaling,
+            var nextScale = nextStep.scale * windowScale;
+            var k = Math.abs(pct);
+
+            var interpolatedStep = {
+                translate: {
+                    x: interpolate(currentState.translate.x, -nextStep.translate.x, k),
+                    y: interpolate(currentState.translate.y, -nextStep.translate.y, k),
+                    z: interpolate(currentState.translate.z, -nextStep.translate.z, k)
+                },
+                rotate: {
+                    x: interpolate(currentState.rotate.x, -nextStep.rotate.x, k),
+                    y: interpolate(currentState.rotate.y, -nextStep.rotate.y, k),
+                    z: interpolate(currentState.rotate.z, -nextStep.rotate.z, k)
+                },
+                scale: interpolate(currentState.scale, nextScale)
+            };
+
+            css(root, {
+                // to keep the perspective look similar for different scales
+                // we need to 'scale' the perspective, too
+                transform: perspective(config.perspective / interpolatedStep.scale) + scale(interpolatedStep.scale),
+                transitionDuration: "0ms",
+                transitionDelay: "0ms"
+            });
+
+            css(canvas, {
+                transform: rotate(interpolatedStep.rotate, true) + translate(interpolatedStep.translate),
+                transitionDuration: "0ms",
+                transitionDelay: "0ms"
+            });
+        };
+
+
         // Adding some useful classes to step elements.
         //
         // All the steps that have not been shown yet are given `future` class.
@@ -699,6 +778,7 @@
             goto: goto,
             next: next,
             prev: prev,
+            swipe: swipe,
             addPreInitPlugin: addPreInitPlugin,
             addPreStepLeavePlugin: addPreStepLeavePlugin
         });

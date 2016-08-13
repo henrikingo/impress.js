@@ -14,6 +14,7 @@ buildify()
            'src/plugins/rel/rel.js',
            'src/plugins/skip/skip.js',
            'src/plugins/stop/stop.js',
+           'src/plugins/touch/touch.js',
            'src/plugins/toolbar/toolbar.js'])
   .save('js/impress.js')
   .uglify()
