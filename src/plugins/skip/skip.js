@@ -30,12 +30,12 @@
     };
     var getPrevStep = function( el ){
         var steps = document.querySelectorAll(".step");
-        for( var i = steps.length; i > 0; i-- ) {
+        for( var i = steps.length-1; i >= 0; i-- ) {
             if( steps[i] == el )
                 if( i-1 >= 0 )
                     return steps[i-1];
                 else
-                    return steps[steps.length];
+                    return steps[steps.length-1];
         }
     };
 
