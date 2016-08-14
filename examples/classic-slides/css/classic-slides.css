@@ -360,7 +360,52 @@ body.impress-mouse-timeout {
   opacity: 0.6;
 }
 
+/*
+    Styles for specific slides.
+*/
 
+/* The bar graph for Acme Inc profits */
+
+#acme-graph-bottom {
+    position: absolute;
+    bottom: 100px;
+    left: 440px;
+    background-color: black;
+    width: 410px;
+    height: 2px;
+}
+
+/* height: is set from javascript */
+#acme-graph-q1,
+#acme-graph-q2,
+#acme-graph-q3,
+#acme-graph-q4 {
+    border: solid 1px black;
+    width: 70px;
+    margin-left: 10px;
+    position: absolute;
+    bottom: 100px;
+}
+
+#acme-graph-q1 {
+    background-color: red;
+    left: 450px;
+}
+
+#acme-graph-q2 {
+    background-color: blue;
+    left: 550px;
+}
+
+#acme-graph-q3 {
+    background-color: green;
+    left: 650px;
+}
+
+#acme-graph-q4 {
+    background-color: purple;
+    left: 750px;
+}
 
 /*
     And as the last thing there is a workaround for quite strange bug.

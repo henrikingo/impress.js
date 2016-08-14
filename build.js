@@ -6,6 +6,7 @@ buildify()
   .concat(['src/plugins/autoplay/autoplay.js',
            'src/plugins/blackout/blackout.js',
            'src/plugins/extras/extras.js',
+           'src/plugins/form/form.js',
            'src/plugins/goto/goto.js',
            'src/plugins/mouse-timeout/mouse-timeout.js',
            'src/plugins/mobile/mobile.js',

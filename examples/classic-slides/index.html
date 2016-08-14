@@ -325,11 +325,74 @@
 * [A more advanced Markdown presentation is here.](../markdown/)
     </div>
 
+    <div id="acme" class="step slide" data-rel-x="300" data-rel-y="-1100" data-rotate="300">
+        <ul>
+        <li>Remember, in <em>impress.js</em> the full power of HTML5, CSS3 &amp; JavaScript is always at your fingertips!</li>
+        <li>For example, you can use tables, forms, or dynamic charts as you would on any web page:</li>
+        </ul>
+        <h2>Acme Inc Quarterly Profits</h2>
+
+        <!-- Improvised bar graph of divs, to avoid copying something like NVD3 into the repo. -->
+        <div id="acme-graph">
+            <div id="acme-graph-bars">
+                <div id="acme-graph-q1"></div>
+                <div id="acme-graph-q2"></div>
+                <div id="acme-graph-q3"></div>
+                <div id="acme-graph-q4"></div>
+            </div>
+            <div id="acme-graph-bottom"></div>
+        </div>
+
+        <table border="1">
+        <tr><td>Q1</td><td id="acme-q1">234€</td></tr>
+        <tr><td>Q2</td><td id="acme-q2">255€</td></tr>
+        <tr><td>Q3</td><td><input id="acme-q3" size="5" oninput="acmeDrawGraph();" />€ <small>(insert here)</small></td></tr>
+        <tr><td>Q4</td><td><input id="acme-q4" size="5" oninput="acmeDrawGraph();" />€</td></tr>
+        </table>
+        <div class="notes">
+        </div>
+    </div>
+    <script type="text/javascript">
+        var acmeDrawGraph = function() {
+            var profits = {};
+            
+            // Q1-Q2: get innerHTML, remove €
+            var value = document.getElementById('acme-q1').innerHTML;
+            if( value[value.length-1] == "€" ) value = value.substring(0, value.length-1);
+            profits['q1'] = value;
+            var value = document.getElementById('acme-q2').innerHTML;
+            if( value[value.length-1] == "€" ) value = value.substring(0, value.length-1);
+            profits['q2'] = value;
+            
+            // Q3-Q4: get input.value
+            profits['q3'] = document.getElementById('acme-q3').value;
+            profits['q4'] = document.getElementById('acme-q4').value;
+
+            // Convert all to numeric value, and remember max value for scaling purposes.
+            var max = profits['q1'];
+            for ( var q in profits ) {
+                profits[q] = isNaN(profits[q]) ? 0 : Number(profits[q]);
+                if( profits[q] > max ) {
+                    max = profits[q];
+                }
+            }
+            
+            // Draw the bar graph
+            for ( var q in profits ) {
+                var h = 200 * profits[q] / max;
+                var div = document.getElementById('acme-graph-'+q);
+                div.style = 'height: ' + h + 'px';
+            }
+        };
+        // This draws the first 2 bars during page load
+        acmeDrawGraph();
+    </script>
+
     <!--
         Finally, the relative positioning plugin also supports values that are a multiple of the windows size.
         Add "w" or "h" to specify a multiple of window width or height, respectively.
     -->
-    <div id="moreinfo" class="step slide" data-rel-x="1.5w" data-rel-y="-0.3w" data-rotate="720">
+    <div id="moreinfo" class="step slide" data-rel-x="1.4w" data-rel-y="0.8w" data-rotate="720">
         <h1>More info</h1>
         <ul>
         <li>Official documentation

@@ -68,7 +68,6 @@
         } else {
             var value = parseFloat(ratio[1]);
             var multiplier = ratio[2] == 'w' ? window.innerWidth : window.innerHeight;
-            console.log(value*multiplier);
             return value * multiplier;
         }
     };

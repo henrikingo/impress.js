@@ -1150,6 +1150,28 @@
 
 
 /**
+ * Form support
+ *
+ * Functionality to better support use of input, textarea, button... elements in a presentation.
+ *
+ * Currently this does only one single thing: On impress:stepleave, de-focus any potentially active element.
+ * This is to prevent the focus from being left in a form element that is no longer visible in the window, and
+ * user therefore typing garbage into the form.
+ *
+ * Copyright 2016 Henrik Ingo
+ * MIT License
+ */
+(function ( document, window ) {
+    'use strict';
+    
+    document.addEventListener("impress:stepleave", function (event) {
+        document.activeElement.blur()
+    }, false);
+        
+})(document, window);
+
+
+/**
  * Goto Plugin
  *
  * The goto plugin is a pre-stepleave plugin. It is executed before impress:stepleave,
@@ -1406,18 +1428,8 @@
         // or anything. `impress:init` event data gives you everything you 
         // need to control the presentation that was just initialized.
         var api = event.detail.api;
-        
-        // KEYBOARD NAVIGATION HANDLERS
-        
-        // Prevent default keydown action when one of supported key is pressed.
-        document.addEventListener("keydown", function ( event ) {
-            if ( event.keyCode === 9 || ( event.keyCode >= 32 && event.keyCode <= 34 ) || (event.keyCode >= 37 && event.keyCode <= 40) ) {
-                event.preventDefault();
-            }
-        }, false);
-        
-        // Trigger impress action (next or prev) on keyup.
-        
+        var tab = 9;
+
         // Supported keys are:
         // [space] - quite common in presentation software to move forward
         // [up] [right] / [down] [left] - again common and natural addition,
@@ -1431,13 +1443,42 @@
         //   positioning. I didn't want to just prevent this default action, so I used [tab]
         //   as another way to moving to next step... And yes, I know that for the sake of
         //   consistency I should add [shift+tab] as opposite action...
-        document.addEventListener("keyup", function ( event ) {
-
+        var isNavigationEvent = function (event) {
+            // Don't trigger navigation for example when user returns to browser window with ALT+TAB
             if ( event.shiftKey || event.altKey || event.ctrlKey || event.metaKey ){
-                return;
+                return false;
             }
             
-            if ( event.keyCode === 9 || ( event.keyCode >= 32 && event.keyCode <= 34 ) || (event.keyCode >= 37 && event.keyCode <= 40) ) {
+            // In the case of TAB, we force step navigation always, overriding the browser navigation between
+            // input elements, buttons and links.
+            if ( event.keyCode === 9 ) {
+                return true;
+            }
+            
+            // For arrows, etc, check that event target is html or body element. This is to allow presentations to have,
+            // for example, forms with input elements where user can type text, including space, and not move to next step.
+            if ( event.target.nodeName != "BODY" && event.target.nodeName != "HTML" ) {
+                return false;
+            }
+
+            if ( ( event.keyCode >= 32 && event.keyCode <= 34 ) || (event.keyCode >= 37 && event.keyCode <= 40 ) ) {
+                return true;
+            }
+        };
+        
+        
+        // KEYBOARD NAVIGATION HANDLERS
+        
+        // Prevent default keydown action when one of supported key is pressed.
+        document.addEventListener("keydown", function ( event ) {
+            if ( isNavigationEvent(event) ) {
+                event.preventDefault();
+            }
+        }, false);
+        
+        // Trigger impress action (next or prev) on keyup.
+        document.addEventListener("keyup", function ( event ) {
+            if ( isNavigationEvent(event) ) {
                 switch( event.keyCode ) {
                     case 33: // pg up
                     case 37: // left
@@ -1452,7 +1493,6 @@
                              api.next();
                              break;
                 }
-                
                 event.preventDefault();
             }
         }, false);
@@ -1716,7 +1756,6 @@
         } else {
             var value = parseFloat(ratio[1]);
             var multiplier = ratio[2] == 'w' ? window.innerWidth : window.innerHeight;
-            console.log(value*multiplier);
             return value * multiplier;
         }
     };
