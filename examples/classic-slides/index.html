@@ -391,8 +391,12 @@
     <!--
         Finally, the relative positioning plugin also supports values that are a multiple of the windows size.
         Add "w" or "h" to specify a multiple of window width or height, respectively.
+        
+        This step also sets a custom data-transition-duration. All of the above steps used the value set
+        in the root div#impress element, but it is also allowed to set it for each step. Since transitioning
+        to this step will rotate twice around it's axis, we give the transition a bit more time here.
     -->
-    <div id="moreinfo" class="step slide" data-rel-x="1.4w" data-rel-y="0.8w" data-rotate="720">
+    <div id="moreinfo" class="step slide" data-rel-x="1.4w" data-rel-y="0.8w" data-rotate="720" data-transition-duration="2000">
         <h1>More info</h1>
         <ul>
         <li>Official documentation

@@ -354,6 +354,7 @@
                         z: toNumber(data.rotateZ || data.rotate)
                     },
                     scale: toNumber(data.scale, 1),
+                    transitionDuration: toNumber(data.transitionDuration, config.transitionDuration),
                     el: el
                 };
             
@@ -483,21 +484,19 @@
             // If you are reading this and know any better way to handle it, I'll be glad to hear about it!
             window.scrollTo(0, 0);
             
+            var step = stepsData["impress-" + el.id];
+            
             // If we are in fact moving to another step, start with executing the registered preStepLeave plugins.
             if (activeStep && activeStep !== el) {
-                // Execute the registered preStepLeave plugins
                 var event = { target: activeStep, detail : {} };
                 event.detail.next = el;
-                event.detail.transitionDuration = toNumber(duration, config.transitionDuration);
+                event.detail.transitionDuration = step.transitionDuration;
                 event.detail.reason = reason;
                 execPreStepLeavePlugins(event);
                 // Plugins are allowed to change the detail values
-                // We assign them back to corresponding vars purely to minimize diff against upstream
                 el = event.detail.next;
                 duration = event.detail.transitionDuration;
             }
-            
-            var step = stepsData["impress-" + el.id];
             
             if ( activeStep ) {
                 activeStep.classList.remove("active");
@@ -1214,12 +1213,15 @@
         // Handle event.target data-goto-next attribute
         if ( !isNaN(data.gotoNext) && event.detail.reason == "next" ) {
             event.detail.next = steps[data.gotoNext];
+            // If the new next element has its own transitionDuration, we're responsible for setting that on the event as well
+            event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
         if ( data.gotoNext && event.detail.reason == "next" ) {
             var newTarget = document.getElementById( data.gotoNext );
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
+                event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
@@ -1230,12 +1232,14 @@
         // Handle event.target data-goto-prev attribute
         if ( !isNaN(data.gotoPrev) && event.detail.reason == "prev" ) {
             event.detail.next = steps[data.gotoPrev];
+            event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
         if ( data.gotoPrev && event.detail.reason == "prev" ) {
             var newTarget = document.getElementById( data.gotoPrev );
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
+                event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
@@ -1246,12 +1250,14 @@
         // Handle event.target data-goto attribute
         if ( !isNaN(data.goto) ) {
             event.detail.next = steps[data.goto];
+            event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
         if ( data.goto ) {
             var newTarget = document.getElementById( data.goto );
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
+                event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
@@ -1892,6 +1898,8 @@
                 event.detail.next = getPrevStep( event.detail.next );
                 skip( event );
             }
+            // If the new next element has its own transitionDuration, we're responsible for setting that on the event as well
+            event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
         }
     };
     

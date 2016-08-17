@@ -34,12 +34,15 @@
         // Handle event.target data-goto-next attribute
         if ( !isNaN(data.gotoNext) && event.detail.reason == "next" ) {
             event.detail.next = steps[data.gotoNext];
+            // If the new next element has its own transitionDuration, we're responsible for setting that on the event as well
+            event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
         if ( data.gotoNext && event.detail.reason == "next" ) {
             var newTarget = document.getElementById( data.gotoNext );
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
+                event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
@@ -50,12 +53,14 @@
         // Handle event.target data-goto-prev attribute
         if ( !isNaN(data.gotoPrev) && event.detail.reason == "prev" ) {
             event.detail.next = steps[data.gotoPrev];
+            event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
         if ( data.gotoPrev && event.detail.reason == "prev" ) {
             var newTarget = document.getElementById( data.gotoPrev );
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
+                event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
@@ -66,12 +71,14 @@
         // Handle event.target data-goto attribute
         if ( !isNaN(data.goto) ) {
             event.detail.next = steps[data.goto];
+            event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
         if ( data.goto ) {
             var newTarget = document.getElementById( data.goto );
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
+                event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {

@@ -354,6 +354,7 @@
                         z: toNumber(data.rotateZ || data.rotate)
                     },
                     scale: toNumber(data.scale, 1),
+                    transitionDuration: toNumber(data.transitionDuration, config.transitionDuration),
                     el: el
                 };
             
@@ -483,21 +484,19 @@
             // If you are reading this and know any better way to handle it, I'll be glad to hear about it!
             window.scrollTo(0, 0);
             
+            var step = stepsData["impress-" + el.id];
+            
             // If we are in fact moving to another step, start with executing the registered preStepLeave plugins.
             if (activeStep && activeStep !== el) {
-                // Execute the registered preStepLeave plugins
                 var event = { target: activeStep, detail : {} };
                 event.detail.next = el;
-                event.detail.transitionDuration = toNumber(duration, config.transitionDuration);
+                event.detail.transitionDuration = step.transitionDuration;
                 event.detail.reason = reason;
                 execPreStepLeavePlugins(event);
                 // Plugins are allowed to change the detail values
-                // We assign them back to corresponding vars purely to minimize diff against upstream
                 el = event.detail.next;
                 duration = event.detail.transitionDuration;
             }
-            
-            var step = stepsData["impress-" + el.id];
             
             if ( activeStep ) {
                 activeStep.classList.remove("active");

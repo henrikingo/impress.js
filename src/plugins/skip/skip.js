@@ -55,6 +55,8 @@
                 event.detail.next = getPrevStep( event.detail.next );
                 skip( event );
             }
+            // If the new next element has its own transitionDuration, we're responsible for setting that on the event as well
+            event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
         }
     };
     
