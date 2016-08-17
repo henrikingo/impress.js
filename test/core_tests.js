@@ -24,11 +24,12 @@ QUnit.test( "Initialize Impress.js", function( assert ) {
       assert.ok( true, "impress:init event triggered.");
 
       var canvas = iframeDoc.querySelector( "div#impress > div" );
+      // delay and duration don't become set before the first transition actually happened
       assert.equal( canvas.style.transitionDelay,
                     "0ms",
                     "canvas.style.transitionDelay initialized correctly" );
       assert.equal( canvas.style.transitionDuration,
-                    "1000ms",
+                    "0ms",
                     "canvas.style.transitionDuration initialized correctly" );
 
       doneInit();
