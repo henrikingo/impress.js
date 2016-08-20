@@ -885,6 +885,12 @@
         el.dispatchEvent(event);
     };
 
+    var makeDomElement = function ( html ) {
+        var tempDiv = document.createElement("div");
+        tempDiv.innerHTML = html;
+        return tempDiv.firstChild;
+    };
+
     var toggleStatus = function() {
         if (currentStepTimeout>0 && status!="paused") {
             status="paused";
@@ -918,27 +924,24 @@
 
     var addToolbarButton = function (toolbar) {
         var html = '<button id="impress-autoplay-playpause" title="Autoplay" class="impress-autoplay">' + getButtonText() + '</button>';
-
-        toolbar.addEventListener("impress:toolbar:added:autoplay", function(e){
-            toolbarButton = document.getElementById("impress-autoplay-playpause");
-            toolbarButton.addEventListener( "click", function( event ) {
-                toggleStatus();
-                if (status=="playing") {
-                    if (autoplayDefault == 0) {
-                        autoplayDefault = 7;
-                    }
-                    if ( currentStepTimeout == 0 ) {
-                        currentStepTimeout = autoplayDefault;
-                    }
-                    setAutoplayTimeout(currentStepTimeout);
+        toolbarButton = makeDomElement( html );
+        toolbarButton.addEventListener( "click", function( event ) {
+            toggleStatus();
+            if (status=="playing") {
+                if (autoplayDefault == 0) {
+                    autoplayDefault = 7;
                 }
-                else if (status=="paused") {
-                    setAutoplayTimeout(0);
+                if ( currentStepTimeout == 0 ) {
+                    currentStepTimeout = autoplayDefault;
                 }
-            });
+                setAutoplayTimeout(currentStepTimeout);
+            }
+            else if (status=="paused") {
+                setAutoplayTimeout(0);
+            }
         });
 
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 10, html : html, callback : "autoplay" } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 10, element : toolbarButton } );
     };
 
 })(document, window);
@@ -1288,9 +1291,15 @@
 /**
  * Help popup plugin
  *
- * Shows
- *
+ * Example:
+ * 
+ *     <!-- Show a help popup at start, or if user presses 'H' -->
  *     <div id="impress-help"></div>
+ *
+ * For developers:
+ *
+ * Typical use for this plugin, is for plugins that support some keypress, to add a line
+ * to the help popup produced by this plugin. For example "P: Presenter console".
  *
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
@@ -1345,7 +1354,7 @@
     // API
     // Other plugins can add help texts, typically if they support an action on a keypress.
     /**
-     * Add a help text to the help screen.
+     * Add a help text to the help popup.
      *
      * :param: e.detail.command  Example: "H"
      * :param: e.detail.text     Example: "Show this help."
@@ -1719,14 +1728,17 @@
     var prev;
     var select;
     var next;
-    var timeoutHandle;
-    // How many seconds shall UI controls be visible after a touch or mousemove
-    var timeout = 3;
 
     var triggerEvent = function (el, eventName, detail) {
         var event = document.createEvent("CustomEvent");
         event.initCustomEvent(eventName, true, true, detail);
         el.dispatchEvent(event);
+    };
+
+    var makeDomElement = function ( html ) {
+        var tempDiv = document.createElement("div");
+        tempDiv.innerHTML = html;
+        return tempDiv.firstChild;
     };
 
     var addNavigationControls = function( event ) {
@@ -1745,34 +1757,28 @@
                            + '</select>';
         var nextHtml   = '<button id="impress-navigation-ui-next" title="Next" class="impress-navigation-ui">&gt;</button>';
 
-        toolbar.addEventListener("impress:toolbar:added:navigation-ui:prev", function(e){
-            prev = document.getElementById("impress-navigation-ui-prev");
-            prev.addEventListener( "click",
-                function( event ) {
-                    api.prev();
-            });
+        var prevElement = makeDomElement( prevHtml );
+        prevElement.addEventListener( "click",
+            function( event ) {
+                api.prev();
         });
-        toolbar.addEventListener("impress:toolbar:added:navigation-ui:select", function(e){
-            select = document.getElementById("impress-navigation-ui-select");
-            select.addEventListener( "change",
-                function( event ) {
-                    api.goto( event.target.value );
-            });
-            root.addEventListener("impress:stepenter", function(event){
-                select.value = event.target.id;
-            });
+        var selectElement = makeDomElement( selectHtml );
+        selectElement.addEventListener( "change",
+            function( event ) {
+                api.goto( event.target.value );
         });
-        toolbar.addEventListener("impress:toolbar:added:navigation-ui:next", function(e){
-            next = document.getElementById("impress-navigation-ui-next");
-            next.addEventListener( "click",
-                function() {
-                    api.next();
-            });
+        root.addEventListener("impress:stepenter", function(event){
+            selectElement.value = event.target.id;
         });
-
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : prevHtml, callback : "navigation-ui:prev" } );
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : selectHtml, callback : "navigation-ui:select" } );
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : nextHtml, callback : "navigation-ui:next" } );
+        var nextElement = makeDomElement( nextHtml );
+        nextElement.addEventListener( "click",
+            function() {
+                api.next();
+        });
+        
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : prevElement } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : selectElement } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : nextElement } );
     };
     
     // wait for impress.js to be initialized
@@ -2205,7 +2211,7 @@
         if(!groups[index]){
             groups[index] = document.createElement("span");
             groups[index].id = id;
-            var nextIndex = getNextIndex(index);
+            var nextIndex = getNextGroupIndex(index);
             if ( nextIndex === undefined ){
                 toolbar.appendChild(groups[index]);
             }
@@ -2217,7 +2223,7 @@
     };
     
     /**
-     * Get the node from groups[] that is immediately after given index.
+     * Get the span element from groups[] that is immediately after given index.
      *
      * This can be used to find the reference node for an insertBefore() call.
      * If no element exists at a larger index, returns undefined. (In this case,
@@ -2225,7 +2231,7 @@
      *
      * Note that index needn't itself exist in groups[].
      */
-    var getNextIndex = function(index){
+    var getNextGroupIndex = function(index){
         var i = index+1;
         while( ! groups[i] && i < groups.length) {
             i++;
@@ -2243,34 +2249,21 @@
          * Append a widget inside toolbar span element identified by given group index.
          *
          * :param: e.detail.group    integer specifying the span element where widget will be placed
-         * :param: e.detail.html     html code that is the widget to show in the toolbar
-         * :param: e.detail.callback a string used in the event triggered when new widget is added
+         * :param: e.detail.element  a dom element to add to the toolbar
          */
         toolbar.addEventListener("impress:toolbar:appendChild", function( e ){
             var group = getGroupElement(e.detail.group);
-            var tempDiv = document.createElement("div");
-            tempDiv.innerHTML = e.detail.html;
-            var widget = tempDiv.firstChild;
-            group.appendChild(widget);
-
-            // Once the new widget is added, send a callback event so that the caller plugin
-            // can, for example, add its event listeners to the new button.
-            var callbackEvent = "impress:toolbar:added:" + e.detail.callback;
-            triggerEvent(toolbar, callbackEvent, toolbar );
-            triggerEvent(toolbar, "impress:toolbar:added", toolbar );
+            group.appendChild(e.detail.element);
         });
 
+        /**
+         * Add a widget to toolbar using insertBefore() DOM method.
+         *
+         * :param: e.detail.before   the reference dom element, before which new element is added
+         * :param: e.detail.element  a dom element to add to the toolbar
+         */
         toolbar.addEventListener("impress:toolbar:insertBefore", function( e ){
-            var tempDiv = document.createElement("div");
-            tempDiv.innerHTML = e.detail.html;
-            var widget = tempDiv.firstChild;
-            toolbar.insertBefore(widget, e.detail.before);
-
-            // Once the new widget is added, send a callback event so that the caller plugin
-            // can, for example, add its event listeners to the new button.
-            var callbackEvent = "impress:toolbar:added:" + e.detail.callback;
-            triggerEvent(toolbar, callbackEvent, toolbar );
-            triggerEvent(toolbar, "impress:toolbar:added", toolbar );
+            toolbar.insertBefore(e.detail.element, e.detail.before);
         });
 
         /**
@@ -2278,7 +2271,6 @@
          */
         toolbar.addEventListener("impress:toolbar:removeWidget", function( e ){
             toolbar.removeChild(e.detail.remove);
-            triggerEvent(toolbar, "impress:toolbar:removed", toolbar );
         });
     } // if toolbar
 

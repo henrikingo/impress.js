@@ -83,6 +83,12 @@
         el.dispatchEvent(event);
     };
 
+    var makeDomElement = function ( html ) {
+        var tempDiv = document.createElement("div");
+        tempDiv.innerHTML = html;
+        return tempDiv.firstChild;
+    };
+
     var toggleStatus = function() {
         if (currentStepTimeout>0 && status!="paused") {
             status="paused";
@@ -116,27 +122,24 @@
 
     var addToolbarButton = function (toolbar) {
         var html = '<button id="impress-autoplay-playpause" title="Autoplay" class="impress-autoplay">' + getButtonText() + '</button>';
-
-        toolbar.addEventListener("impress:toolbar:added:autoplay", function(e){
-            toolbarButton = document.getElementById("impress-autoplay-playpause");
-            toolbarButton.addEventListener( "click", function( event ) {
-                toggleStatus();
-                if (status=="playing") {
-                    if (autoplayDefault == 0) {
-                        autoplayDefault = 7;
-                    }
-                    if ( currentStepTimeout == 0 ) {
-                        currentStepTimeout = autoplayDefault;
-                    }
-                    setAutoplayTimeout(currentStepTimeout);
+        toolbarButton = makeDomElement( html );
+        toolbarButton.addEventListener( "click", function( event ) {
+            toggleStatus();
+            if (status=="playing") {
+                if (autoplayDefault == 0) {
+                    autoplayDefault = 7;
                 }
-                else if (status=="paused") {
-                    setAutoplayTimeout(0);
+                if ( currentStepTimeout == 0 ) {
+                    currentStepTimeout = autoplayDefault;
                 }
-            });
+                setAutoplayTimeout(currentStepTimeout);
+            }
+            else if (status=="paused") {
+                setAutoplayTimeout(0);
+            }
         });
 
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 10, html : html, callback : "autoplay" } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 10, element : toolbarButton } );
     };
 
 })(document, window);

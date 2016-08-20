@@ -19,14 +19,17 @@
     var prev;
     var select;
     var next;
-    var timeoutHandle;
-    // How many seconds shall UI controls be visible after a touch or mousemove
-    var timeout = 3;
 
     var triggerEvent = function (el, eventName, detail) {
         var event = document.createEvent("CustomEvent");
         event.initCustomEvent(eventName, true, true, detail);
         el.dispatchEvent(event);
+    };
+
+    var makeDomElement = function ( html ) {
+        var tempDiv = document.createElement("div");
+        tempDiv.innerHTML = html;
+        return tempDiv.firstChild;
     };
 
     var addNavigationControls = function( event ) {
@@ -45,34 +48,28 @@
                            + '</select>';
         var nextHtml   = '<button id="impress-navigation-ui-next" title="Next" class="impress-navigation-ui">&gt;</button>';
 
-        toolbar.addEventListener("impress:toolbar:added:navigation-ui:prev", function(e){
-            prev = document.getElementById("impress-navigation-ui-prev");
-            prev.addEventListener( "click",
-                function( event ) {
-                    api.prev();
-            });
+        var prevElement = makeDomElement( prevHtml );
+        prevElement.addEventListener( "click",
+            function( event ) {
+                api.prev();
         });
-        toolbar.addEventListener("impress:toolbar:added:navigation-ui:select", function(e){
-            select = document.getElementById("impress-navigation-ui-select");
-            select.addEventListener( "change",
-                function( event ) {
-                    api.goto( event.target.value );
-            });
-            root.addEventListener("impress:stepenter", function(event){
-                select.value = event.target.id;
-            });
+        var selectElement = makeDomElement( selectHtml );
+        selectElement.addEventListener( "change",
+            function( event ) {
+                api.goto( event.target.value );
         });
-        toolbar.addEventListener("impress:toolbar:added:navigation-ui:next", function(e){
-            next = document.getElementById("impress-navigation-ui-next");
-            next.addEventListener( "click",
-                function() {
-                    api.next();
-            });
+        root.addEventListener("impress:stepenter", function(event){
+            selectElement.value = event.target.id;
         });
-
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : prevHtml, callback : "navigation-ui:prev" } );
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : selectHtml, callback : "navigation-ui:select" } );
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, html : nextHtml, callback : "navigation-ui:next" } );
+        var nextElement = makeDomElement( nextHtml );
+        nextElement.addEventListener( "click",
+            function() {
+                api.next();
+        });
+        
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : prevElement } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : selectElement } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : nextElement } );
     };
     
     // wait for impress.js to be initialized

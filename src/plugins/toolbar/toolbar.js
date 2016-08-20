@@ -85,7 +85,7 @@
         if(!groups[index]){
             groups[index] = document.createElement("span");
             groups[index].id = id;
-            var nextIndex = getNextIndex(index);
+            var nextIndex = getNextGroupIndex(index);
             if ( nextIndex === undefined ){
                 toolbar.appendChild(groups[index]);
             }
@@ -97,7 +97,7 @@
     };
     
     /**
-     * Get the node from groups[] that is immediately after given index.
+     * Get the span element from groups[] that is immediately after given index.
      *
      * This can be used to find the reference node for an insertBefore() call.
      * If no element exists at a larger index, returns undefined. (In this case,
@@ -105,7 +105,7 @@
      *
      * Note that index needn't itself exist in groups[].
      */
-    var getNextIndex = function(index){
+    var getNextGroupIndex = function(index){
         var i = index+1;
         while( ! groups[i] && i < groups.length) {
             i++;
@@ -123,34 +123,21 @@
          * Append a widget inside toolbar span element identified by given group index.
          *
          * :param: e.detail.group    integer specifying the span element where widget will be placed
-         * :param: e.detail.html     html code that is the widget to show in the toolbar
-         * :param: e.detail.callback a string used in the event triggered when new widget is added
+         * :param: e.detail.element  a dom element to add to the toolbar
          */
         toolbar.addEventListener("impress:toolbar:appendChild", function( e ){
             var group = getGroupElement(e.detail.group);
-            var tempDiv = document.createElement("div");
-            tempDiv.innerHTML = e.detail.html;
-            var widget = tempDiv.firstChild;
-            group.appendChild(widget);
-
-            // Once the new widget is added, send a callback event so that the caller plugin
-            // can, for example, add its event listeners to the new button.
-            var callbackEvent = "impress:toolbar:added:" + e.detail.callback;
-            triggerEvent(toolbar, callbackEvent, toolbar );
-            triggerEvent(toolbar, "impress:toolbar:added", toolbar );
+            group.appendChild(e.detail.element);
         });
 
+        /**
+         * Add a widget to toolbar using insertBefore() DOM method.
+         *
+         * :param: e.detail.before   the reference dom element, before which new element is added
+         * :param: e.detail.element  a dom element to add to the toolbar
+         */
         toolbar.addEventListener("impress:toolbar:insertBefore", function( e ){
-            var tempDiv = document.createElement("div");
-            tempDiv.innerHTML = e.detail.html;
-            var widget = tempDiv.firstChild;
-            toolbar.insertBefore(widget, e.detail.before);
-
-            // Once the new widget is added, send a callback event so that the caller plugin
-            // can, for example, add its event listeners to the new button.
-            var callbackEvent = "impress:toolbar:added:" + e.detail.callback;
-            triggerEvent(toolbar, callbackEvent, toolbar );
-            triggerEvent(toolbar, "impress:toolbar:added", toolbar );
+            toolbar.insertBefore(e.detail.element, e.detail.before);
         });
 
         /**
@@ -158,7 +145,6 @@
          */
         toolbar.addEventListener("impress:toolbar:removeWidget", function( e ){
             toolbar.removeChild(e.detail.remove);
-            triggerEvent(toolbar, "impress:toolbar:removed", toolbar );
         });
     } // if toolbar
 
