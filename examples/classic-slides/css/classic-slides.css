@@ -360,6 +360,26 @@ body.impress-mouse-timeout {
   opacity: 0.6;
 }
 
+/* Help popup plugin */
+.impress-enabled #impress-help {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0.5);
+    color: #EEEEEE;
+    font-size: 80%;
+    position: fixed;
+    left: 2em;
+    bottom: 2em;
+    width: 24em;
+    border-radius: 1em;
+    padding: 1em;
+    text-align: center;
+    z-index: 100;
+    font-family: Verdana, Arial, Sans;
+}
+.impress-enabled #impress-help td {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
 /*
     Styles for specific slides.
 */
@@ -431,32 +451,3 @@ body.impress-mouse-timeout {
 .impress-enabled                          { pointer-events: none }
 .impress-enabled #impress                 { pointer-events: auto }
 .impress-enabled #impress-toolbar         { pointer-events: auto }
-
-
-/*****************************************************************************************
- * Help popup
- * 
- * This is originally from hovercraft.js project. I found it helpful so have started to
- * integrate with all my impress.js presentations.
- */
-
-.impress-enabled #impress-help {
-    background: none repeat scroll 0 0 rgba(0, 0, 0, 0.5);
-    color: #EEEEEE;
-    font-size: 80%;
-    left: 2em;
-    bottom: 2em;
-    width: 24em;
-    border-radius: 1em;
-    padding: 1em;
-    position: fixed;
-    right: 0;
-    text-align: center;
-    z-index: 100;
-    display: block;
-    font-family: Verdana, Arial, Sans;
-}
-
-.impress-enabled #impress-help.hide {
-    display: none;
-}

@@ -16,6 +16,15 @@
  */
 (function ( document, window ) {
     'use strict';
+
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
+
+
     var preInit = function() {
         if( window.markdown ){
             // particular. We do it ourselves here. In addition, we use "-----" as a delimiter for new slide.
@@ -67,6 +76,10 @@
             else{
                 impressConsole().init();
             }
+            
+            // Add 'P' to the help popup
+            triggerEvent(document, "impress:help:add", { command : "P", text : "Presenter console", row : 10} );
+
             // Legacy impressConsole attribute (that breaks our namespace
             // convention) to open the console at start of presentation.
             // TODO: This kind of thing would in any case be better placed

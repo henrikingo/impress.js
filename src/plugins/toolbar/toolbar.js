@@ -117,7 +117,7 @@
 
     // API
     // Other plugins can add and remove buttons by sending them as events.
-    // In return, toolbar plugin will trigger events when button is pressed.
+    // In return, toolbar plugin will trigger events when button was added.
     if (toolbar) {
         /**
          * Append a widget inside toolbar span element identified by given group index.

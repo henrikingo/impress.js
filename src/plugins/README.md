@@ -60,6 +60,11 @@ plugins that you may want to use or adapt.
         </div>
       </div>
       
+      <div id="impress-toolbar"></div>
+      <div class="impress-progressbar"><div></div></div>
+      <div class="impress-progress"></div>
+      <div id="impress-help"></div>
+
       <script type="text/javascript" src="../../extras/highlight/highlight.pack.js"></script>
       <script type="text/javascript" src="../../extras/mermaid/mermaid.min.js"></script>
       <script type="text/javascript" src="../../extras/markdown/markdown.js"></script>
@@ -103,7 +108,7 @@ plugins that you may want to use or adapt.
     /* If you disable pointer-events (like in the impress.js official demo), you need to re-enable them for the toolbar. */
     .impress-enabled #impress-toolbar         { pointer-events: auto }
     /* Progress bar */
-    .impress-progressbar {
+    .impress-enabled .impress-progressbar {
       position: absolute;
       right: 318px;
       bottom: 1px;
@@ -111,19 +116,37 @@ plugins that you may want to use or adapt.
       border-radius: 7px;
       border: 2px solid rgba(100, 100, 100, 0.2);
     }
-    .impress-progressbar DIV {
+    .impress-enabled .impress-progressbar DIV {
       width: 0;
       height: 2px;
       border-radius: 5px;
       background: rgba(75, 75, 75, 0.4);
       transition: width 1s linear;
     }
-    .impress-progress {
+    .impress-enabled .impress-progress {
       position: absolute;
       left: 59px;
       bottom: 1px;
       text-align: left;
       opacity: 0.6;
+    }
+    .impress-enabled #impress-help {
+        background: none repeat scroll 0 0 rgba(0, 0, 0, 0.5);
+        color: #EEEEEE;
+        font-size: 80%;
+        position: fixed;
+        left: 2em;
+        bottom: 2em;
+        width: 24em;
+        border-radius: 1em;
+        padding: 1em;
+        text-align: center;
+        z-index: 100;
+        font-family: Verdana, Arial, Sans;
+    }
+    .impress-enabled #impress-help td {
+        padding-left: 1em;
+        padding-right: 1em;
     }
 
 

@@ -1076,6 +1076,15 @@
  */
 (function ( document, window ) {
     'use strict';
+
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
+
+
     var preInit = function() {
         if( window.markdown ){
             // particular. We do it ourselves here. In addition, we use "-----" as a delimiter for new slide.
@@ -1127,6 +1136,10 @@
             else{
                 impressConsole().init();
             }
+            
+            // Add 'P' to the help popup
+            triggerEvent(document, "impress:help:add", { command : "P", text : "Presenter console", row : 10} );
+
             // Legacy impressConsole attribute (that breaks our namespace
             // convention) to open the console at start of presentation.
             // TODO: This kind of thing would in any case be better placed
@@ -1273,59 +1286,102 @@
 
 
 /**
- * Mouse timeout plugin
+ * Help popup plugin
  *
- * After 3 seconds of mouse inactivity, add the css class 
- * `body.impress-mouse-timeout`. On `mousemove`, `click` or `touch`, remove the
- * class.
+ * Shows
  *
- * The use case for this plugin is to use CSS to hide elements from the screen
- * and only make them visible when the mouse is moved. Examples where this
- * might be used are: the toolbar from the toolbar plugin, and the mouse cursor
- * itself.
- *
- * Example CSS:
- *
- *     body.impress-mouse-timeout {
- *         cursor: none;
- *     }
- *     body.impress-mouse-timeout div#impress-toolbar {
- *         display: none;
- *     }
- *
+ *     <div id="impress-help"></div>
  *
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
 (function ( document, window ) {
     'use strict';
-    var timeout = 3;
+    var rows = [];
     var timeoutHandle;
 
-    var hide = function(){
-        // Mouse is now inactive
-        document.body.classList.add("impress-mouse-timeout");
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
     };
 
-    var show = function(){
-        if ( timeoutHandle ) {
-            clearTimeout(timeoutHandle);
+    var renderHelpDiv = function( e ){
+        var helpDiv = document.getElementById("impress-help");
+        if(helpDiv){
+            var html = [];
+            for( var row in rows ){
+                for( var arrayItem in row ){
+                    html.push(rows[row][arrayItem]);
+                }
+            }
+            if( html ) {
+                helpDiv.innerHTML = "<table>\n" + html.join("\n") + "</table>\n";
+            }
         }
-        // Mouse is now active
-        document.body.classList.remove("impress-mouse-timeout");
-        // Then set new timeout after which it is considered inactive again
-        timeoutHandle = setTimeout( hide, timeout*1000 );
+    };
+    
+    var toggleHelp = function() {
+        var helpDiv = document.getElementById("impress-help");
+        if(helpDiv.style.display == 'block') {
+            helpDiv.style.display = 'none';
+        }
+        else {
+            helpDiv.style.display = 'block';
+            clearTimeout( timeoutHandle );
+        }
     };
 
-    document.addEventListener("impress:init", function (event) {
-        document.addEventListener("mousemove", show);
-        document.addEventListener("click", show);
-        document.addEventListener("touch", show);
-        // Set first timeout
-        show();
+    document.addEventListener("keyup", function ( event ) {
+        // Check that event target is html or body element.
+        if ( event.target.nodeName == "BODY" || event.target.nodeName == "HTML" ) {
+            if ( event.keyCode == 72 ) { // 'h'
+                event.preventDefault();
+                toggleHelp();
+            }
+        }
     }, false);
 
+    // API
+    // Other plugins can add help texts, typically if they support an action on a keypress.
+    /**
+     * Add a help text to the help screen.
+     *
+     * :param: e.detail.command  Example: "H"
+     * :param: e.detail.text     Example: "Show this help."
+     * :param: e.detail.row      Row index from 0 to 9 where to place this help text. Example: 0
+     */
+    document.addEventListener("impress:help:add", function( e ){
+        // The idea is for the sender of the event to supply a unique row index, used for sorting.
+        // But just in case two plugins would ever use the same row index, we wrap each row into
+        // its own array. If there are more than one entry for the same index, they are shown in
+        // first come, first serve ordering.
+        var rowIndex = e.detail.row;
+        if ( typeof rows[rowIndex] != 'object' || !rows[rowIndex].isArray ) {
+            rows[rowIndex] = [];
+        }
+        rows[e.detail.row].push( "<tr><td><strong>" + e.detail.command + "</strong></td><td>" + e.detail.text + "</td></tr>" );
+        renderHelpDiv();
+    });
+
+    document.addEventListener("impress:init", function( e ){
+        renderHelpDiv();
+        // At start, show the help for 7 seconds.
+        var helpDiv = document.getElementById("impress-help");
+        if( helpDiv ) {
+            helpDiv.style.display = "block";
+            timeoutHandle = setTimeout(function () {
+                var helpDiv = window.document.getElementById("impress-help");
+                helpDiv.style.display = "none";
+            }, 7000);
+        }
+    });
+    
+    // Use our own API to register the help text for 'h'
+    triggerEvent(document, "impress:help:add", { command : "H", text : "Show this help", row : 0} );
+    
 })(document, window);
+
 
 /**
  * Mobile devices support
@@ -1396,6 +1452,61 @@
 
 
 /**
+ * Mouse timeout plugin
+ *
+ * After 3 seconds of mouse inactivity, add the css class 
+ * `body.impress-mouse-timeout`. On `mousemove`, `click` or `touch`, remove the
+ * class.
+ *
+ * The use case for this plugin is to use CSS to hide elements from the screen
+ * and only make them visible when the mouse is moved. Examples where this
+ * might be used are: the toolbar from the toolbar plugin, and the mouse cursor
+ * itself.
+ *
+ * Example CSS:
+ *
+ *     body.impress-mouse-timeout {
+ *         cursor: none;
+ *     }
+ *     body.impress-mouse-timeout div#impress-toolbar {
+ *         display: none;
+ *     }
+ *
+ *
+ * Copyright 2016 Henrik Ingo (@henrikingo)
+ * Released under the MIT license.
+ */
+(function ( document, window ) {
+    'use strict';
+    var timeout = 3;
+    var timeoutHandle;
+
+    var hide = function(){
+        // Mouse is now inactive
+        document.body.classList.add("impress-mouse-timeout");
+    };
+
+    var show = function(){
+        if ( timeoutHandle ) {
+            clearTimeout(timeoutHandle);
+        }
+        // Mouse is now active
+        document.body.classList.remove("impress-mouse-timeout");
+        // Then set new timeout after which it is considered inactive again
+        timeoutHandle = setTimeout( hide, timeout*1000 );
+    };
+
+    document.addEventListener("impress:init", function (event) {
+        document.addEventListener("mousemove", show);
+        document.addEventListener("click", show);
+        document.addEventListener("touch", show);
+        // Set first timeout
+        show();
+    }, false);
+
+})(document, window);
+
+/**
  * Navigation events plugin
  *
  * As you can see this part is separate from the impress.js core code.
@@ -1421,6 +1532,12 @@
 (function ( document, window ) {
     'use strict';
     
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
     // throttling function calls, by Remy Sharp
     // http://remysharp.com/2010/07/21/throttling-function-calls/
     var throttle = function (fn, delay) {
@@ -1573,6 +1690,9 @@
             api.goto( document.querySelector(".step.active"), 500 );
         }, 250), false);
         
+        // Add a line to the help popup
+        triggerEvent(document, "impress:help:add", { command : "Left &amp; Right", text : "Previous &amp; Next step", row : 1} );
+        
     }, false);
         
 })(document, window);
@@ -1584,18 +1704,8 @@
  * This plugin provides UI elements "back", "forward" and a list to select
  * a specific slide number.
  *
- * This plugin is what we call a _UI plugin_. It's actually an init plugin, but
- * exposes visible UI elements. All UI plugins available in the default
- * set, must be invisible by default. To add these controls, add the following
- * empty div to your html:
- *
- *     <div id="impress-navigation-ui" style="position: fixed;"></div>
- *
- * (The style attribute is optional, but it's my preferred way of of preventing
- * mouse clicks from propagating through the UI elements into the slides, that
- * may be behind the elements we create here. Since clicking on a slide causes
- * impress.js to navigate to that slide, this will be in conflict with the
- * intended behavior of these controls.)
+ * The navigation controls are added to the toolbar plugin via DOM events. User must enable the
+ * toolbar in a presentation to have them visible.
  *
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
@@ -2127,7 +2237,7 @@
 
     // API
     // Other plugins can add and remove buttons by sending them as events.
-    // In return, toolbar plugin will trigger events when button is pressed.
+    // In return, toolbar plugin will trigger events when button was added.
     if (toolbar) {
         /**
          * Append a widget inside toolbar span element identified by given group index.

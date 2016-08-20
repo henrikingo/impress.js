@@ -24,6 +24,12 @@
 (function ( document, window ) {
     'use strict';
     
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
     // throttling function calls, by Remy Sharp
     // http://remysharp.com/2010/07/21/throttling-function-calls/
     var throttle = function (fn, delay) {
@@ -175,6 +181,9 @@
             // force going to active step again, to trigger rescaling
             api.goto( document.querySelector(".step.active"), 500 );
         }, 250), false);
+        
+        // Add a line to the help popup
+        triggerEvent(document, "impress:help:add", { command : "Left &amp; Right", text : "Previous &amp; Next step", row : 1} );
         
     }, false);
         

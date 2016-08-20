@@ -167,6 +167,8 @@ toggle the CSS style:</p>
 </div>
 
 <div id="impress-toolbar"></div>
+<div id="impress-help"></div>
+
 
 <!-- Extra modules
      Load highlight.js, mermaid.js and markdown.js from extras.
@@ -189,26 +191,5 @@ toggle the CSS style:</p>
 -->
 <script type="text/javascript" src="../../js/impress.js"></script>
 <script>impress().init();</script>
-
-
-<!--
-    Show a help popup for 5 seconds in the beginning, and if 'h' is pressed.
-    
-    This nice help popup is originally from hovercraft.js project, and while I didn't want to
-    use the rst markup from hovercraft, I've retained this popup, as it looks really nice.
--->
-<div id="impress-help">
-  <table>
-    <tr><th>H</th><td>Toggle this help</td></tr>
-    <tr><th>Space</th><td>Forward</td></tr>
-    <tr><th>Right, Down, Page Down</th><td>Next slide</td></tr>
-    <tr><th>Left, Up, Page Up</th><td>Previous slide</td></tr>
-    <!-- Only shown if impressConsole.js is present, hence it needs a dedicated #id -->
-    <tr id="impress-help-p"><th>P</th><td>Open presenter console</td></tr>
-  </table>
-</div>
-<script type="text/javascript" src="js/impress-help-popup.js"></script>
-
-
 </body>
 </html>
