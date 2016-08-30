@@ -16,6 +16,7 @@
     var api;
     var root;
     var steps;
+    var hideSteps = [];
     var prev;
     var select;
     var next;
@@ -31,46 +32,62 @@
         tempDiv.innerHTML = html;
         return tempDiv.firstChild;
     };
+    
+    var selectOptionsHtml = function(){
+        var options = "";
+        for ( var i = 0; i < steps.length; i++ ) {
+            // Omit steps that are listed as hidden from select widget
+            if ( hideSteps.indexOf( steps[i] ) < 0 ) {
+                options = options + '<option value="' + steps[i].id + '">' + steps[i].id + '</option>' + "\n";
+            }
+        }
+        return options;    
+    };
 
     var addNavigationControls = function( event ) {
         api = event.detail.api;
         root = event.target;
         steps = root.querySelectorAll(".step");
 
-        var options = "";
-        for ( var i = 0; i < steps.length; i++ ) {
-            options = options + '<option value="' + steps[i].id + '">' + steps[i].id + '</option>' + "\n";
-        }
-
         var prevHtml   = '<button id="impress-navigation-ui-prev" title="Previous" class="impress-navigation-ui">&lt;</button>';
         var selectHtml = '<select id="impress-navigation-ui-select" title="Go to" class="impress-navigation-ui">' + "\n"
-                           + options
+                           + selectOptionsHtml();
                            + '</select>';
         var nextHtml   = '<button id="impress-navigation-ui-next" title="Next" class="impress-navigation-ui">&gt;</button>';
 
-        var prevElement = makeDomElement( prevHtml );
-        prevElement.addEventListener( "click",
+        prev = makeDomElement( prevHtml );
+        prev.addEventListener( "click",
             function( event ) {
                 api.prev();
         });
-        var selectElement = makeDomElement( selectHtml );
-        selectElement.addEventListener( "change",
+        select = makeDomElement( selectHtml );
+        select.addEventListener( "change",
             function( event ) {
                 api.goto( event.target.value );
         });
         root.addEventListener("impress:stepenter", function(event){
-            selectElement.value = event.target.id;
+            select.value = event.target.id;
         });
-        var nextElement = makeDomElement( nextHtml );
-        nextElement.addEventListener( "click",
+        next = makeDomElement( nextHtml );
+        next.addEventListener( "click",
             function() {
                 api.next();
         });
         
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : prevElement } );
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : selectElement } );
-        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : nextElement } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : prev } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : select } );
+        triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : next } );
     };
+    
+    // API for not listing given step in the select widget.
+    // For example, if you set class="skip" on some element, you may not want it to show up in the list either.
+    // Otoh we cannot assume that, or anything else, so steps that user wants omitted must be specifically added with this API call.
+    document.addEventListener("impress:navigation-ui:hideStep", function (event) {
+        hideSteps.push(event.target);
+        if (select) {
+            select.innerHTML = selectOptionsHtml();
+        }
+    }, false);
     
     // wait for impress.js to be initialized
     document.addEventListener("impress:init", function (event) {
