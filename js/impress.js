@@ -495,6 +495,7 @@
                 execPreStepLeavePlugins(event);
                 // Plugins are allowed to change the detail values
                 el = event.detail.next;
+                step = stepsData["impress-" + el.id];
                 duration = event.detail.transitionDuration;
             }
             
