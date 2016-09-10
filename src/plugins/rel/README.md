@@ -34,6 +34,42 @@ Example:
 
         <div class="step" data-rel-x="1.5w" data-rel-y="1.5h">
 
+
+IMPORTANT: Incompatible change
+------------------------------
+
+Enabling / adding this plugin has a small incompatible side effect on default values.
+
+Prior to this plugin, a missing data-x/y/z attribute would be assigned the default value of 0.
+But when using a version of impress.js with this plugin enabled, a missing data-x/y/z attribute
+will inherit the value from the previous step. (The first step will inherit the default value of 0.)
+
+For example, if you have an old presentation with the following 3 steps, they would be positioned
+differently when using a version of impress.js that includes this plugin:
+
+        <div class="step" data-x="100" data-y="100" data-z="100"></div>
+        <div class="step" data-x="100" data-y="100"></div>
+        <div class="step" data-x="100" data-y="100"></div>
+
+To get the same rendering now, you need to add an explicit `data-z="0"` to the second step:
+
+        <div class="step" data-x="100" data-y="100" data-z="100"></div>
+        <div class="step" data-x="100" data-y="100" data-z="0"></div>
+        <div class="step" data-x="100" data-y="100"></div>
+
+Note that the latter code will render correctly also in old versions of impress.js.
+
+If you have an old presentation that doesn't use relative positioning, and for some reason you
+cannot or don't want to add the explicit 0 values where needed, your last resort is to simply
+remove the `rel.js` plugin completely. You can either:
+
+* Remove `rel.js` from [/build.js](../../../build.js) and recompile `impress.js` with: `npm build`
+* Just open [/js/impress.js] in an editor and delete the `rel.js` code.
+* Or, just uncomment the following single line, which is the last line of the plugin:
+
+        impress().addPreInitPlugin( rel );
+
+
 About Pre-Init Plugins
 ----------------------
 
