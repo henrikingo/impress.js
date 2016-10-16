@@ -85,6 +85,26 @@
         return isNaN(numeric) ? (fallback || 0) : Number(numeric);
     };
     
+    var validateOrder = function ( order, fallback ) {
+        var validChars = "xyz";
+        var returnStr = "";
+        if ( typeof order == "string" ) {
+            for ( var i in order.split("") ) {
+                if( validChars.indexOf( order[i] >= 0 ) ) {
+                    returnStr += order[i];
+                    // Each of x,y,z can be used only once.
+                    validChars = validChars.split(order[i]).join("");
+                }
+            }
+        }
+        if ( returnStr )
+            return returnStr;
+        else if ( fallback !== undefined )
+            return fallback;
+        else
+            return "xyz";
+    };
+    
     // `byId` returns element with given `id` - you probably have guessed that ;)
     var byId = function ( id ) {
         return document.getElementById(id);
@@ -121,11 +141,17 @@
     // By default the rotations are in X Y Z order that can be reverted by passing `true`
     // as second parameter.
     var rotate = function ( r, revert ) {
-        var rX = " rotateX(" + r.x + "deg) ",
-            rY = " rotateY(" + r.y + "deg) ",
-            rZ = " rotateZ(" + r.z + "deg) ";
-        
-        return revert ? rZ+rY+rX : rX+rY+rZ;
+        var order = r.order ? r.order : "xyz";
+        var css = "";
+        var axes = order.split("");
+        if ( revert ) {
+            axes = axes.reverse();
+        }
+
+        for ( var i in axes ) {
+            css += " rotate" + axes[i].toUpperCase() + "(" + r[axes[i]] + "deg)"
+        }
+        return css;
     };
     
     // `scale` builds a scale transform string for given data.
@@ -351,7 +377,8 @@
                     rotate: {
                         x: toNumber(data.rotateX),
                         y: toNumber(data.rotateY),
-                        z: toNumber(data.rotateZ || data.rotate)
+                        z: toNumber(data.rotateZ || data.rotate),
+                        order: validateOrder(data.rotateOrder)
                     },
                     scale: toNumber(data.scale, 1),
                     transitionDuration: toNumber(data.transitionDuration, config.transitionDuration),
@@ -440,7 +467,7 @@
             // set a default initial state of the canvas
             currentState = {
                 translate: { x: 0, y: 0, z: 0 },
-                rotate:    { x: 0, y: 0, z: 0 },
+                rotate:    { x: 0, y: 0, z: 0, order: "xyz" },
                 scale:     1
             };
             
@@ -512,7 +539,8 @@
                 rotate: {
                     x: -step.rotate.x,
                     y: -step.rotate.y,
-                    z: -step.rotate.z
+                    z: -step.rotate.z,
+                    order: step.rotate.order
                 },
                 translate: {
                     x: -step.translate.x,
@@ -687,9 +715,11 @@
                 rotate: {
                     x: interpolate(currentState.rotate.x, -nextStep.rotate.x, k),
                     y: interpolate(currentState.rotate.y, -nextStep.rotate.y, k),
-                    z: interpolate(currentState.rotate.z, -nextStep.rotate.z, k)
+                    z: interpolate(currentState.rotate.z, -nextStep.rotate.z, k),
+                    // Unfortunately there's a discontinuity if rotation order changes. Nothing I can do about it?
+                    order: k < 0.7 ? currentState.rotate.order : nextStep.rotate.order
                 },
-                scale: interpolate(currentState.scale, nextScale)
+                scale: interpolate(currentState.scale, nextScale, k)
             };
 
             css(root, {
