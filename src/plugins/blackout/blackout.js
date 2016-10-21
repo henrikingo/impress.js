@@ -1,7 +1,7 @@
 /**
  * Blackout plugin
  *
- * Press 'b' to hide all slides, and 'b' again to show them.
+ * Press Ctrl+b to hide all slides, and Ctrl+b again to show them.
  * Also navigating to a different slide will show them again (impress:stepleave).
  * 
  * Copyright 2014 @Strikeskids
@@ -84,7 +84,7 @@
         canvas = root.firstElementChild;
         
         document.addEventListener("keydown", function ( event ) {
-            if ( event.keyCode === 66 ) {
+            if ( event.ctrlKey && event.keyCode === 66 ) {
                 event.preventDefault();
                 if (!blackedOut) {
                     blackout();
@@ -99,7 +99,7 @@
         }, false);
         
         document.addEventListener("keyup", function ( event ) {
-            if ( event.keyCode === 66 ) {
+            if ( event.ctrlKey && event.keyCode === 66 ) {
                 event.preventDefault();
             }
         }, false);
