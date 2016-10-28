@@ -119,11 +119,6 @@
         return " scale(" + s + ") ";
     };
 
-    // `perspective` builds a perspective transform string for given data.
-    var perspective = function( p ) {
-        return " perspective(" + p + "px) ";
-    };
-
     // `computeWindowScale` counts the scale factor between window size and size
     // defined for the presentation in the config.
     var computeWindowScale = function( config ) {
@@ -378,7 +373,8 @@
             css( root, {
                 top: "50%",
                 left: "50%",
-                transform: perspective( config.perspective / windowScale ) + scale( windowScale )
+                perspective: ( config.perspective / windowScale ) + "px",
+                transform: scale( windowScale )
             } );
             css( canvas, rootStyles );
 
@@ -538,7 +534,8 @@
 
                 // To keep the perspective look similar for different scales
                 // we need to "scale" the perspective, too
-                transform: perspective( config.perspective / targetScale ) + scale( targetScale ),
+                perspective: ( config.perspective / targetScale ) + "px",
+                transform: scale( targetScale ),
                 transitionDuration: duration + "ms",
                 transitionDelay: ( zoomin ? delay : 0 ) + "ms"
             } );
