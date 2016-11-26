@@ -192,12 +192,9 @@
     
     // CHECK SUPPORT
     var body = document.body;
-    
-    var ua = navigator.userAgent.toLowerCase();
     var impressSupported = 
                           // browser should support CSS 3D transtorms 
                            ( pfx("perspective") !== null ) &&
-                           
                           // and `classList` and `dataset` APIs
                            ( body.classList ) &&
                            ( body.dataset );
@@ -205,11 +202,7 @@
     if (!impressSupported) {
         // we can't be sure that `classList` is supported
         body.className += " impress-not-supported ";
-    } else {
-        body.classList.remove("impress-not-supported");
-        body.classList.add("impress-supported");
     }
-    
     // GLOBALS AND DEFAULTS
     
     // This is where the root elements of all impress.js instances will be kept.
@@ -253,7 +246,8 @@
                 prev: empty,
                 next: empty,
                 addPreInitPlugin: empty,
-                addPreStepLeavePlugin: empty
+                addPreStepLeavePlugin: empty,
+                lib: {}
             };
         }
         
@@ -264,6 +258,13 @@
             return roots["impress-root-" + rootId];
         }
         
+        // The gc library depends on being initialized before we do any changes to DOM.
+        var lib = initLibraries(rootId);
+        if (lib === "error") return;
+        
+        body.classList.remove("impress-not-supported");
+        body.classList.add("impress-supported");
+
         // data of all presentation steps
         var stepsData = {};
         
@@ -812,13 +813,40 @@
             prev: prev,
             swipe: swipe,
             addPreInitPlugin: addPreInitPlugin,
-            addPreStepLeavePlugin: addPreStepLeavePlugin
+            addPreStepLeavePlugin: addPreStepLeavePlugin,
+            lib: lib
         });
 
     };
     
     // flag that can be used in JS to check if browser have passed the support test
     impress.supported = impressSupported;
+    
+    // ADD and INIT LIBRARIES
+    // Library factories are defined in src/lib/*.js, and register themselves by calling
+    // impress.addLibraryFactory(libraryFactoryObject). They're stored here, and used to augment
+    // the API with library functions when client calls impress(rootId).
+    // See src/lib/README.md for clearer example.
+    // (Advanced usage: For different values of rootId, a different instance of the libaries are
+    // generated, in case they need to hold different state for different root elements.)
+    var libraryFactories = {};
+    impress.addLibraryFactory = function(obj){
+        for (var libname in obj) {
+            libraryFactories[libname] = obj[libname];
+        }
+    };
+    // Call each library factory, and return the lib object that is added to the api.
+    var initLibraries = function(rootId){
+        var lib = {}
+        for (var libname in libraryFactories) {
+            if(lib[libname] !== undefined) {
+                console.log("impress.js ERROR: Two libraries both tried to use libname: " + libname);
+                return "error";
+            }
+            lib[libname] = libraryFactories[libname](rootId);
+        }
+        return lib;
+    };
 
 })(document, window);
 
@@ -830,6 +858,130 @@
 //
 // I've learnt a lot when building impress.js and I hope this code and comments
 // will help somebody learn at least some part of it.
+
+/**
+ * Garbage collection utility
+ *
+ * This library allows plugins to add elements and event listeners they add to the DOM. The user
+ * can call `impress().lib.gc.teardown()` to cause all of them to be removed from DOM, so that
+ * the document is in the state it was before calling `impress().init()`.
+ *
+ * In addition to just adding elements and event listeners to the garbage collector, plugins
+ * can also register callback functions to do arbitrary cleanup upon teardown.
+ *
+ * Henrik Ingo (c) 2016
+ * MIT License
+ */
+(function ( document, window ) {
+    'use strict';
+    var roots = [];
+    
+    var libraryFactory = function(rootId) {
+        if (roots["impress-root-" + rootId]) {
+            return roots["impress-root-" + rootId];
+        }
+        
+        // Per root global variables (instance variables?)
+        var elementList = [];
+        var eventListenerList = [];
+        var callbackList = [];
+        var startingState = {};
+        
+        recordStartingState(startingState, rootId);
+        
+        // LIBRARY FUNCTIONS
+        // Below are definitions of the library functions we return at the end
+        var pushElement = function ( element ) {
+            elementList.push(element);
+        };
+        
+        // Convenience wrapper that combines DOM appendChild with gc.pushElement
+        var appendChild = function ( parent, element ) {
+            parent.appendChild(element);
+            pushElement(element);
+        };
+        
+        var pushEventListener = function ( target, type, listenerFunction ) {
+            eventListenerList.push( {target:target, type:type, listener:listenerFunction} );
+        };
+        
+        // Convenience wrapper that combines DOM addEventListener with gc.pushEventListener
+        var addEventListener = function ( target, type, listenerFunction ) {
+            target.addEventListener( type, listenerFunction );
+            pushEventListener( target, type, listenerFunction );
+        };
+        
+        // If the above utilities are not enough, plugins can add their own callback function
+        // to do arbitrary things.
+        var addCallback = function ( callback ) {
+            callbackList.push(callback);
+        };
+        addCallback(function(rootId){ resetStartingState(startingState, rootId)} );
+        
+        var teardown = function () {
+            for ( var i in callbackList ) {
+                callbackList[i](rootId);
+            }
+            callbackList = [];
+            for ( var i in elementList ) {
+                elementList[i].parentElement.removeChild(elementList[i]);
+            }
+            elementList = [];
+            for ( var i in eventListenerList ) {
+                var target   = eventListenerList[i].target;
+                var type     = eventListenerList[i].type;
+                var listener = eventListenerList[i].listener;
+                target.removeEventListener(type, listener);
+            }
+        };
+        
+        var lib = {
+            pushElement: pushElement,
+            appendChild: appendChild,
+            pushEventListener: pushEventListener,
+            addEventListener: addEventListener,
+            addCallback: addCallback,
+            teardown: teardown
+        }
+        roots["impress-root-" + rootId] = lib;
+        return lib;
+    };
+    
+    // Let impress core know about the existence of this library
+    window.impress.addLibraryFactory( { gc : libraryFactory } );
+    
+    
+    // CORE INIT
+    // The library factory (gc(rootId)) is called at the beginning of impress(rootId).init()
+    // For the purposes of teardown(), we can use this as an opportunity to save the state
+    // of a few things in the DOM in their virgin state, before impress().init() did anything.
+    // Note: These could also be recorded by the code in impress.js core as these values
+    // are changed, but in an effort to not deviate too much from upstream, I'm adding
+    // them here rather than the core itself.
+    var recordStartingState = function(startingState, rootId) {
+        startingState.body = {};
+        // It is customary for authors to set body.class="impress-not-supported" as a starting
+        // value, which can then be removed by impress().init(). But it is not required.
+        // Remember whether it was there or not.
+        if ( document.body.classList.contains(rootId+"-not-supported") ) {
+            startingState.body.impressNotSupported = true;
+        }
+        else {
+            startingState.body.impressNotSupported = false;
+        }
+    };
+    
+    // CORE TEARDOWN
+    var resetStartingState = function(startingState, rootId) {
+        document.body.classList.remove(rootId+"-enabled");
+        document.body.classList.remove(rootId+"-supported");
+        if (startingState.body.impressNotSupported) {
+            document.body.classList.add(rootId+"-not-supported");
+        };
+    };
+
+    
+})(document, window);
 
 /**
  * Autoplay plugin - Automatically advance slideshow after N seconds

@@ -192,12 +192,9 @@
     
     // CHECK SUPPORT
     var body = document.body;
-    
-    var ua = navigator.userAgent.toLowerCase();
     var impressSupported = 
                           // browser should support CSS 3D transtorms 
                            ( pfx("perspective") !== null ) &&
-                           
                           // and `classList` and `dataset` APIs
                            ( body.classList ) &&
                            ( body.dataset );
@@ -205,11 +202,7 @@
     if (!impressSupported) {
         // we can't be sure that `classList` is supported
         body.className += " impress-not-supported ";
-    } else {
-        body.classList.remove("impress-not-supported");
-        body.classList.add("impress-supported");
     }
-    
     // GLOBALS AND DEFAULTS
     
     // This is where the root elements of all impress.js instances will be kept.
@@ -253,7 +246,8 @@
                 prev: empty,
                 next: empty,
                 addPreInitPlugin: empty,
-                addPreStepLeavePlugin: empty
+                addPreStepLeavePlugin: empty,
+                lib: {}
             };
         }
         
@@ -264,6 +258,13 @@
             return roots["impress-root-" + rootId];
         }
         
+        // The gc library depends on being initialized before we do any changes to DOM.
+        var lib = initLibraries(rootId);
+        if (lib === "error") return;
+        
+        body.classList.remove("impress-not-supported");
+        body.classList.add("impress-supported");
+
         // data of all presentation steps
         var stepsData = {};
         
@@ -812,13 +813,40 @@
             prev: prev,
             swipe: swipe,
             addPreInitPlugin: addPreInitPlugin,
-            addPreStepLeavePlugin: addPreStepLeavePlugin
+            addPreStepLeavePlugin: addPreStepLeavePlugin,
+            lib: lib
         });
 
     };
     
     // flag that can be used in JS to check if browser have passed the support test
     impress.supported = impressSupported;
+    
+    // ADD and INIT LIBRARIES
+    // Library factories are defined in src/lib/*.js, and register themselves by calling
+    // impress.addLibraryFactory(libraryFactoryObject). They're stored here, and used to augment
+    // the API with library functions when client calls impress(rootId).
+    // See src/lib/README.md for clearer example.
+    // (Advanced usage: For different values of rootId, a different instance of the libaries are
+    // generated, in case they need to hold different state for different root elements.)
+    var libraryFactories = {};
+    impress.addLibraryFactory = function(obj){
+        for (var libname in obj) {
+            libraryFactories[libname] = obj[libname];
+        }
+    };
+    // Call each library factory, and return the lib object that is added to the api.
+    var initLibraries = function(rootId){
+        var lib = {}
+        for (var libname in libraryFactories) {
+            if(lib[libname] !== undefined) {
+                console.log("impress.js ERROR: Two libraries both tried to use libname: " + libname);
+                return "error";
+            }
+            lib[libname] = libraryFactories[libname](rootId);
+        }
+        return lib;
+    };
 
 })(document, window);
 
