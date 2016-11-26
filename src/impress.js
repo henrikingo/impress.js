@@ -320,51 +320,6 @@
             }
         };
         
-        // `addPreInitPlugin` allows plugins to register a function that should
-        // be run (synchronously) at the beginning of init, before 
-        // impress().init() itself executes.
-        var addPreInitPlugin = function( plugin, weight ) {
-            weight = toNumber(weight,10);
-            if ( preInitPlugins[weight] === undefined ) {
-                preInitPlugins[weight] = [];
-            }
-            preInitPlugins[weight].push( plugin );
-        };
-        
-        // Called at beginning of init, to execute all pre-init plugins.
-        var execPreInitPlugins = function() {
-            for( var i = 0; i < preInitPlugins.length; i++ ) {
-                var thisLevel = preInitPlugins[i];
-                if( thisLevel !== undefined ) {
-                    for( var j = 0; j < thisLevel.length; j++ ) {
-                        thisLevel[j]();
-                    }
-                }
-            }
-        };
-        
-        // `addPreStepLeavePlugin` allows plugins to register a function that should
-        // be run (synchronously) at the beginning of goto()
-        var addPreStepLeavePlugin = function( plugin, weight ) {
-            weight = toNumber(weight,10);
-            if ( preStepLeavePlugins[weight] === undefined ) {
-                preStepLeavePlugins[weight] = [];
-            }
-            preStepLeavePlugins[weight].push( plugin );
-        };
-        
-        // Called at beginning of goto(), to execute all preStepLeave plugins.
-        var execPreStepLeavePlugins = function(event) {
-            for( var i = 0; i < preStepLeavePlugins.length; i++ ) {
-                var thisLevel = preStepLeavePlugins[i];
-                if( thisLevel !== undefined ) {
-                    for( var j = 0; j < thisLevel.length; j++ ) {
-                        thisLevel[j](event);
-                    }
-                }
-            }
-        };
-
         // `initStep` initializes given step element by reading data from its
         // data attributes and setting correct styles.
         var initStep = function ( el, idx ) {
@@ -405,7 +360,7 @@
         // `init` API function that initializes (and runs) the presentation.
         var init = function () {
             if (initialized) { return; }
-            execPreInitPlugins();
+            execPreInitPlugins(root);
             
             // First we set up the viewport for mobile devices.
             // For some reason iPad goes nuts when it is not done properly.
@@ -812,8 +767,6 @@
             next: next,
             prev: prev,
             swipe: swipe,
-            addPreInitPlugin: addPreInitPlugin,
-            addPreStepLeavePlugin: addPreStepLeavePlugin,
             lib: lib
         });
 
@@ -846,6 +799,51 @@
             lib[libname] = libraryFactories[libname](rootId);
         }
         return lib;
+    };
+
+    // `addPreInitPlugin` allows plugins to register a function that should
+    // be run (synchronously) at the beginning of init, before 
+    // impress().init() itself executes.
+    impress.addPreInitPlugin = function( plugin, weight ) {
+        weight = toNumber(weight,10);
+        if ( preInitPlugins[weight] === undefined ) {
+            preInitPlugins[weight] = [];
+        }
+        preInitPlugins[weight].push( plugin );
+    };
+    
+    // Called at beginning of init, to execute all pre-init plugins.
+    var execPreInitPlugins = function(root) {
+        for( var i = 0; i < preInitPlugins.length; i++ ) {
+            var thisLevel = preInitPlugins[i];
+            if( thisLevel !== undefined ) {
+                for( var j = 0; j < thisLevel.length; j++ ) {
+                    thisLevel[j](root);
+                }
+            }
+        }
+    };
+    
+    // `addPreStepLeavePlugin` allows plugins to register a function that should
+    // be run (synchronously) at the beginning of goto()
+    impress.addPreStepLeavePlugin = function( plugin, weight ) {
+        weight = toNumber(weight,10);
+        if ( preStepLeavePlugins[weight] === undefined ) {
+            preStepLeavePlugins[weight] = [];
+        }
+        preStepLeavePlugins[weight].push( plugin );
+    };
+    
+    // Called at beginning of goto(), to execute all preStepLeave plugins.
+    var execPreStepLeavePlugins = function(event) {
+        for( var i = 0; i < preStepLeavePlugins.length; i++ ) {
+            var thisLevel = preStepLeavePlugins[i];
+            if( thisLevel !== undefined ) {
+                for( var j = 0; j < thisLevel.length; j++ ) {
+                    thisLevel[j](event);
+                }
+            }
+        }
     };
 
 })(document, window);

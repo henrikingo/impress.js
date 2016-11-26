@@ -88,7 +88,7 @@
     };
     
     // Register the plugin to be called in pre-stepleave phase
-    impress().addPreStepLeavePlugin( goto );
+    impress.addPreStepLeavePlugin( goto );
     
 })(document, window);
 

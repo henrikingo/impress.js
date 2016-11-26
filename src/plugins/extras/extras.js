@@ -95,7 +95,7 @@
     // Register the plugin to be called in pre-init phase
     // Note: Markdown.js should run early/first, because it creates new div elements.
     // So add this with a lower-than-default weight.
-    impress().addPreInitPlugin( preInit, 0 );
+    impress.addPreInitPlugin( preInit, 0 );
 
     // Register the plugin to be called on impress:init event
     document.addEventListener("impress:init", postInit, false);

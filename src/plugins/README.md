@@ -307,7 +307,7 @@ A pre-init plugin must be called synchronously, before `impress().init()` is
 executed. Plugins can register themselves to be called in the pre-init phase
 by calling:
 
-    impress().addPreInitPlugin( plugin, weight );
+    impress.addPreInitPlugin( plugin [, weight] );
 
 The argument `plugin` must be a function. `weight` is optional and defaults to
 `10`. Plugins are ordered by weight when they are executed, with lower weight
@@ -322,7 +322,7 @@ beginning of `impress().goto()`.
 
 To register a plugin, call
 
-    impress().addPreStepLeavePlugin( plugin [, weight] );
+    impress.addPreStepLeavePlugin( plugin [, weight] );
 
 When the plugin function is executed, it will be passed an argument
 that resembles the `event` object from DOM event handlers:

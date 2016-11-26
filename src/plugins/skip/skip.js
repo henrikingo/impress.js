@@ -62,7 +62,7 @@
     
     // Register the plugin to be called in pre-stepleave phase
     // The weight makes this plugin run early. This is a good thing, because this plugin calls itself recursively.
-    impress().addPreStepLeavePlugin( skip, 1 );
+    impress.addPreStepLeavePlugin( skip, 1 );
     
 })(document, window);
 

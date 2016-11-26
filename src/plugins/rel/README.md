@@ -67,7 +67,7 @@ remove the `rel.js` plugin completely. You can either:
 * Just open [/js/impress.js] in an editor and delete the `rel.js` code.
 * Or, just uncomment the following single line, which is the last line of the plugin:
 
-        impress().addPreInitPlugin( rel );
+        impress.addPreInitPlugin( rel );
 
 
 About Pre-Init Plugins

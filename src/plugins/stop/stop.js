@@ -26,7 +26,7 @@
     
     // Register the plugin to be called in pre-stepleave phase
     // The weight makes this plugin run fairly late.
-    impress().addPreStepLeavePlugin( stop, 20 );
+    impress.addPreStepLeavePlugin( stop, 20 );
     
 })(document, window);
 

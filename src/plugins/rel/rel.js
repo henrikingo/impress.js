@@ -105,8 +105,7 @@
         return step;        
     };
             
-    var rel = function() {
-        var root  = document.querySelector("#impress");
+    var rel = function(root) {
         var steps = root.querySelectorAll(".step");
         var prev;
         for ( var i = 0; i < steps.length; i++ ) {
@@ -121,7 +120,7 @@
     };
     
     // Register the plugin to be called in pre-init phase
-    impress().addPreInitPlugin( rel );
+    impress.addPreInitPlugin( rel );
     
 })(document, window);
 
