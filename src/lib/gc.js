@@ -14,6 +14,7 @@
 (function ( document, window ) {
     'use strict';
     var roots = [];
+    var rootsCount = 0;
     
     var libraryFactory = function(rootId) {
         if (roots["impress-root-" + rootId]) {
@@ -26,7 +27,9 @@
         var callbackList = [];
         var startingState = {};
         
-        recordStartingState(startingState, rootId);
+        if ( rootsCount == 0 ) {
+            recordStartingState(startingState, rootId);
+        }
         
         // LIBRARY FUNCTIONS
         // Below are definitions of the library functions we return at the end
@@ -83,6 +86,7 @@
             teardown: teardown
         }
         roots["impress-root-" + rootId] = lib;
+        rootsCount++;
         return lib;
     };
     
@@ -102,7 +106,7 @@
         // It is customary for authors to set body.class="impress-not-supported" as a starting
         // value, which can then be removed by impress().init(). But it is not required.
         // Remember whether it was there or not.
-        if ( document.body.classList.contains(rootId+"-not-supported") ) {
+        if ( document.body.classList.contains("impress-not-supported") ) {
             startingState.body.impressNotSupported = true;
         }
         else {
@@ -112,11 +116,59 @@
     
     // CORE TEARDOWN
     var resetStartingState = function(startingState, rootId) {
-        document.body.classList.remove(rootId+"-enabled");
-        document.body.classList.remove(rootId+"-supported");
-        if (startingState.body.impressNotSupported) {
-            document.body.classList.add(rootId+"-not-supported");
-        };
+        // Reset body element
+        document.body.classList.remove("impress-enabled");
+        document.body.classList.remove("impress-disabled");
+        
+        var root = document.getElementById(rootId);
+        var activeId = root.querySelector(".active").id;
+        document.body.classList.remove("impress-on-" + activeId);
+        
+        document.documentElement.style["height"] = '';
+        document.body.style["height"] = '';
+        document.body.style["overflow"] = '';
+        // Remove style values from the root and step elements
+        // Note: We remove the ones set by impress.js core. Otoh, we didn't preserve any original
+        // values. A more sophisticated implementation could keep track of original values and then
+        // reset those.
+        var steps = root.querySelectorAll(".step");
+        for( var i=0; i < steps.length; i++ ){
+            steps[i].classList.remove("future");
+            steps[i].classList.remove("past");
+            steps[i].classList.remove("present");
+            steps[i].classList.remove("active");
+            steps[i].style["position"] = '';
+            steps[i].style["transform"] = '';
+            steps[i].style["transform-style"] = '';
+        }
+        root.style["position"] = '';
+        root.style["transform-origin"] = '';
+        root.style["transition"] = '';
+        root.style["transform-style"] = '';
+        root.style["top"] = '';
+        root.style["left"] = '';
+        root.style["transform"] = '';
+        // Move step div elements away from canvas, then delete canvas
+        // Note: There's an implicit assumption here that the canvas div is the only child element
+        // of the root div. If there would be something else, it's gonna be lost.
+        var canvas = root.firstChild;
+        var canvasHTML = canvas.innerHTML;
+        root.innerHTML = canvasHTML;
+        
+        if( roots["impress-root-" + rootId] !== undefined ) {
+            delete roots["impress-root-" + rootId];
+            rootsCount--;
+        }
+        if( rootsCount == 0 ) {
+            // In the rare case that more than one impress root elements were initialized, these
+            // are only reset when all are uninitialized.
+            document.body.classList.remove("impress-supported");
+            if (startingState.body.impressNotSupported) {
+                document.body.classList.add("impress-not-supported");
+            };
+        }
+        
+        
     };
 
     

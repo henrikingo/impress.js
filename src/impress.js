@@ -692,6 +692,14 @@
                 transitionDelay: "0ms"
             });
         };
+        
+        // Teardown impress
+        // Resets the DOM to the state it was before impress().init() was called.
+        // (If you called impress(rootId).init() for multiple different rootId's, then you must
+        // also call tear() once for each of them.)
+        var tear = function() {
+            lib.gc.teardown();
+        }
 
 
         // Adding some useful classes to step elements.
@@ -767,6 +775,7 @@
             next: next,
             prev: prev,
             swipe: swipe,
+            tear: tear,
             lib: lib
         });
 
