@@ -2128,8 +2128,8 @@
 		}
 		gc.addCallback( function(){
 			stepids = [];
-                        progressbar.style.width = '';
-                        progress.innerHTML = '';
+                        if (progressbar) progressbar.style.width = '';
+                        if (progress) progress.innerHTML = '';
                 });
 	});
 	var progressbar = document.querySelector('div.impress-progressbar div');
