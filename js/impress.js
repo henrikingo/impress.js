@@ -1009,18 +1009,6 @@
     
     // CORE TEARDOWN
     var resetStartingState = function(rootId) {
-        var steps = startingState.roots[rootId].steps;
-        var step;
-        while( step = steps.pop() ){
-            if( step.id === null ) {
-                step.el.removeAttribute( "id" );
-            }
-            else {
-                step.el.setAttribute( "id", step.id );
-            }
-        }
-        delete startingState.roots[rootId];
-
         // Reset body element
         document.body.classList.remove("impress-enabled");
         document.body.classList.remove("impress-disabled");
@@ -1053,6 +1041,20 @@
         root.style["top"] = '';
         root.style["left"] = '';
         root.style["transform"] = '';
+
+        // Reset id of steps ("step-1" id's are auto generated)
+        var steps = startingState.roots[rootId].steps;
+        var step;
+        while( step = steps.pop() ){
+            if( step.id === null ) {
+                step.el.removeAttribute( "id" );
+            }
+            else {
+                step.el.setAttribute( "id", step.id );
+            }
+        }
+        delete startingState.roots[rootId];
+
         // Move step div elements away from canvas, then delete canvas
         // Note: There's an implicit assumption here that the canvas div is the only child element
         // of the root div. If there would be something else, it's gonna be lost.
