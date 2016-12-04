@@ -44,11 +44,18 @@
     };
 
     document.addEventListener("impress:init", function (event) {
-        document.addEventListener("mousemove", show);
-        document.addEventListener("click", show);
-        document.addEventListener("touch", show);
+        var api = event.detail.api;
+        var gc = api.lib.gc;
+        gc.addEventListener(document, "mousemove", show);
+        gc.addEventListener(document, "click", show);
+        gc.addEventListener(document, "touch", show);
         // Set first timeout
         show();
+        // Unset all this on teardown
+        gc.addCallback( function(){
+            clearTimeout(timeoutHandle);
+            document.body.classList.remove("impress-mouse-timeout");
+        });
     }, false);
 
 })(document, window);

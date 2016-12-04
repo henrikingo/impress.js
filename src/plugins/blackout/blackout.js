@@ -82,8 +82,9 @@
         var api = event.detail.api;
         var root = event.target;
         canvas = root.firstElementChild;
+        var gc = api.lib.gc;
         
-        document.addEventListener("keydown", function ( event ) {
+        gc.addEventListener(document, "keydown", function ( event ) {
             if ( event.ctrlKey && event.keyCode === 66 ) {
                 event.preventDefault();
                 if (!blackedOut) {
@@ -98,7 +99,7 @@
             }
         }, false);
         
-        document.addEventListener("keyup", function ( event ) {
+        gc.addEventListener(document, "keyup", function ( event ) {
             if ( event.ctrlKey && event.keyCode === 66 ) {
                 event.preventDefault();
             }

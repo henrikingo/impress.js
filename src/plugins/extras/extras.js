@@ -27,6 +27,7 @@
 
     var preInit = function() {
         if( window.markdown ){
+            // Unlike the other extras, Markdown.js doesn't by default do anything in
             // particular. We do it ourselves here. In addition, we use "-----" as a delimiter for new slide.
 
             // Query all .markdown elements and translate to HTML

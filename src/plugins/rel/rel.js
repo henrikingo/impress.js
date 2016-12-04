@@ -45,6 +45,8 @@
 (function ( document, window ) {
     'use strict';
 
+    var startingState = {};
+
     /**
      * Copied from core impress.js. We currently lack a library mechanism to
      * to share utility functions like this.
@@ -54,7 +56,7 @@
     };
 
     /**
-     * Extends toNumer() to correctly compute also relative-to-screen-size values 5w and 5h.
+     * Extends toNumber() to correctly compute also relative-to-screen-size values 5w and 5h.
      *
      * Returns the computed value in pixels with w/h postfix removed.
      */
@@ -108,8 +110,15 @@
     var rel = function(root) {
         var steps = root.querySelectorAll(".step");
         var prev;
+        startingState[root.id] = [];
         for ( var i = 0; i < steps.length; i++ ) {
             var el = steps[i];
+            startingState[root.id].push({
+                el: el,
+                x: el.getAttribute("data-x"),
+                y: el.getAttribute("data-y"),
+                z: el.getAttribute("data-z")
+            });
             var step = computeRelativePositions( el, prev );
             // Apply relative position (if non-zero)
             el.setAttribute( "data-x", step.x );
@@ -122,5 +131,34 @@
     // Register the plugin to be called in pre-init phase
     impress.addPreInitPlugin( rel );
     
+    // Register teardown callback to reset the data.x, .y, .z values.
+    document.addEventListener( "impress:init", function(event) {
+        var root = event.target;
+        event.detail.api.lib.gc.addCallback( function(){
+            var steps = startingState[root.id];
+            var step;
+            while( step = steps.pop() ){
+                if( step.x === null ) {
+                    step.el.removeAttribute( "data-x" );
+                }
+                else {
+                    step.el.setAttribute( "data-x", step.x );
+                }
+                if( step.y === null ) {
+                    step.el.removeAttribute( "data-y" );
+                }
+                else {
+                    step.el.setAttribute( "data-y", step.y );
+                }
+                if( step.z === null ) {
+                    step.el.removeAttribute( "data-z" );
+                }
+                else {
+                    step.el.setAttribute( "data-z", step.z );
+                }
+            }
+            delete startingState[root.id];
+        });
+    }, false);
 })(document, window);
 

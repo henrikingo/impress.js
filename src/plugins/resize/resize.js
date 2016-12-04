@@ -32,7 +32,7 @@
     document.addEventListener("impress:init", function (event) {
         var api = event.detail.api;
         // rescale presentation when window is resized
-        window.addEventListener("resize", throttle(function () {
+        api.lib.gc.addEventListener(window, "resize", throttle(function () {
             // force going to active step again, to trigger rescaling
             api.goto( document.querySelector(".step.active"), 500 );
         }, 250), false);

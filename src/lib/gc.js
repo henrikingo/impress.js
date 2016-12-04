@@ -15,21 +15,19 @@
     'use strict';
     var roots = [];
     var rootsCount = 0;
+    var startingState = { roots : [] };
     
     var libraryFactory = function(rootId) {
-        if (roots["impress-root-" + rootId]) {
-            return roots["impress-root-" + rootId];
+        if (roots[rootId]) {
+            return roots[rootId];
         }
         
         // Per root global variables (instance variables?)
         var elementList = [];
         var eventListenerList = [];
         var callbackList = [];
-        var startingState = {};
         
-        if ( rootsCount == 0 ) {
-            recordStartingState(startingState, rootId);
-        }
+        recordStartingState(rootId);
         
         // LIBRARY FUNCTIONS
         // Below are definitions of the library functions we return at the end
@@ -58,10 +56,11 @@
         var addCallback = function ( callback ) {
             callbackList.push(callback);
         };
-        addCallback(function(rootId){ resetStartingState(startingState, rootId)} );
+        addCallback(function(rootId){ resetStartingState(rootId)} );
         
         var teardown = function () {
-            for ( var i in callbackList ) {
+            // Execute the callbacks in LIFO order
+            for ( var i = callbackList.length-1; i >= 0; i-- ) {
                 callbackList[i](rootId);
             }
             callbackList = [];
@@ -85,7 +84,7 @@
             addCallback: addCallback,
             teardown: teardown
         }
-        roots["impress-root-" + rootId] = lib;
+        roots[rootId] = lib;
         rootsCount++;
         return lib;
     };
@@ -101,21 +100,58 @@
     // Note: These could also be recorded by the code in impress.js core as these values
     // are changed, but in an effort to not deviate too much from upstream, I'm adding
     // them here rather than the core itself.
-    var recordStartingState = function(startingState, rootId) {
-        startingState.body = {};
-        // It is customary for authors to set body.class="impress-not-supported" as a starting
-        // value, which can then be removed by impress().init(). But it is not required.
-        // Remember whether it was there or not.
-        if ( document.body.classList.contains("impress-not-supported") ) {
-            startingState.body.impressNotSupported = true;
+    var recordStartingState = function(rootId) {
+        startingState.roots[rootId] = {};
+        startingState.roots[rootId].steps = [];
+
+        // Record whether the steps have an id or not
+        var steps = document.getElementById(rootId).querySelectorAll(".step");
+        for ( var i = 0; i < steps.length; i++ ) {
+            var el = steps[i];
+            startingState.roots[rootId].steps.push({
+                el: el,
+                id: el.getAttribute("id")
+            });
         }
-        else {
-            startingState.body.impressNotSupported = false;
+        
+        // In the rare case of multiple roots, the following is changed on first init() and
+        // reset at last tear().
+        if ( rootsCount == 0 ) {
+            startingState.body = {};
+            // It is customary for authors to set body.class="impress-not-supported" as a starting
+            // value, which can then be removed by impress().init(). But it is not required.
+            // Remember whether it was there or not.
+            if ( document.body.classList.contains("impress-not-supported") ) {
+                startingState.body.impressNotSupported = true;
+            }
+            else {
+                startingState.body.impressNotSupported = false;
+            }
+            // If there's a <meta name="viewport"> element, its contents will be overwritten by init
+            var metas = document.head.querySelectorAll("meta");
+            for (var i = 0; i < metas.length; i++){
+                var m = metas[i];
+                if( m.name == "viewport" ) {
+                    startingState.meta = m.content;
+                }
+            };
         }
     };
     
     // CORE TEARDOWN
-    var resetStartingState = function(startingState, rootId) {
+    var resetStartingState = function(rootId) {
+        var steps = startingState.roots[rootId].steps;
+        var step;
+        while( step = steps.pop() ){
+            if( step.id === null ) {
+                step.el.removeAttribute( "id" );
+            }
+            else {
+                step.el.setAttribute( "id", step.id );
+            }
+        }
+        delete startingState.roots[rootId];
+
         // Reset body element
         document.body.classList.remove("impress-enabled");
         document.body.classList.remove("impress-disabled");
@@ -155,8 +191,8 @@
         var canvasHTML = canvas.innerHTML;
         root.innerHTML = canvasHTML;
         
-        if( roots["impress-root-" + rootId] !== undefined ) {
-            delete roots["impress-root-" + rootId];
+        if( roots[rootId] !== undefined ) {
+            delete roots[rootId];
             rootsCount--;
         }
         if( rootsCount == 0 ) {
@@ -166,6 +202,21 @@
             if (startingState.body.impressNotSupported) {
                 document.body.classList.add("impress-not-supported");
             };
+            
+            // We need to remove or reset the meta element inserted by impress.js
+            var meta = null;
+            var metas = document.head.querySelectorAll("meta");
+            for (var i = 0; i < metas.length; i++){
+                var m = metas[i];
+                if( m.name == "viewport" ) {
+                    if ( startingState.meta !== undefined ) {
+                        m.content = startingState.meta;
+                    }
+                    else {
+                        m.parentElement.removeChild(m);
+                    }
+                }
+            }
         }
         
         

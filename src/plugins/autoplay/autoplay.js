@@ -40,6 +40,10 @@
         if (toolbar) {
             addToolbarButton(toolbar);
         }
+        
+        api.lib.gc.addCallback( function(rootId){
+            clearTimeout(timeoutHandle);
+        });
         // Note that right after impress:init event, also impress:stepenter is
         // triggered for the first slide, so that's where code flow continues.
     }, false);

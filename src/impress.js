@@ -699,6 +699,7 @@
         // also call tear() once for each of them.)
         var tear = function() {
             lib.gc.teardown();
+            delete roots[ "impress-root-" + rootId ];
         }
 
 
@@ -715,19 +716,19 @@
         // There classes can be used in CSS to style different types of steps.
         // For example the `present` class can be used to trigger some custom
         // animations when step is shown.
-        root.addEventListener("impress:init", function(){
+        lib.gc.addEventListener(root, "impress:init", function(){
             // STEP CLASSES
             steps.forEach(function (step) {
                 step.classList.add("future");
             });
             
-            root.addEventListener("impress:stepenter", function (event) {
+            lib.gc.addEventListener(root, "impress:stepenter", function (event) {
                 event.target.classList.remove("past");
                 event.target.classList.remove("future");
                 event.target.classList.add("present");
             }, false);
             
-            root.addEventListener("impress:stepleave", function (event) {
+            lib.gc.addEventListener(root, "impress:stepleave", function (event) {
                 event.target.classList.remove("present");
                 event.target.classList.add("past");
             }, false);
@@ -735,7 +736,7 @@
         }, false);
         
         // Adding hash change support.
-        root.addEventListener("impress:init", function(){
+        lib.gc.addEventListener(root, "impress:init", function(){
             
             // last hash detected
             var lastHash = "";
@@ -746,11 +747,11 @@
             // And it has to be set after animation finishes, because in Chrome it
             // makes transtion laggy.
             // BUG: http://code.google.com/p/chromium/issues/detail?id=62820
-            root.addEventListener("impress:stepenter", function (event) {
+            lib.gc.addEventListener(root, "impress:stepenter", function (event) {
                 window.location.hash = lastHash = "#/" + event.target.id;
             }, false);
             
-            window.addEventListener("hashchange", function () {
+            lib.gc.addEventListener(window, "hashchange", function () {
                 // When the step is entered hash in the location is updated
                 // (just few lines above from here), so the hash change is 
                 // triggered and we would call `goto` again on the same element.

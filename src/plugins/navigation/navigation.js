@@ -37,6 +37,7 @@
         // or anything. `impress:init` event data gives you everything you 
         // need to control the presentation that was just initialized.
         var api = event.detail.api;
+        var gc = api.lib.gc;
         var tab = 9;
 
         // Supported keys are:
@@ -84,14 +85,14 @@
         // KEYBOARD NAVIGATION HANDLERS
         
         // Prevent default keydown action when one of supported key is pressed.
-        document.addEventListener("keydown", function ( event ) {
+        gc.addEventListener(document, "keydown", function ( event ) {
             if ( isNavigationEvent(event) ) {
                 event.preventDefault();
             }
         }, false);
         
         // Trigger impress action (next or prev) on keyup.
-        document.addEventListener("keyup", function ( event ) {
+        gc.addEventListener(document, "keyup", function ( event ) {
             if ( isNavigationEvent(event) ) {
                 if ( event.shiftKey ) {
                     switch( event.keyCode ) {
@@ -121,7 +122,7 @@
         }, false);
         
         // delegated handler for clicking on the links to presentation steps
-        document.addEventListener("click", function ( event ) {
+        gc.addEventListener(document, "click", function ( event ) {
             // event delegation with "bubbling"
             // check if event target (or any of its parents is a link)
             var target = event.target;
@@ -146,7 +147,7 @@
         }, false);
         
         // delegated handler for clicking on step elements
-        document.addEventListener("click", function ( event ) {
+        gc.addEventListener(document, "click", function ( event ) {
             var target = event.target;
             // find closest step element that is not active
             while ( !(target.classList.contains("step") && !target.classList.contains("active")) &&

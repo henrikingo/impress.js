@@ -43,6 +43,17 @@
         if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){ 
             body.classList.add('impress-mobile');
         }
+        // Unset all this on teardown
+        var api = event.detail.api;
+        api.lib.gc.addCallback( function(){
+            document.body.classList.remove("impress-mobile");
+            var prev = document.getElementsByClassName('prev')[0];
+            var next = document.getElementsByClassName('next')[0];
+            if(typeof prev != 'undefined')
+                prev.classList.remove('prev');
+            if(typeof next != 'undefined')
+                next.classList.remove('next');
+        });
     });
 
     // Add prev and next classes to the siblings of the newly entered active step element

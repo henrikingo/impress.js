@@ -4,12 +4,18 @@
 	var stepids = [];
 	// wait for impress.js to be initialized
 	document.addEventListener("impress:init", function (event) {
-	  var root = event.target;
-    var steps = root.querySelectorAll(".step");
+        	var root = event.target;
+		var gc = event.detail.api.lib.gc;
+		var steps = root.querySelectorAll(".step");
 		for (var i = 0; i < steps.length; i++)
 		{
 		  stepids[i+1] = steps[i].id;
 		}
+		gc.addCallback( function(){
+			stepids = [];
+                        progressbar.style.width = '';
+                        progress.innerHTML = '';
+                });
 	});
 	var progressbar = document.querySelector('div.impress-progressbar div');
 	var progress = document.querySelector('div.impress-progress');

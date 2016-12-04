@@ -93,11 +93,19 @@
                 var helpDiv = window.document.getElementById("impress-help");
                 helpDiv.style.display = "none";
             }, 7000);
+            // Regster callback to empty the help div on teardown
+            var api = e.detail.api;
+            api.lib.gc.addCallback( function(){
+                clearTimeout(timeoutHandle);
+                helpDiv.style.display = '';
+                helpDiv.innerHTML = '';
+                rows = [];
+            });
         }
+        // Use our own API to register the help text for 'h'
+        triggerEvent(document, "impress:help:add", { command : "H", text : "Show this help", row : 0} );
     });
     
-    // Use our own API to register the help text for 'h'
-    triggerEvent(document, "impress:help:add", { command : "H", text : "Show this help", row : 0} );
     
 })(document, window);
 

@@ -146,6 +146,14 @@
         toolbar.addEventListener("impress:toolbar:removeWidget", function( e ){
             toolbar.removeChild(e.detail.remove);
         });
+
+        document.addEventListener("impress:init", function( event ) {
+            var api = event.detail.api;
+            api.lib.gc.addCallback( function() {
+                toolbar.innerHTML = '';
+                groups = [];
+            });
+        });
     } // if toolbar
 
 })(document, window);
