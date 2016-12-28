@@ -21,7 +21,6 @@ buildify()
            'src/plugins/stop/stop.js',
            'src/plugins/touch/touch.js',
            'src/plugins/toolbar/toolbar.js'])
-  .save('js/impress.js');
-/*  .uglify()
+  .save('js/impress.js')
+  .uglify()
   .save('js/impress.min.js');
-*/

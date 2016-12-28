@@ -32,9 +32,10 @@
 
             // Query all .markdown elements and translate to HTML
             var markdownDivs = document.querySelectorAll(".markdown");
-            for (var element of markdownDivs) {
+            for (var idx=0; idx < markdownDivs.length; idx++) {
+              var element = markdownDivs[idx];
 
-            // Note: unlike the previous two, markdown.js doesn't automatically find or convert anything in 
+              // Note: unlike the previous two, markdown.js doesn't automatically find or convert anything in 
               var slides = element.textContent.split(/^-----$/m);
               var i = slides.length - 1;
               element.innerHTML = markdown.toHTML(slides[i]);

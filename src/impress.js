@@ -450,7 +450,8 @@
         
         // `goto` API function that moves to step given with `el` parameter (by index, id or element),
         // with a transition `duration` optionally given as second parameter.
-        var goto = function ( el, duration, reason = "goto" ) {
+        var goto = function ( el, duration, reason ) {
+            reason = reason || "goto";
             
             if ( !initialized || !(el = getStep(el)) ) {
                 // presentation not initialized or given element is not a step
