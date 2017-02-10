@@ -303,11 +303,15 @@
         // `onStepEnter` is called whenever the step element is entered
         // but the event is triggered only if the step is different than
         // last entered step.
+        // We sometimes call `goto`, and therefore `onStepEnter`, just to redraw a step, such as
+        // after screen resize. In this case - more precisely, in any case - we trigger a
+        // `impress:steprefresh` event.
         var onStepEnter = function (step) {
             if (lastEntered !== step) {
                 triggerEvent(step, "impress:stepenter");
                 lastEntered = step;
             }
+            triggerEvent(step, "impress:steprefresh");
         };
         
         // `onStepLeave` is called whenever the step element is left
@@ -355,6 +359,13 @@
                            scale(step.scale),
                 transformStyle: "preserve-3d"
             });
+        };
+        
+        // Initialize all steps.
+        // Read the data-* attributes, store in internal stepsData, and render with CSS.
+        var initAllSteps = function() {
+            steps = $$(".step", root);
+            steps.forEach( initStep );
         };
         
         // `init` API function that initializes (and runs) the presentation.
@@ -417,8 +428,7 @@
             body.classList.add("impress-enabled");
             
             // get and init steps
-            steps = $$(".step", root);
-            steps.forEach( initStep );
+            initAllSteps();
             
             // set a default initial state of the canvas
             currentState = {
@@ -457,6 +467,11 @@
                 // presentation not initialized or given element is not a step
                 return false;
             }
+            
+            // Re-execute initAllSteps for each transition. This allows to edit step attributes dynamically,
+            // such as change their coordinates, or even remove or add steps, and have that change
+            // apply when goto() is called.
+            initAllSteps();
             
             // Sometimes it's possible to trigger focus on first link with some keyboard action.
             // Browser in such a case tries to scroll the page to make this element visible

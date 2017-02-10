@@ -46,6 +46,7 @@
 
     var addNavigationControls = function( event ) {
         api = event.detail.api;
+        var gc = api.lib.gc;
         root = event.target;
         steps = root.querySelectorAll(".step");
 
@@ -65,7 +66,12 @@
             function( event ) {
                 api.goto( event.target.value );
         });
-        root.addEventListener("impress:stepenter", function(event){
+        gc.addEventListener(root, "impress:steprefresh", function(event){
+            // As impress.js core now allows to dynamically edit the steps, including adding, removing,
+            // and reordering steps, we need to requery and redraw the select list on every stepenter event.
+            steps = root.querySelectorAll(".step");
+            select.innerHTML = "\n" + selectOptionsHtml();
+            // Make sure the list always shows the step we're actually on, even if it wasn't selected from the list
             select.value = event.target.id;
         });
         next = makeDomElement( nextHtml );
@@ -77,6 +83,7 @@
         triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : prev } );
         triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : select } );
         triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : next } );
+        
     };
     
     // API for not listing given step in the select widget.

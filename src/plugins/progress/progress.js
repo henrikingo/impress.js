@@ -1,22 +1,28 @@
 (function ( document, window ) {
     'use strict';
-    
+	var root;
 	var stepids = [];
-	// wait for impress.js to be initialized
-	document.addEventListener("impress:init", function (event) {
-        	var root = event.target;
-		var gc = event.detail.api.lib.gc;
+	// Get stepids from the steps under impress root
+	var getSteps = function(){
+		stepids = [];
 		var steps = root.querySelectorAll(".step");
 		for (var i = 0; i < steps.length; i++)
 		{
 		  stepids[i+1] = steps[i].id;
 		}
+        }
+	// wait for impress.js to be initialized
+	document.addEventListener("impress:init", function (event) {
+        	root = event.target;
+		getSteps();
+		var gc = event.detail.api.lib.gc;
 		gc.addCallback( function(){
 			stepids = [];
-                        if (progressbar) progressbar.style.width = '';
-                        if (progress) progress.innerHTML = '';
-                });
+			if (progressbar) progressbar.style.width = '';
+			if (progress) progress.innerHTML = '';
+		});
 	});
+
 	var progressbar = document.querySelector('div.impress-progressbar div');
 	var progress = document.querySelector('div.impress-progress');
 	
@@ -25,9 +31,11 @@
 			updateProgressbar(event.detail.next.id);
 		});
 		
-		document.addEventListener("impress:stepenter", function (event) {
+		document.addEventListener("impress:steprefresh", function (event) {
+			getSteps();
 			updateProgressbar(event.target.id);
 		});
+
 	}
 
 	function updateProgressbar(slideId) {

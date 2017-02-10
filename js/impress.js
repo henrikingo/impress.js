@@ -303,11 +303,15 @@
         // `onStepEnter` is called whenever the step element is entered
         // but the event is triggered only if the step is different than
         // last entered step.
+        // We sometimes call `goto`, and therefore `onStepEnter`, just to redraw a step, such as
+        // after screen resize. In this case - more precisely, in any case - we trigger a
+        // `impress:steprefresh` event.
         var onStepEnter = function (step) {
             if (lastEntered !== step) {
                 triggerEvent(step, "impress:stepenter");
                 lastEntered = step;
             }
+            triggerEvent(step, "impress:steprefresh");
         };
         
         // `onStepLeave` is called whenever the step element is left
@@ -355,6 +359,13 @@
                            scale(step.scale),
                 transformStyle: "preserve-3d"
             });
+        };
+        
+        // Initialize all steps.
+        // Read the data-* attributes, store in internal stepsData, and render with CSS.
+        var initAllSteps = function() {
+            steps = $$(".step", root);
+            steps.forEach( initStep );
         };
         
         // `init` API function that initializes (and runs) the presentation.
@@ -417,8 +428,7 @@
             body.classList.add("impress-enabled");
             
             // get and init steps
-            steps = $$(".step", root);
-            steps.forEach( initStep );
+            initAllSteps();
             
             // set a default initial state of the canvas
             currentState = {
@@ -457,6 +467,11 @@
                 // presentation not initialized or given element is not a step
                 return false;
             }
+            
+            // Re-execute initAllSteps for each transition. This allows to edit step attributes dynamically,
+            // such as change their coordinates, or even remove or add steps, and have that change
+            // apply when goto() is called.
+            initAllSteps();
             
             // Sometimes it's possible to trigger focus on first link with some keyboard action.
             // Browser in such a case tries to scroll the page to make this element visible
@@ -2063,6 +2078,7 @@
 
     var addNavigationControls = function( event ) {
         api = event.detail.api;
+        var gc = api.lib.gc;
         root = event.target;
         steps = root.querySelectorAll(".step");
 
@@ -2082,7 +2098,12 @@
             function( event ) {
                 api.goto( event.target.value );
         });
-        root.addEventListener("impress:stepenter", function(event){
+        gc.addEventListener(root, "impress:steprefresh", function(event){
+            // As impress.js core now allows to dynamically edit the steps, including adding, removing,
+            // and reordering steps, we need to requery and redraw the select list on every stepenter event.
+            steps = root.querySelectorAll(".step");
+            select.innerHTML = "\n" + selectOptionsHtml();
+            // Make sure the list always shows the step we're actually on, even if it wasn't selected from the list
             select.value = event.target.id;
         });
         next = makeDomElement( nextHtml );
@@ -2094,6 +2115,7 @@
         triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : prev } );
         triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : select } );
         triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 0, element : next } );
+        
     };
     
     // API for not listing given step in the select widget.
@@ -2119,23 +2141,29 @@
 
 (function ( document, window ) {
     'use strict';
-    
+	var root;
 	var stepids = [];
-	// wait for impress.js to be initialized
-	document.addEventListener("impress:init", function (event) {
-        	var root = event.target;
-		var gc = event.detail.api.lib.gc;
+	// Get stepids from the steps under impress root
+	var getSteps = function(){
+		stepids = [];
 		var steps = root.querySelectorAll(".step");
 		for (var i = 0; i < steps.length; i++)
 		{
 		  stepids[i+1] = steps[i].id;
 		}
+        }
+	// wait for impress.js to be initialized
+	document.addEventListener("impress:init", function (event) {
+        	root = event.target;
+		getSteps();
+		var gc = event.detail.api.lib.gc;
 		gc.addCallback( function(){
 			stepids = [];
-                        if (progressbar) progressbar.style.width = '';
-                        if (progress) progress.innerHTML = '';
-                });
+			if (progressbar) progressbar.style.width = '';
+			if (progress) progress.innerHTML = '';
+		});
 	});
+
 	var progressbar = document.querySelector('div.impress-progressbar div');
 	var progress = document.querySelector('div.impress-progress');
 	
@@ -2144,9 +2172,11 @@
 			updateProgressbar(event.detail.next.id);
 		});
 		
-		document.addEventListener("impress:stepenter", function (event) {
+		document.addEventListener("impress:steprefresh", function (event) {
+			getSteps();
 			updateProgressbar(event.target.id);
 		});
+
 	}
 
 	function updateProgressbar(slideId) {
