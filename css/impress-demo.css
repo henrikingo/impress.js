@@ -268,7 +268,7 @@ a:focus {
 }
 
 #title h1 {
-    font-size: 190px;
+    font-size: 180px;
 
     -webkit-transform: translateZ(50px);
     -moz-transform:    translateZ(50px);
@@ -294,6 +294,7 @@ a:focus {
     line-height: 1;
 }
 
+#big strong, /* Tinymce converts b to strong in impressionist */
 #big b {
     display: block;
     font-size: 250px;
