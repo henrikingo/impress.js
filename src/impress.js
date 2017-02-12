@@ -463,8 +463,7 @@
         var goto = function ( el, duration, reason ) {
             reason = reason || "goto";
             
-            if ( !initialized || !(el = getStep(el)) ) {
-                // presentation not initialized or given element is not a step
+            if ( !initialized ) {
                 return false;
             }
             
@@ -472,6 +471,10 @@
             // such as change their coordinates, or even remove or add steps, and have that change
             // apply when goto() is called.
             initAllSteps();
+            
+            if ( !(el = getStep(el)) ) {
+                return false;
+            }
             
             // Sometimes it's possible to trigger focus on first link with some keyboard action.
             // Browser in such a case tries to scroll the page to make this element visible
