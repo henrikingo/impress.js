@@ -487,12 +487,13 @@
             window.scrollTo(0, 0);
             
             var step = stepsData["impress-" + el.id];
+            duration = (duration !== undefined ? duration : step.transitionDuration);
             
             // If we are in fact moving to another step, start with executing the registered preStepLeave plugins.
             if (activeStep && activeStep !== el) {
                 var event = { target: activeStep, detail : {} };
                 event.detail.next = el;
-                event.detail.transitionDuration = step.transitionDuration;
+                event.detail.transitionDuration = duration;
                 event.detail.reason = reason;
                 execPreStepLeavePlugins(event);
                 // Plugins are allowed to change the detail values
