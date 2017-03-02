@@ -389,29 +389,29 @@
     </script>
 
     <!--
-        Finally, the relative positioning plugin also supports values that are a multiple of the windows size.
-        Add "w" or "h" to specify a multiple of window width or height, respectively.
-        
         This step also sets a custom data-transition-duration. All of the above steps used the value set
         in the root div#impress element, but it is also allowed to set it for each step. Since transitioning
         to this step will rotate twice around it's axis, we give the transition a bit more time here.
     -->
-    <div id="moreinfo" class="step slide" data-rel-x="1.655w" data-rel-y="0" data-rotate="720" data-transition-duration="2000">
+    <div id="moreinfo" class="step slide" data-x="2020" data-y="700" data-rotate="720" data-transition-duration="2000">
         <h1>More info</h1>
         <ul>
-        <li>Official documentation
-            <ul>
-            <li>Sorry, we're working on it. For now, please read the source code of this presentation and its css file.</li>
-            </ul>
+        <li><a href="https://github.com/henrikingo/impress.js/blob/myfork/DOCUMENTATION.md">DOCUMENTATION.md</a> is the API reference.
         </li>
-        <li><a href="https://github.com/henrikingo/impress.js/">This Impress.js fork on Github</a></li>
+        <li><a href="https://github.com/henrikingo/impress.js/blob/myfork/examples/classic-slides/index.html">Source of this presentation itself</a> is commented</li>
         <li><a href="http://henrikingo.github.io/impress.js/">Advanced Impress.js demo</a> by <a href="http://twitter.com/bartaz">@bartaz</a>
             <ul>
-            <li>Again, the <a href="http://github.com/henrikingo/impress.js/blob/master/index.html">html</a> 
-                and <a href="https://github.com/henrikingo/impress.js/blob/master/css/impress-demo.css">css</a> source is well commented.</li>
+            <li>Again, the <a href="http://github.com/henrikingo/impress.js/blob/myfork/index.html">html</a> 
+                and <a href="https://github.com/henrikingo/impress.js/blob/myfork/css/impress-demo.css">css</a> source is well commented.</li>
             </ul>
         </li>
-        <li>More examples and demos <a href="https://github.com/impress/impress.js/wiki/Examples-and-demos">on the impress.js wiki</a></li>
+        <li>More examples and demos:
+            <ul>
+            <li><a href="https://github.com/henrikingo/impress.js/tree/myfork/examples">examples/</a> in this repository</li>
+            <li><a href="https://github.com/impress/impress.js/wiki/Examples-and-demos">on the impress.js wiki</a></li>
+            </ul>
+        </li>
+        <li>Check out <a href="https://github.com/henrikingo/impressionist">Impressionist</a>: a 3D GUI to create impress.js presentations</li>
         </ul>
 
         <div class="notes">

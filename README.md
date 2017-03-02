@@ -37,6 +37,8 @@ on the wiki, too.
 
 There is also a book available about [Building impressive presentations with impress.js](http://www.packtpub.com/building-impressive-presentations-with-impressjs/book) by Rakhitha Nimesh Ratnayake.
 
+You may want to check out the sibling project [Impressionist|https://github.com/henrikingo/impressionist]: a 3D GUI editor that can help you in creating impress.js presentations.
+
 
 REPOSITORY STRUCTURE
 --------------------
