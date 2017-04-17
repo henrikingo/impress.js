@@ -50,7 +50,7 @@
         
     // If default autoplay time was defined in the presentation root, or
     // in this step, set timeout.
-    document.addEventListener("impress:stepenter", function (event) {
+    var reloadTimeout = function ( event ) {
         var step = event.target;
         currentStepTimeout = toNumber( step.dataset.autoplay, autoplayDefault );
         if (status=="paused") {
@@ -59,6 +59,14 @@
         else {
             setAutoplayTimeout(currentStepTimeout);
         }
+    };
+
+    document.addEventListener("impress:stepenter", function (event) {
+        reloadTimeout(event);
+    }, false);
+
+    document.addEventListener("impress:substep:stepleaveaborted", function (event) {
+        reloadTimeout(event);
     }, false);
 
     /**

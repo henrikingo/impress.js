@@ -495,7 +495,11 @@
                 event.detail.next = el;
                 event.detail.transitionDuration = duration;
                 event.detail.reason = reason;
-                execPreStepLeavePlugins(event);
+                if( execPreStepLeavePlugins(event) === false ) {
+                    // preStepLeave plugins are allowed to abort the transition altogether, by returning false.
+                    // see stop and substep plugins for an example of doing just that
+                    return false;
+                }
                 // Plugins are allowed to change the detail values
                 el = event.detail.next;
                 step = stepsData["impress-" + el.id];
@@ -659,6 +663,7 @@
             if( Math.abs(pct) > 1 ) return;
             // Prepare & execute the preStepLeave event
             var event = { target: activeStep, detail : {} };
+            event.detail.swipe = pct;
             // Will be ignored within swipe animation, but just in case a plugin wants to read this, humor them
             event.detail.transitionDuration = config.transitionDuration;
             if (pct < 0) {
@@ -673,7 +678,11 @@
                 // No move
                 return;
             }
-            execPreStepLeavePlugins(event);
+            if( execPreStepLeavePlugins(event) === false ) {
+                // If a preStepLeave plugin wants to abort the transition, don't animate a swipe
+                // For stop, this is probably ok. For substep, the plugin it self might want to do some animation, but that's not the current implementation.
+                return false;
+            }
             var nextElement = event.detail.next;
             
             var nextStep = stepsData['impress-' + nextElement.id];
@@ -870,7 +879,10 @@
             var thisLevel = preStepLeavePlugins[i];
             if( thisLevel !== undefined ) {
                 for( var j = 0; j < thisLevel.length; j++ ) {
-                    thisLevel[j](event);
+                    if ( thisLevel[j](event) === false ) {
+                        // If a plugin returns false, the stepleave event (and related transition) is aborted
+                        return false;
+                    }
                 }
             }
         }

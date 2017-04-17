@@ -495,7 +495,11 @@
                 event.detail.next = el;
                 event.detail.transitionDuration = duration;
                 event.detail.reason = reason;
-                execPreStepLeavePlugins(event);
+                if( execPreStepLeavePlugins(event) === false ) {
+                    // preStepLeave plugins are allowed to abort the transition altogether, by returning false.
+                    // see stop and substep plugins for an example of doing just that
+                    return false;
+                }
                 // Plugins are allowed to change the detail values
                 el = event.detail.next;
                 step = stepsData["impress-" + el.id];
@@ -659,6 +663,7 @@
             if( Math.abs(pct) > 1 ) return;
             // Prepare & execute the preStepLeave event
             var event = { target: activeStep, detail : {} };
+            event.detail.swipe = pct;
             // Will be ignored within swipe animation, but just in case a plugin wants to read this, humor them
             event.detail.transitionDuration = config.transitionDuration;
             if (pct < 0) {
@@ -673,7 +678,11 @@
                 // No move
                 return;
             }
-            execPreStepLeavePlugins(event);
+            if( execPreStepLeavePlugins(event) === false ) {
+                // If a preStepLeave plugin wants to abort the transition, don't animate a swipe
+                // For stop, this is probably ok. For substep, the plugin it self might want to do some animation, but that's not the current implementation.
+                return false;
+            }
             var nextElement = event.detail.next;
             
             var nextStep = stepsData['impress-' + nextElement.id];
@@ -870,7 +879,10 @@
             var thisLevel = preStepLeavePlugins[i];
             if( thisLevel !== undefined ) {
                 for( var j = 0; j < thisLevel.length; j++ ) {
-                    thisLevel[j](event);
+                    if ( thisLevel[j](event) === false ) {
+                        // If a plugin returns false, the stepleave event (and related transition) is aborted
+                        return false;
+                    }
                 }
             }
         }
@@ -1168,7 +1180,7 @@
         
     // If default autoplay time was defined in the presentation root, or
     // in this step, set timeout.
-    document.addEventListener("impress:stepenter", function (event) {
+    var reloadTimeout = function ( event ) {
         var step = event.target;
         currentStepTimeout = toNumber( step.dataset.autoplay, autoplayDefault );
         if (status=="paused") {
@@ -1177,6 +1189,14 @@
         else {
             setAutoplayTimeout(currentStepTimeout);
         }
+    };
+
+    document.addEventListener("impress:stepenter", function (event) {
+        reloadTimeout(event);
+    }, false);
+
+    document.addEventListener("impress:substep:stepleaveaborted", function (event) {
+        reloadTimeout(event);
     }, false);
 
     /**
@@ -2479,7 +2499,7 @@
  *        <!-- Stop at this slide.
  *             (For example, when used on the last slide, this prevents the 
  *             presentation from wrapping back to the beginning.) -->
- *        <div class="step" data-stop="true">
+ *        <div class="step stop">
  * 
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
@@ -2493,14 +2513,90 @@
         
         if ( event.target.classList.contains("stop") ) {
             if ( event.detail.reason == "next" )
-                event.detail.next = event.target;
+                return false;
         }
     };
     
     // Register the plugin to be called in pre-stepleave phase
-    // The weight makes this plugin run fairly late.
-    impress.addPreStepLeavePlugin( stop, 20 );
+    // The weight makes this plugin run fairly early.
+    impress.addPreStepLeavePlugin( stop, 2 );
     
+})(document, window);
+
+
+/**
+ * Substep Plugin
+ *
+ * Copyright 2017 Henrik Ingo (@henrikingo)
+ * Released under the MIT license.
+ */
+(function ( document, window ) {
+    'use strict';
+
+    // Copied from core impress.js. Good candidate for moving to a utilities collection.
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
+    var substep = function(event) {
+        if ( (!event) || (!event.target) )
+            return;
+
+        // Get array of substeps, if any
+        var step = event.target;
+        var substeps = step.querySelectorAll(".substep");
+        // Get the subset of steps that are currently visible
+        var visible = step.querySelectorAll(".substep-visible");
+        if ( substeps.length > 0 ) {
+            if ( event.detail.reason == "next" ) {
+                var el = showSubstep(substeps, visible);
+                if ( el ) {
+                    // Send a message to others, that we aborted a stepleave event.
+                    // Autoplay will reload itself from this, as there won't be a stepenter event now.
+                    triggerEvent(el, "impress:substep:stepleaveaborted", { reason: "next" } );
+                    // Returning false aborts the stepleave event
+                    return false;
+                }
+            }
+            if ( event.detail.reason == "prev" ) {
+                var el = hideSubstep(visible);
+                if ( el ) {
+                    triggerEvent(el, "impress:substep:stepleaveaborted", { reason: "prev" } );
+                    return false;
+                }
+            }
+        }
+    };
+
+    var showSubstep = function (substeps, visible) {
+        if ( visible.length < substeps.length ) {
+            var el = substeps[visible.length];
+            el.classList.add("substep-visible");
+            return el;
+        }
+    };
+    
+    var hideSubstep = function (visible) {
+        if ( visible.length > 0 ) {
+            var el = visible[visible.length-1];
+            el.classList.remove("substep-visible");
+            return el;
+        }
+    };
+    // Register the plugin to be called in pre-stepleave phase.
+    // The weight makes this plugin run before other preStepLeave plugins.
+    impress.addPreStepLeavePlugin( substep, 1 );
+
+    // When entering a step, in particular when re-entering, make sure that all substeps are hidden at first
+    document.addEventListener("impress:stepenter", function (event) {
+        var step = event.target;
+        var visible = step.querySelectorAll(".substep-visible");
+        for ( var i = 0; i < visible.length; i++ ) {
+            visible[i].classList.remove("substep-visible");
+        }
+    }, false);
 })(document, window);
 
 

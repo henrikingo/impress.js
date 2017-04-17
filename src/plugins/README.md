@@ -52,8 +52,14 @@ plugins that you may want to use or adapt.
              data-autoplay="15"
              data-rel-x="1000"
              data-rel-y="1000">
-          Slide content...
+
+          <h1>Slide content</h1>
           
+          <ul>
+            <li class="substep">Point 1</li>
+            <li class="substep">Point 2</li>
+          </ul>
+
           <div class="notes">
           Speaker notes are shown in the impressConsole.
           </div>
@@ -79,6 +85,15 @@ plugins that you may want to use or adapt.
 
 ### Sample CSS related to plugins and extra addons
 
+    /* Using the substep plugin, hide bullet points at first, then show them one by one. */
+    #impress .step .substep {
+        opacity: 0;
+    }
+
+    #impress .step .substep.substep-visible {
+        opacity: 1;
+        transition: opacity 1s;
+    }
     /*
       Speaker notes allow you to write comments within the steps, that will not 
       be displayed as part of the presentation. However, they will be picked up

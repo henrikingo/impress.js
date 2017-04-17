@@ -6,7 +6,7 @@
  *        <!-- Stop at this slide.
  *             (For example, when used on the last slide, this prevents the 
  *             presentation from wrapping back to the beginning.) -->
- *        <div class="step" data-stop="true">
+ *        <div class="step stop">
  * 
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
@@ -20,13 +20,13 @@
         
         if ( event.target.classList.contains("stop") ) {
             if ( event.detail.reason == "next" )
-                event.detail.next = event.target;
+                return false;
         }
     };
     
     // Register the plugin to be called in pre-stepleave phase
-    // The weight makes this plugin run fairly late.
-    impress.addPreStepLeavePlugin( stop, 20 );
+    // The weight makes this plugin run fairly early.
+    impress.addPreStepLeavePlugin( stop, 2 );
     
 })(document, window);
 

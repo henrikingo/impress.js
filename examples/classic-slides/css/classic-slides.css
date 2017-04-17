@@ -380,6 +380,17 @@ body.impress-mouse-timeout {
     padding-right: 1em;
 }
 
+/* Substep plugin */
+
+#impress .step .substep {
+    opacity: 0;
+}
+
+#impress .step .substep.substep-visible {
+    opacity: 1;
+    transition: opacity 1s;
+}
+
 /*
     Styles for specific slides.
 */

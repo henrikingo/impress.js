@@ -19,6 +19,7 @@ buildify()
            'src/plugins/resize/resize.js',
            'src/plugins/skip/skip.js',
            'src/plugins/stop/stop.js',
+           'src/plugins/substep/substep.js',
            'src/plugins/touch/touch.js',
            'src/plugins/toolbar/toolbar.js'])
   .save('js/impress.js')
