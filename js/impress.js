@@ -2555,7 +2555,7 @@
                 if ( el ) {
                     // Send a message to others, that we aborted a stepleave event.
                     // Autoplay will reload itself from this, as there won't be a stepenter event now.
-                    triggerEvent(el, "impress:substep:stepleaveaborted", { reason: "next" } );
+                    triggerEvent(step, "impress:substep:stepleaveaborted", { reason: "next", substep: el } );
                     // Returning false aborts the stepleave event
                     return false;
                 }
@@ -2563,7 +2563,7 @@
             if ( event.detail.reason == "prev" ) {
                 var el = hideSubstep(visible);
                 if ( el ) {
-                    triggerEvent(el, "impress:substep:stepleaveaborted", { reason: "prev" } );
+                    triggerEvent(step, "impress:substep:stepleaveaborted", { reason: "prev", substep: el } );
                     return false;
                 }
             }
