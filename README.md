@@ -14,6 +14,20 @@ impress.js may not help you if you have nothing interesting to say ;)
 HOW TO USE IT
 ---------------
 
+### Checking out and initializing the git repository
+
+    git clone https://github.com/henrikingo/impress.js.git
+    cd impress.js
+    # Not all presentations need the extra addons, but if you do, then
+    git submodule init
+    git submodule update
+
+(Note: There's actually a simpler way. Just add the `--recursive` option to `git clone` and the
+submodule is automatically cloned too.)
+
+### Documentation
+
+
 Reference documentation of all impress.js features and API you can find it in [DOCUMENTATION.md](DOCUMENTATION.md).
 
 The [HTML source code](index.html) of the official [impress.js demo](http://henrikingo.github.io/impress.js/) serves as a good example usage and contains comments explaning various features of impress.js. For more information about styling you can look into [CSS code](css/impress-demo.css) which shows how classes provided by impress.js can be used. Last but not least [JavaScript code of impress.js](js/impress.js) has some useful comments if you are interested in how everything works. Feel free to explore!
@@ -24,7 +38,7 @@ The [HTML source code](index.html) of the official [impress.js demo](http://henr
 
 ### Examples and demos
 
-The [Classic Slides](http://henrikingo.github.io/impress.js/examples/classic-slides/) demo is targeted towards beginners, or can be used as a template for presentations that look like the traditional PowerPoint slide deck.
+The [Classic Slides](http://henrikingo.github.io/impress.js/examples/classic-slides/) demo is targeted towards beginners, or can be used as a template for presentations that look like the traditional PowerPoint slide deck. Over time, it also grew into the example presentation that uses most of the features and addons available.
 
 More examples and demos can be found on [Examples and demos wiki page](http://github.com/impress/impress.js/wiki/Examples-and-demos).
 
@@ -101,7 +115,7 @@ Note that if, for example, you want to add a new plugin, you should do it agains
 ABOUT THE NAME
 ----------------
 
-impress.js name in [courtesy of @skuzniak](http://twitter.com/skuzniak/status/143627215165333504).
+impress.js name is [courtesy of @skuzniak](http://twitter.com/skuzniak/status/143627215165333504).
 
 It's an (un)fortunate coincidence that a Open/LibreOffice presentation tool is called Impress ;)
 
@@ -127,4 +141,7 @@ In particular, impress.js makes use of the following JS and CSS features:
 COPYRIGHT AND LICENSE
 ---------------------
 
-Copyright 2011-2016 Bartek Szopka - Released under the MIT [License](LICENSE)
+Copyright 2011-2016 Bartek Szopka
+Copyright 2015-2017 Henrik Ingo
+
+Released under the MIT [License](LICENSE)

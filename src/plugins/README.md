@@ -74,6 +74,7 @@ plugins that you may want to use or adapt.
       <script type="text/javascript" src="../../extras/highlight/highlight.pack.js"></script>
       <script type="text/javascript" src="../../extras/mermaid/mermaid.min.js"></script>
       <script type="text/javascript" src="../../extras/markdown/markdown.js"></script>
+      <script type="text/javascript" src="../../extras/mathjax/MathJax.js?config=TeX-AMS_CHTML"></script>
     </body>
 
 ### Sample CSS related to plugins and extra addons

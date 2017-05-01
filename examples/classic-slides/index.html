@@ -306,6 +306,9 @@
           classDef startEnd fill:#fcc,stroke:#353,stroke-width:2px;
           class A,D,E startEnd;
         </div>
+
+        <h1><a href="http://docs.mathjax.org/en/latest/start.html">MathJax.js</a></h1>
+        <p>Use \(\LaTeX\), MathML or AsciiMath to properly show mathematical formula.</p>
         <div class="notes">
           Mermaid.js, likewise in a href="https://github.com/henrikingo/impress.js/tree/myfork/extras">extras/</a>
            directory, draws SVG diagrams from a MarkDown-like syntax. To learn
@@ -442,12 +445,12 @@
 <div id="impress-help"></div>
 
 <!-- Extra modules
-     Load highlight.js, mermaid.js and markdown.js from extras.
+     Load highlight.js, mermaid.js, markdown.js and MathJax.js from extras.
      If you're curious about details, these are initialized in src/plugins/extras/extras.js -->
 <script type="text/javascript" src="../../extras/highlight/highlight.pack.js"></script>
 <script type="text/javascript" src="../../extras/mermaid/mermaid.min.js"></script>
 <script type="text/javascript" src="../../extras/markdown/markdown.js"></script>
-
+<script type="text/javascript" src="../../extras/mathjax/MathJax.js?config=TeX-AMS_CHTML"></script>
 <!--
     To make all described above really work, you need to include impress.js in the page.
     You also need to call a `impress().init()` function to initialize impress.js presentation.

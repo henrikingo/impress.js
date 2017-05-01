@@ -17,6 +17,9 @@ discover them and perform initialization (such as calling
 
 If no extras plugins are added to a presentation, this plugin does nothing.
 
+Note that some extra plugins (like mathjax) initialize themselves immediately, and
+there's nothing to do here.
+
 Author
 ------
 
