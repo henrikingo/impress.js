@@ -13,7 +13,7 @@ Generally, for an extras plugin to have been loaded, 2 things must have happened
 
 If one or more extras plugins were so added, this plugin will automatically
 discover them and perform initialization (such as calling 
-`impressConsole.init()`).
+`mermaid.initialize()`).
 
 If no extras plugins are added to a presentation, this plugin does nothing.
 

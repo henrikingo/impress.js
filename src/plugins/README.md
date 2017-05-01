@@ -74,13 +74,6 @@ plugins that you may want to use or adapt.
       <script type="text/javascript" src="../../extras/highlight/highlight.pack.js"></script>
       <script type="text/javascript" src="../../extras/mermaid/mermaid.min.js"></script>
       <script type="text/javascript" src="../../extras/markdown/markdown.js"></script>
-      <script type="text/javascript" src="../../extras/impress-console/js/impressConsole.js"></script>
-      <script type="text/javascript">
-        // For impressConsole, we unfortunately must also set the path to a mandatory css file
-        // which is relative to this html file.
-        // See https://github.com/regebro/impress-console/issues/19
-        var impressConsoleCss = '../../extras/impress-console/css/impressConsole.css';
-      </script>
     </body>
 
 ### Sample CSS related to plugins and extra addons
@@ -97,7 +90,7 @@ plugins that you may want to use or adapt.
     /*
       Speaker notes allow you to write comments within the steps, that will not 
       be displayed as part of the presentation. However, they will be picked up
-      and displayed by impressConsole.js when integrated.
+      and displayed by impressConsole.js when you press P.
     */
     .notes {
         display: none;

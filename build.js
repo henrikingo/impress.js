@@ -10,6 +10,7 @@ buildify()
            'src/plugins/form/form.js',
            'src/plugins/goto/goto.js',
            'src/plugins/help/help.js',
+           'src/plugins/impressConsole/impressConsole.js',
            'src/plugins/mobile/mobile.js',
            'src/plugins/mouse-timeout/mouse-timeout.js',
            'src/plugins/navigation/navigation.js',
@@ -22,6 +23,9 @@ buildify()
            'src/plugins/substep/substep.js',
            'src/plugins/touch/touch.js',
            'src/plugins/toolbar/toolbar.js'])
-  .save('js/impress.js')
+  .save('js/impress.js');
+/*
+ * Disabled until uglify supports ES6: https://github.com/mishoo/UglifyJS2/issues/448
   .uglify()
   .save('js/impress.min.js');
+*/
