@@ -459,9 +459,12 @@
         var stepEnterTimeout = null;
         
         // `goto` API function that moves to step given with `el` parameter (by index, id or element),
-        // with a transition `duration` optionally given as second parameter.
-        var goto = function ( el, duration, reason ) {
+        // `duration` optionally given as second parameter, is the transition duration in css.
+        // `reason` is the string "next", "prev" or "goto" (default) and will be made available to preStepLeave plugins.
+        // `origEvent` may contain the event that caused the calll to goto, such as a key press event
+        var goto = function ( el, duration, reason, origEvent ) {
             reason = reason || "goto";
+            origEvent = origEvent || null;
             
             if ( !initialized ) {
                 return false;
@@ -495,6 +498,10 @@
                 event.detail.next = el;
                 event.detail.transitionDuration = duration;
                 event.detail.reason = reason;
+                if ( origEvent ) {
+                    event.origEvent = origEvent;
+                }
+                
                 if( execPreStepLeavePlugins(event) === false ) {
                     // preStepLeave plugins are allowed to abort the transition altogether, by returning false.
                     // see stop and substep plugins for an example of doing just that
@@ -617,19 +624,21 @@
         };
         
         // `prev` API function goes to previous step (in document order)
-        var prev = function () {
+        // `event` is optional, may contain the event that caused the need to call prev()
+        var prev = function (origEvent) {
             var prev = steps.indexOf( activeStep ) - 1;
             prev = prev >= 0 ? steps[ prev ] : steps[ steps.length-1 ];
             
-            return goto(prev, undefined, "prev");
+            return goto(prev, undefined, "prev", origEvent);
         };
         
         // `next` API function goes to next step (in document order)
-        var next = function () {
+        // `event` is optional, may contain the event that caused the need to call next()
+        var next = function (origEvent) {
             var next = steps.indexOf( activeStep ) + 1;
             next = next < steps.length ? steps[ next ] : steps[ 0 ];
             
-            return goto(next, undefined, "next");
+            return goto(next, undefined, "next", origEvent);
         };
         
         // Swipe for touch devices by @and3rson.

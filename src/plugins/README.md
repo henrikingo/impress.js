@@ -350,8 +350,6 @@ A pre-stepleave plugin may alter the values in `event.detail` (except for
 `reason`), and this can change the behavior of the upcoming transition.
 For example, the `goto` plugin will set the `event.detail.next` to point to
 some other element, causing the presentation to jump to that step instead. 
-Setting `event.detail.next` to equal `event.target` would cause the transition
-to be aborted.
 
 
 ### GUI plugins

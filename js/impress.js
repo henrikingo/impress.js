@@ -459,9 +459,12 @@
         var stepEnterTimeout = null;
         
         // `goto` API function that moves to step given with `el` parameter (by index, id or element),
-        // with a transition `duration` optionally given as second parameter.
-        var goto = function ( el, duration, reason ) {
+        // `duration` optionally given as second parameter, is the transition duration in css.
+        // `reason` is the string "next", "prev" or "goto" (default) and will be made available to preStepLeave plugins.
+        // `origEvent` may contain the event that caused the calll to goto, such as a key press event
+        var goto = function ( el, duration, reason, origEvent ) {
             reason = reason || "goto";
+            origEvent = origEvent || null;
             
             if ( !initialized ) {
                 return false;
@@ -495,6 +498,10 @@
                 event.detail.next = el;
                 event.detail.transitionDuration = duration;
                 event.detail.reason = reason;
+                if ( origEvent ) {
+                    event.origEvent = origEvent;
+                }
+                
                 if( execPreStepLeavePlugins(event) === false ) {
                     // preStepLeave plugins are allowed to abort the transition altogether, by returning false.
                     // see stop and substep plugins for an example of doing just that
@@ -617,19 +624,21 @@
         };
         
         // `prev` API function goes to previous step (in document order)
-        var prev = function () {
+        // `event` is optional, may contain the event that caused the need to call prev()
+        var prev = function (origEvent) {
             var prev = steps.indexOf( activeStep ) - 1;
             prev = prev >= 0 ? steps[ prev ] : steps[ steps.length-1 ];
             
-            return goto(prev, undefined, "prev");
+            return goto(prev, undefined, "prev", origEvent);
         };
         
         // `next` API function goes to next step (in document order)
-        var next = function () {
+        // `event` is optional, may contain the event that caused the need to call next()
+        var next = function (origEvent) {
             var next = steps.indexOf( activeStep ) + 1;
             next = next < steps.length ? steps[ next ] : steps[ 0 ];
             
-            return goto(next, undefined, "next");
+            return goto(next, undefined, "next", origEvent);
         };
         
         // Swipe for touch devices by @and3rson.
@@ -1514,12 +1523,16 @@
  *              If moving backwards to previous step - e.g. prev() instead of next() - then go to "step-1". -->
  *         <div class="step" data-goto-next="step-5" data-goto-prev="step-1">
  * 
- * Copyright 2016 Henrik Ingo (@henrikingo)
+ * Copyright 2016-2017 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
 (function ( document, window ) {
     'use strict';
 
+    var isNumber = function (numeric) {
+        return !isNaN(numeric);
+    };
+    
     var toNumber = function (numeric, fallback) {
         return isNaN(numeric) ? (fallback || 0) : Number(numeric);
     };
@@ -1532,8 +1545,49 @@
         var data = event.target.dataset;
         var steps = document.querySelectorAll(".step");
         
+        // data-goto-key-list="" & data-goto-next-list="" ///////////////////////////////////////////
+        if ( data.gotoKeyList !== undefined &&
+             data.gotoNextList !== undefined &&
+             event.origEvent !== undefined &&
+             event.origEvent.key !== undefined ) {
+            var keylist = data.gotoKeyList.split(" ");
+            var nextlist = data.gotoNextList.split(" ");
+
+            if ( keylist.length != nextlist.length ) {
+                console.log("impress goto plugin: data-goto-key-list and data-goto-next-list don't match:");
+                console.log(keylist);
+                console.log(nextlist);
+                // Don't return, allow the other categories to work despite this error
+            }
+            else {
+                var index = Array.indexOf( keylist, event.origEvent.key )
+                if ( index >= 0 ) {
+                    var next = nextlist[index];
+                    if ( isNumber(next) ){
+                        event.detail.next = steps[next];
+                        // If the new next element has its own transitionDuration, we're responsible for setting that on the event as well
+                        event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
+                        return;
+                    }
+                    else {
+                        var newTarget = document.getElementById( next );
+                        if ( newTarget && newTarget.classList.contains("step") ) {
+                            event.detail.next = newTarget;
+                            event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
+                            return;
+                        }
+                        else {
+                            console.log( "impress goto plugin: " + next + " is not a step in this impress presentation.");
+                        }
+                    }
+                }
+            }
+        }
+
+        // data-goto-next="" & data-goto-prev="" ///////////////////////////////////////////////////
+
         // Handle event.target data-goto-next attribute
-        if ( !isNaN(data.gotoNext) && event.detail.reason == "next" ) {
+        if ( isNumber(data.gotoNext) && event.detail.reason == "next" ) {
             event.detail.next = steps[data.gotoNext];
             // If the new next element has its own transitionDuration, we're responsible for setting that on the event as well
             event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
@@ -1552,7 +1606,7 @@
         }
 
         // Handle event.target data-goto-prev attribute
-        if ( !isNaN(data.gotoPrev) && event.detail.reason == "prev" ) {
+        if ( isNumber(data.gotoPrev) && event.detail.reason == "prev" ) {
             event.detail.next = steps[data.gotoPrev];
             event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
@@ -1569,8 +1623,10 @@
             }
         }
 
+        // data-goto="" ///////////////////////////////////////////////////////////////////////////
+
         // Handle event.target data-goto attribute
-        if ( !isNaN(data.goto) ) {
+        if ( isNumber(data.goto) ) {
             event.detail.next = steps[data.goto];
             event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
@@ -1638,6 +1694,8 @@
     
     var toggleHelp = function() {
         var helpDiv = document.getElementById("impress-help");
+        if (!helpDiv) return;
+ 
         if(helpDiv.style.display == 'block') {
             helpDiv.style.display = 'none';
         }
@@ -2605,14 +2663,14 @@
                         case 33: // pg up
                         case 37: // left
                         case 38: // up
-                                 api.prev();
+                                 api.prev(event);
                                  break;
                         case 9:  // tab
                         case 32: // space
                         case 34: // pg down
                         case 39: // right
                         case 40: // down
-                                 api.next();
+                                 api.next(event);
                                  break;
                     }
                 }

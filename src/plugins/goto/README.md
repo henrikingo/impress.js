@@ -13,6 +13,9 @@ Example:
              If moving backwards to previous step - e.g. prev() instead of next() - then go to "step-1". -->
         <div class="step" data-goto-next="step-5" data-goto-prev="step-1">
 
+        <!-- data-goto-key-list and data-goto-next-list allow you to build advanced non-linear navigation. -->
+        <div class="step" data-goto-key-list="ArrowUp ArrowDown ArrowRight ArrowLeft" data-goto-next-list="step-4 step-3 step-2 step-5">
+
 Author
 ------
 

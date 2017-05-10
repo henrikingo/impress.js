@@ -42,6 +42,8 @@
     
     var toggleHelp = function() {
         var helpDiv = document.getElementById("impress-help");
+        if (!helpDiv) return;
+ 
         if(helpDiv.style.display == 'block') {
             helpDiv.style.display = 'none';
         }

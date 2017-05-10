@@ -106,14 +106,14 @@
                         case 33: // pg up
                         case 37: // left
                         case 38: // up
-                                 api.prev();
+                                 api.prev(event);
                                  break;
                         case 9:  // tab
                         case 32: // space
                         case 34: // pg down
                         case 39: // right
                         case 40: // down
-                                 api.next();
+                                 api.next(event);
                                  break;
                     }
                 }
