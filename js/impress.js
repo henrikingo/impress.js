@@ -1522,6 +1522,9 @@
  *         <!-- When leaving this step with next(), go directly to "step-5", instead of the next step.
  *              If moving backwards to previous step - e.g. prev() instead of next() - then go to "step-1". -->
  *         <div class="step" data-goto-next="step-5" data-goto-prev="step-1">
+ *
+ *        <!-- data-goto-key-list and data-goto-next-list allow you to build advanced non-linear navigation. -->
+ *        <div class="step" data-goto-key-list="ArrowUp ArrowDown ArrowRight ArrowLeft" data-goto-next-list="step-4 step-3 step-2 step-5">
  * 
  * Copyright 2016-2017 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
@@ -1779,6 +1782,13 @@
 
 (function ( document, window ) {
     'use strict';
+
+    // TODO: Move this to src/lib/util.js
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
 
     // create Language object depending on browsers language setting
     var lang;
@@ -2239,6 +2249,9 @@
 
         document.addEventListener("impress:init", function() {
             _init();
+
+            // Add 'P' to the help popup
+            triggerEvent(document, "impress:help:add", { command : "P", text : "Presenter console", row : 10} );
         });
 
         // New API for impress.js plugins is based on using events

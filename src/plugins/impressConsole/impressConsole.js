@@ -14,6 +14,13 @@
 (function ( document, window ) {
     'use strict';
 
+    // TODO: Move this to src/lib/util.js
+    var triggerEvent = function (el, eventName, detail) {
+        var event = document.createEvent("CustomEvent");
+        event.initCustomEvent(eventName, true, true, detail);
+        el.dispatchEvent(event);
+    };
+
     // create Language object depending on browsers language setting
     var lang;
     switch (navigator.language) {
@@ -473,6 +480,9 @@
 
         document.addEventListener("impress:init", function() {
             _init();
+
+            // Add 'P' to the help popup
+            triggerEvent(document, "impress:help:add", { command : "P", text : "Presenter console", row : 10} );
         });
 
         // New API for impress.js plugins is based on using events
