@@ -1976,6 +1976,39 @@
             }
         };
 
+        // Sync substeps
+        var onSubstep = function(event){
+            if(consoleWindow) {
+                if ( event.detail.reason == "next" ) {
+                    onSubstepShow();
+                }
+                if ( event.detail.reason == "prev" ) {
+                    onSubstepHide();
+                }
+            }
+        };
+
+        var onSubstepShow = function(){
+            var slideView = consoleWindow.document.getElementById('slideView');
+            triggerEventInView( slideView, "impress:substep:show" );
+        };
+
+        var onSubstepHide = function(){
+            var slideView = consoleWindow.document.getElementById('slideView');
+            triggerEventInView( slideView, "impress:substep:hide" );
+        };
+
+        var triggerEventInView = function (frame, eventName, detail) {
+            // Note: Unfortunately Chrome does not allow createEvent on file:// URLs, so this won't work.
+            // This does work on Firefox, and should work if viewing the presentation on a http:// URL on Chrome.
+            var event = frame.contentDocument.createEvent("CustomEvent");
+            event.initCustomEvent(eventName, true, true, detail);
+            frame.contentDocument.dispatchEvent(event);
+        };
+
+
+
+
         var spaceHandler = function () {
             var notes = consoleWindow.document.getElementById('notes');
             if (notes.scrollTopMax - notes.scrollTop > 20) {
@@ -2077,7 +2110,7 @@
             if (consoleWindow && !consoleWindow.closed) {
                 consoleWindow.focus();
             } else {
-                consoleWindow = window.open();
+                consoleWindow = window.open('', 'impressConsole');
 
                 // if opening failes this may be because the browser prevents this from
                 // not (or less) interactive JavaScript...
@@ -2221,6 +2254,9 @@
             // Register the event
             root.addEventListener('impress:stepleave', onStepLeave);
             root.addEventListener('impress:stepenter', onStepEnter);
+            root.addEventListener('impress:substep:stepleaveaborted', onSubstep);
+            root.addEventListener('impress:substep:show', onSubstepShow);
+            root.addEventListener('impress:substep:hide', onSubstepHide);
 
             //When the window closes, clean up after ourselves.
             window.onunload = function(){
@@ -3217,40 +3253,48 @@
 (function ( document, window ) {
     'use strict';
 
-    // Copied from core impress.js. Good candidate for moving to a utilities collection.
+    // Copied from core impress.js. Good candidate for moving to src/lib/util.js.
     var triggerEvent = function (el, eventName, detail) {
         var event = document.createEvent("CustomEvent");
         event.initCustomEvent(eventName, true, true, detail);
         el.dispatchEvent(event);
     };
 
+    var activeStep = null;
+    document.addEventListener("impress:stepenter", function (event) {
+        activeStep = event.target;
+    }, false);
+
+
     var substep = function(event) {
         if ( (!event) || (!event.target) )
             return;
 
-        // Get array of substeps, if any
         var step = event.target;
+        if ( event.detail.reason == "next" ) {
+            var el = showSubstepIfAny(step);
+            if ( el ) {
+                // Send a message to others, that we aborted a stepleave event.
+                // Autoplay will reload itself from this, as there won't be a stepenter event now.
+                triggerEvent(step, "impress:substep:stepleaveaborted", { reason: "next", substep: el } );
+                // Returning false aborts the stepleave event
+                return false;
+            }
+        }
+        if ( event.detail.reason == "prev" ) {
+            var el = hideSubstepIfAny(step);
+            if ( el ) {
+                triggerEvent(step, "impress:substep:stepleaveaborted", { reason: "prev", substep: el } );
+                return false;
+            }
+        }
+    };
+
+    var showSubstepIfAny = function(step) {
         var substeps = step.querySelectorAll(".substep");
-        // Get the subset of steps that are currently visible
         var visible = step.querySelectorAll(".substep-visible");
         if ( substeps.length > 0 ) {
-            if ( event.detail.reason == "next" ) {
-                var el = showSubstep(substeps, visible);
-                if ( el ) {
-                    // Send a message to others, that we aborted a stepleave event.
-                    // Autoplay will reload itself from this, as there won't be a stepenter event now.
-                    triggerEvent(step, "impress:substep:stepleaveaborted", { reason: "next", substep: el } );
-                    // Returning false aborts the stepleave event
-                    return false;
-                }
-            }
-            if ( event.detail.reason == "prev" ) {
-                var el = hideSubstep(visible);
-                if ( el ) {
-                    triggerEvent(step, "impress:substep:stepleaveaborted", { reason: "prev", substep: el } );
-                    return false;
-                }
-            }
+            return showSubstep(substeps, visible);
         }
     };
 
@@ -3261,7 +3305,15 @@
             return el;
         }
     };
-    
+
+    var hideSubstepIfAny = function(step) {
+        var substeps = step.querySelectorAll(".substep");
+        var visible = step.querySelectorAll(".substep-visible");
+        if ( substeps.length > 0 ) {
+            return hideSubstep(visible);
+        }
+    }
+
     var hideSubstep = function (visible) {
         if ( visible.length > 0 ) {
             var el = visible[visible.length-1];
@@ -3281,6 +3333,16 @@
             visible[i].classList.remove("substep-visible");
         }
     }, false);
+
+    // API for others to reveal/hide next substep ////////////////////////////////////////////////
+    document.addEventListener("impress:substep:show", function (event) {
+        showSubstepIfAny(activeStep);
+    }, false);
+
+    document.addEventListener("impress:substep:hide", function (event) {
+        hideSubstepIfAny(activeStep);
+    }, false);
+
 })(document, window);
 
 

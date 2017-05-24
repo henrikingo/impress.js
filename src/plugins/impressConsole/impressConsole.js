@@ -207,6 +207,39 @@
             }
         };
 
+        // Sync substeps
+        var onSubstep = function(event){
+            if(consoleWindow) {
+                if ( event.detail.reason == "next" ) {
+                    onSubstepShow();
+                }
+                if ( event.detail.reason == "prev" ) {
+                    onSubstepHide();
+                }
+            }
+        };
+
+        var onSubstepShow = function(){
+            var slideView = consoleWindow.document.getElementById('slideView');
+            triggerEventInView( slideView, "impress:substep:show" );
+        };
+
+        var onSubstepHide = function(){
+            var slideView = consoleWindow.document.getElementById('slideView');
+            triggerEventInView( slideView, "impress:substep:hide" );
+        };
+
+        var triggerEventInView = function (frame, eventName, detail) {
+            // Note: Unfortunately Chrome does not allow createEvent on file:// URLs, so this won't work.
+            // This does work on Firefox, and should work if viewing the presentation on a http:// URL on Chrome.
+            var event = frame.contentDocument.createEvent("CustomEvent");
+            event.initCustomEvent(eventName, true, true, detail);
+            frame.contentDocument.dispatchEvent(event);
+        };
+
+
+
+
         var spaceHandler = function () {
             var notes = consoleWindow.document.getElementById('notes');
             if (notes.scrollTopMax - notes.scrollTop > 20) {
@@ -308,7 +341,7 @@
             if (consoleWindow && !consoleWindow.closed) {
                 consoleWindow.focus();
             } else {
-                consoleWindow = window.open();
+                consoleWindow = window.open('', 'impressConsole');
 
                 // if opening failes this may be because the browser prevents this from
                 // not (or less) interactive JavaScript...
@@ -452,6 +485,9 @@
             // Register the event
             root.addEventListener('impress:stepleave', onStepLeave);
             root.addEventListener('impress:stepenter', onStepEnter);
+            root.addEventListener('impress:substep:stepleaveaborted', onSubstep);
+            root.addEventListener('impress:substep:show', onSubstepShow);
+            root.addEventListener('impress:substep:hide', onSubstepHide);
 
             //When the window closes, clean up after ourselves.
             window.onunload = function(){
