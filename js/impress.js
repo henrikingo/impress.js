@@ -1540,7 +1540,6 @@
         return isNaN(numeric) ? (fallback || 0) : Number(numeric);
     };
 
-            
     var goto = function(event) {
         if ( (!event) || (!event.target) )
             return;
@@ -1563,7 +1562,7 @@
                 // Don't return, allow the other categories to work despite this error
             }
             else {
-                var index = Array.indexOf( keylist, event.origEvent.key )
+                var index = keylist.indexOf(event.origEvent.key);
                 if ( index >= 0 ) {
                     var next = nextlist[index];
                     if ( isNumber(next) ){
