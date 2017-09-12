@@ -72,10 +72,6 @@ QUnit.test( "Initialize Impress.js", function( assert ) {
       assert.ok( yesSupportedClass,
                  "body.impress-supported class was added." );
                  
-      // To be pedantic, we run the rest of these tests inside the else 
-      // brackets as well, meaning that impress.js is tested to be supported.
-      // However, other QUnit.test() blocks than this will fail miserably if it
-      // weren't supported.
       assert.ok( !iframeDoc.body.classList.contains("impress-disabled"),
                  "body.impress-disabled is removed." );
       assert.ok( iframeDoc.body.classList.contains("impress-enabled"),
