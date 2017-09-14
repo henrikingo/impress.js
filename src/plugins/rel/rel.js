@@ -42,8 +42,11 @@
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+
+/* global document, window */
+
 (function ( document, window ) {
-    'use strict';
+    "use strict";
 
     var startingState = {};
 
@@ -61,7 +64,7 @@
      * Returns the computed value in pixels with w/h postfix removed.
      */
     var toNumberAdvanced = function (numeric, fallback) {
-        if (!(typeof numeric == 'string')) {
+        if ( typeof numeric !== "string" ) {
             return toNumber(numeric, fallback);
         }
         var ratio = numeric.match(/^([+-]*[\d\.]+)([wh])$/);
@@ -69,7 +72,7 @@
             return toNumber(numeric, fallback);
         } else {
             var value = parseFloat(ratio[1]);
-            var multiplier = ratio[2] == 'w' ? window.innerWidth : window.innerHeight;
+            var multiplier = ratio[2] === "w" ? window.innerWidth : window.innerHeight;
             return value * multiplier;
         }
     };
@@ -79,7 +82,7 @@
         
         if( !prev ) {
             // For the first step, inherit these defaults
-            var prev = { x:0, y:0, z:0, relative: {x:0, y:0, z:0} };
+            prev = { x:0, y:0, z:0, relative: {x:0, y:0, z:0} };
         }
 
         var step = {
@@ -94,9 +97,15 @@
             };
         // Relative position is ignored/zero if absolute is given.
         // Note that this also has the effect of resetting any inherited relative values.
-        if(data.x !== undefined) step.relative.x = 0;
-        if(data.y !== undefined) step.relative.y = 0;
-        if(data.z !== undefined) step.relative.z = 0;
+        if(data.x !== undefined) {
+            step.relative.x = 0;
+        }
+        if(data.y !== undefined) {
+            step.relative.y = 0;
+        }
+        if(data.z !== undefined) {
+            step.relative.z = 0;
+        }
         
         // Apply relative position to absolute position, if non-zero
         // Note that at this point, the relative values contain a number value of pixels.
@@ -129,7 +138,7 @@
     };
     
     // Register the plugin to be called in pre-init phase
-    impress.addPreInitPlugin( rel );
+    window.impress.addPreInitPlugin( rel );
     
     // Register teardown callback to reset the data.x, .y, .z values.
     document.addEventListener( "impress:init", function(event) {

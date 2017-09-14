@@ -21,8 +21,9 @@
  *  source:  http://github.com/bartaz/impress.js/
  *
  */
-(function ( document, window ) {
-    'use strict';
+/* global document */
+(function ( document ) {
+    "use strict";
     
     var triggerEvent = function (el, eventName, detail) {
         var event = document.createEvent("CustomEvent");
@@ -38,7 +39,6 @@
         // need to control the presentation that was just initialized.
         var api = event.detail.api;
         var gc = api.lib.gc;
-        var tab = 9;
 
         // Supported keys are:
         // [space] - quite common in presentation software to move forward
@@ -72,7 +72,7 @@
 
             // For arrows, etc, check that event target is html or body element. This is to allow presentations to have,
             // for example, forms with input elements where user can type text, including space, and not move to next step.
-            if ( event.target.nodeName != "BODY" && event.target.nodeName != "HTML" ) {
+            if ( event.target.nodeName !== "BODY" && event.target.nodeName !== "HTML" ) {
                 return false;
             }
 
@@ -135,7 +135,7 @@
                 var href = target.getAttribute("href");
                 
                 // if it's a link to presentation step, target this step
-                if ( href && href[0] === '#' ) {
+                if ( href && href[0] === "#" ) {
                     target = document.getElementById( href.slice(1) );
                 }
             }
@@ -165,5 +165,5 @@
         
     }, false);
         
-})(document, window);
+})(document);
 

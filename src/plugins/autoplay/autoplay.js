@@ -4,8 +4,10 @@
  * Copyright 2016 Henrik Ingo, henrik.ingo@avoinelama.fi
  * Released under the MIT license.
  */
-(function ( document, window ) {
-    'use strict';
+/* global clearTimeout, setTimeout, document */
+
+(function ( document ) {
+    "use strict";
 
     var autoplayDefault=0;
     var currentStepTimeout=0;
@@ -27,7 +29,7 @@
         // need to control the presentation that was just initialized.
         api = event.detail.api;
         root = event.target;
-        // Element attributes starting with 'data-', become available under
+        // Element attributes starting with "data-", become available under
         // element.dataset. In addition hyphenized words become camelCased.
         var data = root.dataset;
         
@@ -41,7 +43,7 @@
             addToolbarButton(toolbar);
         }
         
-        api.lib.gc.addCallback( function(rootId){
+        api.lib.gc.addCallback( function(){
             clearTimeout(timeoutHandle);
         });
         // Note that right after impress:init event, also impress:stepenter is
@@ -53,7 +55,7 @@
     var reloadTimeout = function ( event ) {
         var step = event.target;
         currentStepTimeout = toNumber( step.dataset.autoplay, autoplayDefault );
-        if (status=="paused") {
+        if (status==="paused") {
             setAutoplayTimeout(0);
         }
         else {
@@ -102,16 +104,16 @@
     };
 
     var toggleStatus = function() {
-        if (currentStepTimeout>0 && status!="paused") {
+        if (currentStepTimeout>0 && status!=="paused") {
             status="paused";
         }
         else {
             status="playing";
         }
-    }
+    };
 
     var getButtonText = function() {
-        if (currentStepTimeout>0 && status!="paused") {
+        if (currentStepTimeout>0 && status!=="paused") {
             return "||"; // pause
         }
         else {
@@ -125,28 +127,30 @@
             var buttonWidth = toolbarButton.offsetWidth;
             var buttonHeight = toolbarButton.offsetHeight;
             toolbarButton.innerHTML = getButtonText();
-            if (!toolbarButton.style.width)
+            if (!toolbarButton.style.width) {
                 toolbarButton.style.width = buttonWidth + "px";
-            if (!toolbarButton.style.height)
+            }
+            if (!toolbarButton.style.height) {
                 toolbarButton.style.height = buttonHeight + "px";
+            }
         }
     };
 
     var addToolbarButton = function (toolbar) {
-        var html = '<button id="impress-autoplay-playpause" title="Autoplay" class="impress-autoplay">' + getButtonText() + '</button>';
+        var html = '<button id="impress-autoplay-playpause" title="Autoplay" class="impress-autoplay">' + getButtonText() + '</button>'; // jshint ignore:line
         toolbarButton = makeDomElement( html );
-        toolbarButton.addEventListener( "click", function( event ) {
+        toolbarButton.addEventListener( "click", function() {
             toggleStatus();
-            if (status=="playing") {
-                if (autoplayDefault == 0) {
+            if (status==="playing") {
+                if (autoplayDefault === 0) {
                     autoplayDefault = 7;
                 }
-                if ( currentStepTimeout == 0 ) {
+                if ( currentStepTimeout === 0 ) {
                     currentStepTimeout = autoplayDefault;
                 }
                 setAutoplayTimeout(currentStepTimeout);
             }
-            else if (status=="paused") {
+            else if (status==="paused") {
                 setAutoplayTimeout(0);
             }
         });
@@ -154,4 +158,4 @@
         triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 10, element : toolbarButton } );
     };
 
-})(document, window);
+})(document);

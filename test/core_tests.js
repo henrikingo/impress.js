@@ -4,6 +4,8 @@
  * Released under the MIT license. See LICENSE file.
  */
 
+/* global document, console, setTimeout, loadIframe, initPresentation, _impressSupported, QUnit */
+
 QUnit.module("Core Tests");
 
 QUnit.test( "Initialize Impress.js", function( assert ) {
@@ -20,7 +22,7 @@ QUnit.test( "Initialize Impress.js", function( assert ) {
     var root  = iframeDoc.querySelector( "div#impress" );
 
     // Catch events triggered by init()
-    var assertInit = function( event, registeredListener ) {
+    var assertInit = function() {
       assert.ok( true, "impress:init event triggered.");
 
       var canvas = iframeDoc.querySelector( "div#impress > div" );
@@ -36,8 +38,8 @@ QUnit.test( "Initialize Impress.js", function( assert ) {
       console.log("End init() test (async)"); 
     };
     
-    var assertInitWrapper = function( event ) {
-      setTimeout( function() { assertInit( event ) }, 10 ); 
+    var assertInitWrapper = function() {
+      setTimeout( function() { assertInit(); }, 10 ); 
     };
     root.addEventListener( "impress:init", assertInitWrapper );
 
@@ -175,7 +177,7 @@ QUnit.test( "Impress Core API", function( assert ) {
       var readyCount = 0;
       var readyForNext = function(){
         readyCount++;
-        if( readyCount % 2 == 0 ) {
+        if( readyCount % 2 === 0 ) {
           if( sequence[i].next ) {
             assert.ok( sequence[i].next(), sequence[i].text );
             i++;
@@ -188,7 +190,7 @@ QUnit.test( "Impress Core API", function( assert ) {
       };
       
       // Things to check on impress:stepenter event -----------------------------//
-      var assertStepEnter = function( event, registeredListener ) {
+      var assertStepEnter = function( event) {
         assert.equal( event.target, sequence[i].entered,
                       event.target.id + " triggered impress:stepenter event." );
         assert.ok( event.target.classList.contains("present"),
@@ -214,13 +216,13 @@ QUnit.test( "Impress Core API", function( assert ) {
       };
       
       var assertStepEnterWrapper = function( event ) {
-        setTimeout( function() { assertStepEnter( event ) }, wait ); 
+        setTimeout( function() { assertStepEnter( event ); }, wait ); 
       };
       root.addEventListener( "impress:stepenter", assertStepEnterWrapper );
 
 
       // Things to check on impress:stepleave event -----------------------------//
-      var assertStepLeave = function( event, registeredListener ) {
+      var assertStepLeave = function( event ) {
         assert.equal( event.target, sequence[i].left,
                       event.target.id + " triggered impress:stepleave event." );
         assert.ok( !event.target.classList.contains("present"),
@@ -233,7 +235,7 @@ QUnit.test( "Impress Core API", function( assert ) {
       };
 
       var assertStepLeaveWrapper = function( event ) {
-        setTimeout( function() { assertStepLeave( event ) }, wait );
+        setTimeout( function() { assertStepLeave( event ); }, wait );
       };
       root.addEventListener( "impress:stepleave", assertStepLeaveWrapper );
       

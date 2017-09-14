@@ -19,8 +19,10 @@
  * Copyright 2016-2017 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+/* global window, document, impress */
+
 (function ( document, window ) {
-    'use strict';
+    "use strict";
 
     var isNumber = function (numeric) {
         return !isNaN(numeric);
@@ -31,8 +33,9 @@
     };
 
     var goto = function(event) {
-        if ( (!event) || (!event.target) )
+        if ( (!event) || (!event.target) ) {
             return;
+        }
         
         var data = event.target.dataset;
         var steps = document.querySelectorAll(".step");
@@ -45,10 +48,10 @@
             var keylist = data.gotoKeyList.split(" ");
             var nextlist = data.gotoNextList.split(" ");
 
-            if ( keylist.length != nextlist.length ) {
-                console.log("impress goto plugin: data-goto-key-list and data-goto-next-list don't match:");
-                console.log(keylist);
-                console.log(nextlist);
+            if ( keylist.length !== nextlist.length ) {
+                window.console.log("impress goto plugin: data-goto-key-list and data-goto-next-list don't match:");
+                window.console.log(keylist);
+                window.console.log(nextlist);
                 // Don't return, allow the other categories to work despite this error
             }
             else {
@@ -69,7 +72,7 @@
                             return;
                         }
                         else {
-                            console.log( "impress goto plugin: " + next + " is not a step in this impress presentation.");
+                            window.console.log( "impress goto plugin: " + next + " is not a step in this impress presentation.");
                         }
                     }
                 }
@@ -79,39 +82,39 @@
         // data-goto-next="" & data-goto-prev="" ///////////////////////////////////////////////////
 
         // Handle event.target data-goto-next attribute
-        if ( isNumber(data.gotoNext) && event.detail.reason == "next" ) {
+        if ( isNumber(data.gotoNext) && event.detail.reason === "next" ) {
             event.detail.next = steps[data.gotoNext];
             // If the new next element has its own transitionDuration, we're responsible for setting that on the event as well
             event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
-        if ( data.gotoNext && event.detail.reason == "next" ) {
-            var newTarget = document.getElementById( data.gotoNext );
+        if ( data.gotoNext && event.detail.reason === "next" ) {
+            var newTarget = document.getElementById( data.gotoNext ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
                 event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
-                console.log( "impress goto plugin: " + data.gotoNext + " is not a step in this impress presentation.");
+                window.console.log( "impress goto plugin: " + data.gotoNext + " is not a step in this impress presentation.");
             }
         }
 
         // Handle event.target data-goto-prev attribute
-        if ( isNumber(data.gotoPrev) && event.detail.reason == "prev" ) {
+        if ( isNumber(data.gotoPrev) && event.detail.reason === "prev" ) {
             event.detail.next = steps[data.gotoPrev];
             event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
-        if ( data.gotoPrev && event.detail.reason == "prev" ) {
-            var newTarget = document.getElementById( data.gotoPrev );
+        if ( data.gotoPrev && event.detail.reason === "prev" ) {
+            var newTarget = document.getElementById( data.gotoPrev ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
                 event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
-                console.log( "impress goto plugin: " + data.gotoPrev + " is not a step in this impress presentation.");
+                window.console.log( "impress goto plugin: " + data.gotoPrev + " is not a step in this impress presentation.");
             }
         }
 
@@ -124,14 +127,14 @@
             return;
         }
         if ( data.goto ) {
-            var newTarget = document.getElementById( data.goto );
+            var newTarget = document.getElementById( data.goto ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
                 event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
-                console.log( "impress goto plugin: " + data.goto + " is not a step in this impress presentation.");
+                window.console.log( "impress goto plugin: " + data.goto + " is not a step in this impress presentation.");
             }
         }
     };

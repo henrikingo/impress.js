@@ -15,12 +15,13 @@
  * Copyright 2016 Henrik Ingo
  * MIT License
  */
-(function ( document, window ) {
-    'use strict';
+/* global document */
+(function ( document ) {
+    "use strict";
     
-    document.addEventListener("impress:stepleave", function (event) {
-        document.activeElement.blur()
+    document.addEventListener("impress:stepleave", function () {
+        document.activeElement.blur();
     }, false);
         
-})(document, window);
+})(document);
 

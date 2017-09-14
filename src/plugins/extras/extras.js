@@ -9,16 +9,10 @@
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+/* global markdown, hljs, mermaid, impress, document, window */
+
 (function ( document, window ) {
-    'use strict';
-
-    var triggerEvent = function (el, eventName, detail) {
-        var event = document.createEvent("CustomEvent");
-        event.initCustomEvent(eventName, true, true, detail);
-        el.dispatchEvent(event);
-    };
-
-
+    "use strict";
 
     var preInit = function() {
         if( window.markdown ){
@@ -30,13 +24,13 @@
             for (var idx=0; idx < markdownDivs.length; idx++) {
               var element = markdownDivs[idx];
 
-              // Note: unlike the previous two, markdown.js doesn't automatically find or convert anything in 
               var slides = element.textContent.split(/^-----$/m);
               var i = slides.length - 1;
               element.innerHTML = markdown.toHTML(slides[i]);
               // If there's an id, unset it for last, and all other, elements, and then set it for the first.
+              var id = null;
               if( element.id ){
-                var id = element.id;
+                id = element.id;
                 element.id = "";
               }
               i--;
@@ -47,7 +41,9 @@
                 element = newElement;
                 i--;
               }
-              element.id = id;
+              if ( id !== null ) {
+                element.id = id;
+              }
             }
         } // markdown
         

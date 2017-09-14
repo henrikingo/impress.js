@@ -59,17 +59,14 @@
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
-(function ( document, window ) {
-    'use strict';
+
+/* global document */
+
+(function ( document ) {
+    "use strict";
     var toolbar = document.getElementById("impress-toolbar");
     var groups = [];
 
-    var triggerEvent = function (el, eventName, detail) {
-        var event = document.createEvent("CustomEvent");
-        event.initCustomEvent(eventName, true, true, detail);
-        el.dispatchEvent(event);
-    };
-    
     /**
      * Get the span element that is a child of toolbar, identified by index.
      *
@@ -150,10 +147,10 @@
         document.addEventListener("impress:init", function( event ) {
             var api = event.detail.api;
             api.lib.gc.addCallback( function() {
-                toolbar.innerHTML = '';
+                toolbar.innerHTML = "";
                 groups = [];
             });
         });
     } // if toolbar
 
-})(document, window);
+})(document);

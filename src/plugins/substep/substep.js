@@ -4,8 +4,11 @@
  * Copyright 2017 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+
+/* global document, window */
+
 (function ( document, window ) {
-    'use strict';
+    "use strict";
 
     // Copied from core impress.js. Good candidate for moving to src/lib/util.js.
     var triggerEvent = function (el, eventName, detail) {
@@ -21,12 +24,14 @@
 
 
     var substep = function(event) {
-        if ( (!event) || (!event.target) )
+        if ( (!event) || (!event.target) ) {
             return;
+        }
 
         var step = event.target;
-        if ( event.detail.reason == "next" ) {
-            var el = showSubstepIfAny(step);
+        var el; // Needed by jshint
+        if ( event.detail.reason === "next" ) {
+            el = showSubstepIfAny(step);
             if ( el ) {
                 // Send a message to others, that we aborted a stepleave event.
                 // Autoplay will reload itself from this, as there won't be a stepenter event now.
@@ -35,8 +40,8 @@
                 return false;
             }
         }
-        if ( event.detail.reason == "prev" ) {
-            var el = hideSubstepIfAny(step);
+        if ( event.detail.reason === "prev" ) {
+            el = hideSubstepIfAny(step);
             if ( el ) {
                 triggerEvent(step, "impress:substep:stepleaveaborted", { reason: "prev", substep: el } );
                 return false;
@@ -66,7 +71,7 @@
         if ( substeps.length > 0 ) {
             return hideSubstep(visible);
         }
-    }
+    };
 
     var hideSubstep = function (visible) {
         if ( visible.length > 0 ) {
@@ -77,7 +82,7 @@
     };
     // Register the plugin to be called in pre-stepleave phase.
     // The weight makes this plugin run before other preStepLeave plugins.
-    impress.addPreStepLeavePlugin( substep, 1 );
+    window.impress.addPreStepLeavePlugin( substep, 1 );
 
     // When entering a step, in particular when re-entering, make sure that all substeps are hidden at first
     document.addEventListener("impress:stepenter", function (event) {
@@ -89,11 +94,11 @@
     }, false);
 
     // API for others to reveal/hide next substep ////////////////////////////////////////////////
-    document.addEventListener("impress:substep:show", function (event) {
+    document.addEventListener("impress:substep:show", function () {
         showSubstepIfAny(activeStep);
     }, false);
 
-    document.addEventListener("impress:substep:hide", function (event) {
+    document.addEventListener("impress:substep:hide", function () {
         hideSubstepIfAny(activeStep);
     }, false);
 

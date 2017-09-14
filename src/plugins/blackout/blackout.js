@@ -7,8 +7,10 @@
  * Copyright 2014 @Strikeskids
  * Released under the MIT license.
  */
-(function ( document, window ) {
-    'use strict';
+/* global document */
+
+(function ( document ) {
+    "use strict";
     
     var canvas = null;
     var blackedOut = false;
@@ -29,15 +31,15 @@
 
     var pfx = (function () {
         
-        var style = document.createElement('dummy').style,
-            prefixes = 'Webkit Moz O ms Khtml'.split(' '),
+        var style = document.createElement("dummy").style,
+            prefixes = "Webkit Moz O ms Khtml".split(" "),
             memory = {};
         
         return function ( prop ) {
             if ( typeof memory[ prop ] === "undefined" ) {
                 
                 var ucProp  = prop.charAt(0).toUpperCase() + prop.substr(1),
-                    props   = (prop + ' ' + prefixes.join(ucProp + ' ') + ucProp).split(' ');
+                    props   = (prop + " " + prefixes.join(ucProp + " ") + ucProp).split(" ");
                 
                 memory[ prop ] = null;
                 for ( var i in props ) {
@@ -59,11 +61,11 @@
     var removeBlackout = function() {
         if (blackedOut) {
             css(canvas, {
-                display: 'block'
+                display: "block"
             });
             blackedOut = false;
         }
-    }
+    };
 
     var blackout = function() {
         if (blackedOut) {
@@ -71,11 +73,11 @@
         }
         else {
             css(canvas, {
-                display: (blackedOut = !blackedOut) ? 'none' : 'block'
+                display: (blackedOut = !blackedOut) ? "none" : "block"
             });
             blackedOut = true;
         }
-    }
+    };
 
     // wait for impress.js to be initialized
     document.addEventListener("impress:init", function (event) {
@@ -107,9 +109,9 @@
 
     }, false);
         
-    document.addEventListener("impress:stepleave", function (event) {
+    document.addEventListener("impress:stepleave", function () {
         removeBlackout();
     }, false);
 
-})(document, window);
+})(document);
 

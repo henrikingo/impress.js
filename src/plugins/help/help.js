@@ -3,7 +3,7 @@
  *
  * Example:
  * 
- *     <!-- Show a help popup at start, or if user presses 'H' -->
+ *     <!-- Show a help popup at start, or if user presses "H" -->
  *     <div id="impress-help"></div>
  *
  * For developers:
@@ -14,8 +14,10 @@
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+/* global window, document */
+
 (function ( document, window ) {
-    'use strict';
+    "use strict";
     var rows = [];
     var timeoutHandle;
 
@@ -25,7 +27,7 @@
         el.dispatchEvent(event);
     };
 
-    var renderHelpDiv = function( e ){
+    var renderHelpDiv = function(){
         var helpDiv = document.getElementById("impress-help");
         if(helpDiv){
             var html = [];
@@ -42,21 +44,23 @@
     
     var toggleHelp = function() {
         var helpDiv = document.getElementById("impress-help");
-        if (!helpDiv) return;
+        if (!helpDiv) {
+            return;
+        }
  
-        if(helpDiv.style.display == 'block') {
-            helpDiv.style.display = 'none';
+        if(helpDiv.style.display === "block") {
+            helpDiv.style.display = "none";
         }
         else {
-            helpDiv.style.display = 'block';
-            clearTimeout( timeoutHandle );
+            helpDiv.style.display = "block";
+            window.clearTimeout( timeoutHandle );
         }
     };
 
     document.addEventListener("keyup", function ( event ) {
         // Check that event target is html or body element.
-        if ( event.target.nodeName == "BODY" || event.target.nodeName == "HTML" ) {
-            if ( event.keyCode == 72 ) { // 'h'
+        if ( event.target.nodeName === "BODY" || event.target.nodeName === "HTML" ) {
+            if ( event.keyCode === 72 ) { // "h"
                 event.preventDefault();
                 toggleHelp();
             }
@@ -78,7 +82,7 @@
         // its own array. If there are more than one entry for the same index, they are shown in
         // first come, first serve ordering.
         var rowIndex = e.detail.row;
-        if ( typeof rows[rowIndex] != 'object' || !rows[rowIndex].isArray ) {
+        if ( typeof rows[rowIndex] !== "object" || !rows[rowIndex].isArray ) {
             rows[rowIndex] = [];
         }
         rows[e.detail.row].push( "<tr><td><strong>" + e.detail.command + "</strong></td><td>" + e.detail.text + "</td></tr>" );
@@ -91,20 +95,20 @@
         var helpDiv = document.getElementById("impress-help");
         if( helpDiv ) {
             helpDiv.style.display = "block";
-            timeoutHandle = setTimeout(function () {
-                var helpDiv = window.document.getElementById("impress-help");
+            timeoutHandle = window.setTimeout(function () {
+                var helpDiv = document.getElementById("impress-help");
                 helpDiv.style.display = "none";
             }, 7000);
             // Regster callback to empty the help div on teardown
             var api = e.detail.api;
             api.lib.gc.addCallback( function(){
-                clearTimeout(timeoutHandle);
-                helpDiv.style.display = '';
-                helpDiv.innerHTML = '';
+                window.clearTimeout(timeoutHandle);
+                helpDiv.style.display = "";
+                helpDiv.innerHTML = "";
                 rows = [];
             });
         }
-        // Use our own API to register the help text for 'h'
+        // Use our own API to register the help text for "h"
         triggerEvent(document, "impress:help:add", { command : "H", text : "Show this help", row : 0} );
     });
     

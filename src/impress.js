@@ -18,11 +18,12 @@
 
 /*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, latedef:true, newcap:true,
          noarg:true, noempty:true, undef:true, strict:true, browser:true */
+/*global console*/
 
 // You are one of those who like to know how things work inside?
 // Let me show you the cogs that make impress.js run...
 (function ( document, window ) {
-    'use strict';
+    "use strict";
     
     // HELPER FUNCTIONS
     
@@ -31,15 +32,15 @@
     // The code is heavily inspired by Modernizr http://www.modernizr.com/
     var pfx = (function () {
         
-        var style = document.createElement('dummy').style,
-            prefixes = 'Webkit Moz O ms Khtml'.split(' '),
+        var style = document.createElement("dummy").style,
+            prefixes = "Webkit Moz O ms Khtml".split(" "),
             memory = {};
         
         return function ( prop ) {
             if ( typeof memory[ prop ] === "undefined" ) {
                 
                 var ucProp  = prop.charAt(0).toUpperCase() + prop.substr(1),
-                    props   = (prop + ' ' + prefixes.join(ucProp + ' ') + ucProp).split(' ');
+                    props   = (prop + " " + prefixes.join(ucProp + " ") + ucProp).split(" ");
                 
                 memory[ prop ] = null;
                 for ( var i in props ) {
@@ -88,7 +89,7 @@
     var validateOrder = function ( order, fallback ) {
         var validChars = "xyz";
         var returnStr = "";
-        if ( typeof order == "string" ) {
+        if ( typeof order === "string" ) {
             for ( var i in order.split("") ) {
                 if( validChars.indexOf( order[i] >= 0 ) ) {
                     returnStr += order[i];
@@ -97,12 +98,15 @@
                 }
             }
         }
-        if ( returnStr )
+        if ( returnStr ) {
             return returnStr;
-        else if ( fallback !== undefined )
+        }
+        else if ( fallback !== undefined ) {
             return fallback;
-        else
+        }
+        else {
             return "xyz";
+        }
     };
     
     // `byId` returns element with given `id` - you probably have guessed that ;)
@@ -148,8 +152,8 @@
             axes = axes.reverse();
         }
 
-        for ( var i in axes ) {
-            css += " rotate" + axes[i].toUpperCase() + "(" + r[axes[i]] + "deg)"
+        for ( var i=0; i<axes.length; i++ ) {
+            css += " rotate" + axes[i].toUpperCase() + "(" + r[axes[i]] + "deg)";
         }
         return css;
     };
@@ -232,7 +236,7 @@
     
     // And that's where interesting things will start to happen.
     // It's the core `impress` function that returns the impress.js API
-    // for a presentation based on the element with given id ('impress'
+    // for a presentation based on the element with given id ("impress"
     // by default).
     var impress = window.impress = function ( rootId ) {
         
@@ -260,7 +264,9 @@
         
         // The gc library depends on being initialized before we do any changes to DOM.
         var lib = initLibraries(rootId);
-        if (lib === "error") return;
+        if (lib === "error") {
+            return;
+        }
         
         body.classList.remove("impress-not-supported");
         body.classList.add("impress-supported");
@@ -378,7 +384,7 @@
             var meta = $("meta[name='viewport']") || document.createElement("meta");
             meta.content = "width=device-width, minimum-scale=1, maximum-scale=1, user-scalable=no";
             if (meta.parentNode !== document.head) {
-                meta.name = 'viewport';
+                meta.name = "viewport";
                 document.head.appendChild(meta);
             }
             
@@ -567,11 +573,11 @@
             // being animated separately:
             // `root` is used for scaling and `canvas` for translate and rotations.
             // Transitions on them are triggered with different delays (to make
-            // visually nice and 'natural' looking transitions), so we need to know
+            // visually nice and "natural" looking transitions), so we need to know
             // that both of them are finished.
             css(root, {
                 // to keep the perspective look similar for different scales
-                // we need to 'scale' the perspective, too
+                // we need to "scale" the perspective, too
                 transform: perspective( config.perspective / targetScale ) + scale( targetScale ),
                 transitionDuration: duration + "ms",
                 transitionDelay: (zoomin ? delay : 0) + "ms"
@@ -669,18 +675,22 @@
         // transition is committed - such as at a touchend event - caller is
         // responsible for also calling prev()/next() as appropriate.
         var swipe = function(pct){
-            if( Math.abs(pct) > 1 ) return;
+            if( Math.abs(pct) > 1 ) {
+                return;
+            }
+            
             // Prepare & execute the preStepLeave event
             var event = { target: activeStep, detail : {} };
             event.detail.swipe = pct;
             // Will be ignored within swipe animation, but just in case a plugin wants to read this, humor them
             event.detail.transitionDuration = config.transitionDuration;
+            var idx; // needed by jshint
             if (pct < 0) {
-                var idx = steps.indexOf(activeStep) + 1;
+                idx = steps.indexOf(activeStep) + 1;
                 event.detail.next = idx < steps.length ? steps[idx] : steps[0];
                 event.detail.reason = "next";
             } else if (pct > 0) {
-                var idx = steps.indexOf(activeStep) - 1;
+                idx = steps.indexOf(activeStep) - 1;
                 event.detail.next = idx >= 0 ? steps[idx] : steps[steps.length - 1];
                 event.detail.reason = "prev";
             } else {
@@ -694,8 +704,7 @@
             }
             var nextElement = event.detail.next;
             
-            var nextStep = stepsData['impress-' + nextElement.id];
-            var zoomin = nextStep.scale >= currentState.scale;
+            var nextStep = stepsData["impress-" + nextElement.id];
             // if the same step is re-selected, force computing window scaling,
             var nextScale = nextStep.scale * windowScale;
             var k = Math.abs(pct);
@@ -738,7 +747,7 @@
         var tear = function() {
             lib.gc.teardown();
             delete roots[ "impress-root-" + rootId ];
-        }
+        };
 
 
         // Adding some useful classes to step elements.
@@ -833,18 +842,22 @@
     var libraryFactories = {};
     impress.addLibraryFactory = function(obj){
         for (var libname in obj) {
-            libraryFactories[libname] = obj[libname];
+            if (obj.hasOwnProperty(libname)) {
+                libraryFactories[libname] = obj[libname];
+            }
         }
     };
     // Call each library factory, and return the lib object that is added to the api.
-    var initLibraries = function(rootId){
-        var lib = {}
+    var initLibraries = function(rootId){ //jshint ignore:line
+        var lib = {};
         for (var libname in libraryFactories) {
-            if(lib[libname] !== undefined) {
-                console.log("impress.js ERROR: Two libraries both tried to use libname: " + libname);
-                return "error";
+            if(libraryFactories.hasOwnProperty(libname)) {
+                if(lib[libname] !== undefined) {
+                    console.log("impress.js ERROR: Two libraries both tried to use libname: " + libname);
+                    return "error";
+                }
+                lib[libname] = libraryFactories[libname](rootId);
             }
-            lib[libname] = libraryFactories[libname](rootId);
         }
         return lib;
     };
@@ -861,7 +874,7 @@
     };
     
     // Called at beginning of init, to execute all pre-init plugins.
-    var execPreInitPlugins = function(root) {
+    var execPreInitPlugins = function(root) { //jshint ignore:line
         for( var i = 0; i < preInitPlugins.length; i++ ) {
             var thisLevel = preInitPlugins[i];
             if( thisLevel !== undefined ) {
@@ -874,7 +887,7 @@
     
     // `addPreStepLeavePlugin` allows plugins to register a function that should
     // be run (synchronously) at the beginning of goto()
-    impress.addPreStepLeavePlugin = function( plugin, weight ) {
+    impress.addPreStepLeavePlugin = function( plugin, weight ) { //jshint ignore:line
         weight = toNumber(weight,10);
         if ( preStepLeavePlugins[weight] === undefined ) {
             preStepLeavePlugins[weight] = [];
@@ -883,7 +896,7 @@
     };
     
     // Called at beginning of goto(), to execute all preStepLeave plugins.
-    var execPreStepLeavePlugins = function(event) {
+    var execPreStepLeavePlugins = function(event) { //jshint ignore:line
         for( var i = 0; i < preStepLeavePlugins.length; i++ ) {
             var thisLevel = preStepLeavePlugins[i];
             if( thisLevel !== undefined ) {

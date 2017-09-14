@@ -11,22 +11,25 @@
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+/* global document, window */
 (function ( document, window ) {
-    'use strict';
+    "use strict";
 
     var stop = function(event) {
-        if ( (!event) || (!event.target) )
+        if ( (!event) || (!event.target) ) {
             return;
+        }
         
         if ( event.target.classList.contains("stop") ) {
-            if ( event.detail.reason == "next" )
+            if ( event.detail.reason === "next" ) {
                 return false;
+            }
         }
     };
     
     // Register the plugin to be called in pre-stepleave phase
     // The weight makes this plugin run fairly early.
-    impress.addPreStepLeavePlugin( stop, 2 );
+    window.impress.addPreStepLeavePlugin( stop, 2 );
     
 })(document, window);
 

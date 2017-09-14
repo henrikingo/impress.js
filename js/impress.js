@@ -18,11 +18,12 @@
 
 /*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, latedef:true, newcap:true,
          noarg:true, noempty:true, undef:true, strict:true, browser:true */
+/*global console*/
 
 // You are one of those who like to know how things work inside?
 // Let me show you the cogs that make impress.js run...
 (function ( document, window ) {
-    'use strict';
+    "use strict";
     
     // HELPER FUNCTIONS
     
@@ -31,15 +32,15 @@
     // The code is heavily inspired by Modernizr http://www.modernizr.com/
     var pfx = (function () {
         
-        var style = document.createElement('dummy').style,
-            prefixes = 'Webkit Moz O ms Khtml'.split(' '),
+        var style = document.createElement("dummy").style,
+            prefixes = "Webkit Moz O ms Khtml".split(" "),
             memory = {};
         
         return function ( prop ) {
             if ( typeof memory[ prop ] === "undefined" ) {
                 
                 var ucProp  = prop.charAt(0).toUpperCase() + prop.substr(1),
-                    props   = (prop + ' ' + prefixes.join(ucProp + ' ') + ucProp).split(' ');
+                    props   = (prop + " " + prefixes.join(ucProp + " ") + ucProp).split(" ");
                 
                 memory[ prop ] = null;
                 for ( var i in props ) {
@@ -88,7 +89,7 @@
     var validateOrder = function ( order, fallback ) {
         var validChars = "xyz";
         var returnStr = "";
-        if ( typeof order == "string" ) {
+        if ( typeof order === "string" ) {
             for ( var i in order.split("") ) {
                 if( validChars.indexOf( order[i] >= 0 ) ) {
                     returnStr += order[i];
@@ -97,12 +98,15 @@
                 }
             }
         }
-        if ( returnStr )
+        if ( returnStr ) {
             return returnStr;
-        else if ( fallback !== undefined )
+        }
+        else if ( fallback !== undefined ) {
             return fallback;
-        else
+        }
+        else {
             return "xyz";
+        }
     };
     
     // `byId` returns element with given `id` - you probably have guessed that ;)
@@ -148,8 +152,8 @@
             axes = axes.reverse();
         }
 
-        for ( var i in axes ) {
-            css += " rotate" + axes[i].toUpperCase() + "(" + r[axes[i]] + "deg)"
+        for ( var i=0; i<axes.length; i++ ) {
+            css += " rotate" + axes[i].toUpperCase() + "(" + r[axes[i]] + "deg)";
         }
         return css;
     };
@@ -232,7 +236,7 @@
     
     // And that's where interesting things will start to happen.
     // It's the core `impress` function that returns the impress.js API
-    // for a presentation based on the element with given id ('impress'
+    // for a presentation based on the element with given id ("impress"
     // by default).
     var impress = window.impress = function ( rootId ) {
         
@@ -260,7 +264,9 @@
         
         // The gc library depends on being initialized before we do any changes to DOM.
         var lib = initLibraries(rootId);
-        if (lib === "error") return;
+        if (lib === "error") {
+            return;
+        }
         
         body.classList.remove("impress-not-supported");
         body.classList.add("impress-supported");
@@ -378,7 +384,7 @@
             var meta = $("meta[name='viewport']") || document.createElement("meta");
             meta.content = "width=device-width, minimum-scale=1, maximum-scale=1, user-scalable=no";
             if (meta.parentNode !== document.head) {
-                meta.name = 'viewport';
+                meta.name = "viewport";
                 document.head.appendChild(meta);
             }
             
@@ -567,11 +573,11 @@
             // being animated separately:
             // `root` is used for scaling and `canvas` for translate and rotations.
             // Transitions on them are triggered with different delays (to make
-            // visually nice and 'natural' looking transitions), so we need to know
+            // visually nice and "natural" looking transitions), so we need to know
             // that both of them are finished.
             css(root, {
                 // to keep the perspective look similar for different scales
-                // we need to 'scale' the perspective, too
+                // we need to "scale" the perspective, too
                 transform: perspective( config.perspective / targetScale ) + scale( targetScale ),
                 transitionDuration: duration + "ms",
                 transitionDelay: (zoomin ? delay : 0) + "ms"
@@ -669,18 +675,22 @@
         // transition is committed - such as at a touchend event - caller is
         // responsible for also calling prev()/next() as appropriate.
         var swipe = function(pct){
-            if( Math.abs(pct) > 1 ) return;
+            if( Math.abs(pct) > 1 ) {
+                return;
+            }
+            
             // Prepare & execute the preStepLeave event
             var event = { target: activeStep, detail : {} };
             event.detail.swipe = pct;
             // Will be ignored within swipe animation, but just in case a plugin wants to read this, humor them
             event.detail.transitionDuration = config.transitionDuration;
+            var idx; // needed by jshint
             if (pct < 0) {
-                var idx = steps.indexOf(activeStep) + 1;
+                idx = steps.indexOf(activeStep) + 1;
                 event.detail.next = idx < steps.length ? steps[idx] : steps[0];
                 event.detail.reason = "next";
             } else if (pct > 0) {
-                var idx = steps.indexOf(activeStep) - 1;
+                idx = steps.indexOf(activeStep) - 1;
                 event.detail.next = idx >= 0 ? steps[idx] : steps[steps.length - 1];
                 event.detail.reason = "prev";
             } else {
@@ -694,8 +704,7 @@
             }
             var nextElement = event.detail.next;
             
-            var nextStep = stepsData['impress-' + nextElement.id];
-            var zoomin = nextStep.scale >= currentState.scale;
+            var nextStep = stepsData["impress-" + nextElement.id];
             // if the same step is re-selected, force computing window scaling,
             var nextScale = nextStep.scale * windowScale;
             var k = Math.abs(pct);
@@ -738,7 +747,7 @@
         var tear = function() {
             lib.gc.teardown();
             delete roots[ "impress-root-" + rootId ];
-        }
+        };
 
 
         // Adding some useful classes to step elements.
@@ -833,18 +842,22 @@
     var libraryFactories = {};
     impress.addLibraryFactory = function(obj){
         for (var libname in obj) {
-            libraryFactories[libname] = obj[libname];
+            if (obj.hasOwnProperty(libname)) {
+                libraryFactories[libname] = obj[libname];
+            }
         }
     };
     // Call each library factory, and return the lib object that is added to the api.
-    var initLibraries = function(rootId){
-        var lib = {}
+    var initLibraries = function(rootId){ //jshint ignore:line
+        var lib = {};
         for (var libname in libraryFactories) {
-            if(lib[libname] !== undefined) {
-                console.log("impress.js ERROR: Two libraries both tried to use libname: " + libname);
-                return "error";
+            if(libraryFactories.hasOwnProperty(libname)) {
+                if(lib[libname] !== undefined) {
+                    console.log("impress.js ERROR: Two libraries both tried to use libname: " + libname);
+                    return "error";
+                }
+                lib[libname] = libraryFactories[libname](rootId);
             }
-            lib[libname] = libraryFactories[libname](rootId);
         }
         return lib;
     };
@@ -861,7 +874,7 @@
     };
     
     // Called at beginning of init, to execute all pre-init plugins.
-    var execPreInitPlugins = function(root) {
+    var execPreInitPlugins = function(root) { //jshint ignore:line
         for( var i = 0; i < preInitPlugins.length; i++ ) {
             var thisLevel = preInitPlugins[i];
             if( thisLevel !== undefined ) {
@@ -874,7 +887,7 @@
     
     // `addPreStepLeavePlugin` allows plugins to register a function that should
     // be run (synchronously) at the beginning of goto()
-    impress.addPreStepLeavePlugin = function( plugin, weight ) {
+    impress.addPreStepLeavePlugin = function( plugin, weight ) { //jshint ignore:line
         weight = toNumber(weight,10);
         if ( preStepLeavePlugins[weight] === undefined ) {
             preStepLeavePlugins[weight] = [];
@@ -883,7 +896,7 @@
     };
     
     // Called at beginning of goto(), to execute all preStepLeave plugins.
-    var execPreStepLeavePlugins = function(event) {
+    var execPreStepLeavePlugins = function(event) { //jshint ignore:line
         for( var i = 0; i < preStepLeavePlugins.length; i++ ) {
             var thisLevel = preStepLeavePlugins[i];
             if( thisLevel !== undefined ) {
@@ -921,8 +934,10 @@
  * Henrik Ingo (c) 2016
  * MIT License
  */
+/* global document, window */
+
 (function ( document, window ) {
-    'use strict';
+    "use strict";
     var roots = [];
     var rootsCount = 0;
     var startingState = { roots : [] };
@@ -966,19 +981,20 @@
         var addCallback = function ( callback ) {
             callbackList.push(callback);
         };
-        addCallback(function(rootId){ resetStartingState(rootId)} );
+        addCallback( function(rootId){ resetStartingState(rootId); } );
         
         var teardown = function () {
             // Execute the callbacks in LIFO order
-            for ( var i = callbackList.length-1; i >= 0; i-- ) {
+            var i; // Needed by jshint
+            for ( i = callbackList.length-1; i >= 0; i-- ) {
                 callbackList[i](rootId);
             }
             callbackList = [];
-            for ( var i in elementList ) {
+            for ( i = 0; i < elementList.length; i++ ) {
                 elementList[i].parentElement.removeChild(elementList[i]);
             }
             elementList = [];
-            for ( var i in eventListenerList ) {
+            for ( i = 0; i < eventListenerList.length; i++ ) {
                 var target   = eventListenerList[i].target;
                 var type     = eventListenerList[i].type;
                 var listener = eventListenerList[i].listener;
@@ -993,7 +1009,7 @@
             addEventListener: addEventListener,
             addCallback: addCallback,
             teardown: teardown
-        }
+        };
         roots[rootId] = lib;
         rootsCount++;
         return lib;
@@ -1026,7 +1042,7 @@
         
         // In the rare case of multiple roots, the following is changed on first init() and
         // reset at last tear().
-        if ( rootsCount == 0 ) {
+        if ( rootsCount === 0 ) {
             startingState.body = {};
             // It is customary for authors to set body.class="impress-not-supported" as a starting
             // value, which can then be removed by impress().init(). But it is not required.
@@ -1039,12 +1055,12 @@
             }
             // If there's a <meta name="viewport"> element, its contents will be overwritten by init
             var metas = document.head.querySelectorAll("meta");
-            for (var i = 0; i < metas.length; i++){
+            for (i = 0; i < metas.length; i++){
                 var m = metas[i];
-                if( m.name == "viewport" ) {
+                if( m.name === "viewport" ) {
                     startingState.meta = m.content;
                 }
-            };
+            }
         }
     };
     
@@ -1058,9 +1074,9 @@
         var activeId = root.querySelector(".active").id;
         document.body.classList.remove("impress-on-" + activeId);
         
-        document.documentElement.style["height"] = '';
-        document.body.style["height"] = '';
-        document.body.style["overflow"] = '';
+        document.documentElement.style.height = "";
+        document.body.style.height = "";
+        document.body.style.overflow = "";
         // Remove style values from the root and step elements
         // Note: We remove the ones set by impress.js core. Otoh, we didn't preserve any original
         // values. A more sophisticated implementation could keep track of original values and then
@@ -1071,20 +1087,20 @@
             steps[i].classList.remove("past");
             steps[i].classList.remove("present");
             steps[i].classList.remove("active");
-            steps[i].style["position"] = '';
-            steps[i].style["transform"] = '';
-            steps[i].style["transform-style"] = '';
+            steps[i].style.position = "";
+            steps[i].style.transform = "";
+            steps[i].style["transform-style"] = "";
         }
-        root.style["position"] = '';
-        root.style["transform-origin"] = '';
-        root.style["transition"] = '';
-        root.style["transform-style"] = '';
-        root.style["top"] = '';
-        root.style["left"] = '';
-        root.style["transform"] = '';
+        root.style.position = "";
+        root.style["transform-origin"] = "";
+        root.style.transition = "";
+        root.style["transform-style"] = "";
+        root.style.top = "";
+        root.style.left = "";
+        root.style.transform = "";
 
         // Reset id of steps ("step-1" id's are auto generated)
-        var steps = startingState.roots[rootId].steps;
+        steps = startingState.roots[rootId].steps;
         var step;
         while( step = steps.pop() ){
             if( step.id === null ) {
@@ -1107,20 +1123,19 @@
             delete roots[rootId];
             rootsCount--;
         }
-        if( rootsCount == 0 ) {
+        if( rootsCount === 0 ) {
             // In the rare case that more than one impress root elements were initialized, these
             // are only reset when all are uninitialized.
             document.body.classList.remove("impress-supported");
             if (startingState.body.impressNotSupported) {
                 document.body.classList.add("impress-not-supported");
-            };
+            }
             
             // We need to remove or reset the meta element inserted by impress.js
-            var meta = null;
             var metas = document.head.querySelectorAll("meta");
-            for (var i = 0; i < metas.length; i++){
+            for (i = 0; i < metas.length; i++){
                 var m = metas[i];
-                if( m.name == "viewport" ) {
+                if( m.name === "viewport" ) {
                     if ( startingState.meta !== undefined ) {
                         m.content = startingState.meta;
                     }
@@ -1143,8 +1158,10 @@
  * Copyright 2016 Henrik Ingo, henrik.ingo@avoinelama.fi
  * Released under the MIT license.
  */
-(function ( document, window ) {
-    'use strict';
+/* global clearTimeout, setTimeout, document */
+
+(function ( document ) {
+    "use strict";
 
     var autoplayDefault=0;
     var currentStepTimeout=0;
@@ -1166,7 +1183,7 @@
         // need to control the presentation that was just initialized.
         api = event.detail.api;
         root = event.target;
-        // Element attributes starting with 'data-', become available under
+        // Element attributes starting with "data-", become available under
         // element.dataset. In addition hyphenized words become camelCased.
         var data = root.dataset;
         
@@ -1180,7 +1197,7 @@
             addToolbarButton(toolbar);
         }
         
-        api.lib.gc.addCallback( function(rootId){
+        api.lib.gc.addCallback( function(){
             clearTimeout(timeoutHandle);
         });
         // Note that right after impress:init event, also impress:stepenter is
@@ -1192,7 +1209,7 @@
     var reloadTimeout = function ( event ) {
         var step = event.target;
         currentStepTimeout = toNumber( step.dataset.autoplay, autoplayDefault );
-        if (status=="paused") {
+        if (status==="paused") {
             setAutoplayTimeout(0);
         }
         else {
@@ -1241,16 +1258,16 @@
     };
 
     var toggleStatus = function() {
-        if (currentStepTimeout>0 && status!="paused") {
+        if (currentStepTimeout>0 && status!=="paused") {
             status="paused";
         }
         else {
             status="playing";
         }
-    }
+    };
 
     var getButtonText = function() {
-        if (currentStepTimeout>0 && status!="paused") {
+        if (currentStepTimeout>0 && status!=="paused") {
             return "||"; // pause
         }
         else {
@@ -1264,28 +1281,30 @@
             var buttonWidth = toolbarButton.offsetWidth;
             var buttonHeight = toolbarButton.offsetHeight;
             toolbarButton.innerHTML = getButtonText();
-            if (!toolbarButton.style.width)
+            if (!toolbarButton.style.width) {
                 toolbarButton.style.width = buttonWidth + "px";
-            if (!toolbarButton.style.height)
+            }
+            if (!toolbarButton.style.height) {
                 toolbarButton.style.height = buttonHeight + "px";
+            }
         }
     };
 
     var addToolbarButton = function (toolbar) {
-        var html = '<button id="impress-autoplay-playpause" title="Autoplay" class="impress-autoplay">' + getButtonText() + '</button>';
+        var html = '<button id="impress-autoplay-playpause" title="Autoplay" class="impress-autoplay">' + getButtonText() + '</button>'; // jshint ignore:line
         toolbarButton = makeDomElement( html );
-        toolbarButton.addEventListener( "click", function( event ) {
+        toolbarButton.addEventListener( "click", function() {
             toggleStatus();
-            if (status=="playing") {
-                if (autoplayDefault == 0) {
+            if (status==="playing") {
+                if (autoplayDefault === 0) {
                     autoplayDefault = 7;
                 }
-                if ( currentStepTimeout == 0 ) {
+                if ( currentStepTimeout === 0 ) {
                     currentStepTimeout = autoplayDefault;
                 }
                 setAutoplayTimeout(currentStepTimeout);
             }
-            else if (status=="paused") {
+            else if (status==="paused") {
                 setAutoplayTimeout(0);
             }
         });
@@ -1293,7 +1312,7 @@
         triggerEvent(toolbar, "impress:toolbar:appendChild", { group : 10, element : toolbarButton } );
     };
 
-})(document, window);
+})(document);
 
 /**
  * Blackout plugin
@@ -1304,8 +1323,10 @@
  * Copyright 2014 @Strikeskids
  * Released under the MIT license.
  */
-(function ( document, window ) {
-    'use strict';
+/* global document */
+
+(function ( document ) {
+    "use strict";
     
     var canvas = null;
     var blackedOut = false;
@@ -1326,15 +1347,15 @@
 
     var pfx = (function () {
         
-        var style = document.createElement('dummy').style,
-            prefixes = 'Webkit Moz O ms Khtml'.split(' '),
+        var style = document.createElement("dummy").style,
+            prefixes = "Webkit Moz O ms Khtml".split(" "),
             memory = {};
         
         return function ( prop ) {
             if ( typeof memory[ prop ] === "undefined" ) {
                 
                 var ucProp  = prop.charAt(0).toUpperCase() + prop.substr(1),
-                    props   = (prop + ' ' + prefixes.join(ucProp + ' ') + ucProp).split(' ');
+                    props   = (prop + " " + prefixes.join(ucProp + " ") + ucProp).split(" ");
                 
                 memory[ prop ] = null;
                 for ( var i in props ) {
@@ -1356,11 +1377,11 @@
     var removeBlackout = function() {
         if (blackedOut) {
             css(canvas, {
-                display: 'block'
+                display: "block"
             });
             blackedOut = false;
         }
-    }
+    };
 
     var blackout = function() {
         if (blackedOut) {
@@ -1368,11 +1389,11 @@
         }
         else {
             css(canvas, {
-                display: (blackedOut = !blackedOut) ? 'none' : 'block'
+                display: (blackedOut = !blackedOut) ? "none" : "block"
             });
             blackedOut = true;
         }
-    }
+    };
 
     // wait for impress.js to be initialized
     document.addEventListener("impress:init", function (event) {
@@ -1404,11 +1425,11 @@
 
     }, false);
         
-    document.addEventListener("impress:stepleave", function (event) {
+    document.addEventListener("impress:stepleave", function () {
         removeBlackout();
     }, false);
 
-})(document, window);
+})(document);
 
 
 /**
@@ -1422,16 +1443,10 @@
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+/* global markdown, hljs, mermaid, impress, document, window */
+
 (function ( document, window ) {
-    'use strict';
-
-    var triggerEvent = function (el, eventName, detail) {
-        var event = document.createEvent("CustomEvent");
-        event.initCustomEvent(eventName, true, true, detail);
-        el.dispatchEvent(event);
-    };
-
-
+    "use strict";
 
     var preInit = function() {
         if( window.markdown ){
@@ -1443,13 +1458,13 @@
             for (var idx=0; idx < markdownDivs.length; idx++) {
               var element = markdownDivs[idx];
 
-              // Note: unlike the previous two, markdown.js doesn't automatically find or convert anything in 
               var slides = element.textContent.split(/^-----$/m);
               var i = slides.length - 1;
               element.innerHTML = markdown.toHTML(slides[i]);
               // If there's an id, unset it for last, and all other, elements, and then set it for the first.
+              var id = null;
               if( element.id ){
-                var id = element.id;
+                id = element.id;
                 element.id = "";
               }
               i--;
@@ -1460,7 +1475,9 @@
                 element = newElement;
                 i--;
               }
-              element.id = id;
+              if ( id !== null ) {
+                element.id = id;
+              }
             }
         } // markdown
         
@@ -1498,14 +1515,15 @@
  * Copyright 2016 Henrik Ingo
  * MIT License
  */
-(function ( document, window ) {
-    'use strict';
+/* global document */
+(function ( document ) {
+    "use strict";
     
-    document.addEventListener("impress:stepleave", function (event) {
-        document.activeElement.blur()
+    document.addEventListener("impress:stepleave", function () {
+        document.activeElement.blur();
     }, false);
         
-})(document, window);
+})(document);
 
 
 /**
@@ -1529,8 +1547,10 @@
  * Copyright 2016-2017 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+/* global window, document, impress */
+
 (function ( document, window ) {
-    'use strict';
+    "use strict";
 
     var isNumber = function (numeric) {
         return !isNaN(numeric);
@@ -1541,8 +1561,9 @@
     };
 
     var goto = function(event) {
-        if ( (!event) || (!event.target) )
+        if ( (!event) || (!event.target) ) {
             return;
+        }
         
         var data = event.target.dataset;
         var steps = document.querySelectorAll(".step");
@@ -1555,10 +1576,10 @@
             var keylist = data.gotoKeyList.split(" ");
             var nextlist = data.gotoNextList.split(" ");
 
-            if ( keylist.length != nextlist.length ) {
-                console.log("impress goto plugin: data-goto-key-list and data-goto-next-list don't match:");
-                console.log(keylist);
-                console.log(nextlist);
+            if ( keylist.length !== nextlist.length ) {
+                window.console.log("impress goto plugin: data-goto-key-list and data-goto-next-list don't match:");
+                window.console.log(keylist);
+                window.console.log(nextlist);
                 // Don't return, allow the other categories to work despite this error
             }
             else {
@@ -1579,7 +1600,7 @@
                             return;
                         }
                         else {
-                            console.log( "impress goto plugin: " + next + " is not a step in this impress presentation.");
+                            window.console.log( "impress goto plugin: " + next + " is not a step in this impress presentation.");
                         }
                     }
                 }
@@ -1589,39 +1610,39 @@
         // data-goto-next="" & data-goto-prev="" ///////////////////////////////////////////////////
 
         // Handle event.target data-goto-next attribute
-        if ( isNumber(data.gotoNext) && event.detail.reason == "next" ) {
+        if ( isNumber(data.gotoNext) && event.detail.reason === "next" ) {
             event.detail.next = steps[data.gotoNext];
             // If the new next element has its own transitionDuration, we're responsible for setting that on the event as well
             event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
-        if ( data.gotoNext && event.detail.reason == "next" ) {
-            var newTarget = document.getElementById( data.gotoNext );
+        if ( data.gotoNext && event.detail.reason === "next" ) {
+            var newTarget = document.getElementById( data.gotoNext ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
                 event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
-                console.log( "impress goto plugin: " + data.gotoNext + " is not a step in this impress presentation.");
+                window.console.log( "impress goto plugin: " + data.gotoNext + " is not a step in this impress presentation.");
             }
         }
 
         // Handle event.target data-goto-prev attribute
-        if ( isNumber(data.gotoPrev) && event.detail.reason == "prev" ) {
+        if ( isNumber(data.gotoPrev) && event.detail.reason === "prev" ) {
             event.detail.next = steps[data.gotoPrev];
             event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
             return;
         }
-        if ( data.gotoPrev && event.detail.reason == "prev" ) {
-            var newTarget = document.getElementById( data.gotoPrev );
+        if ( data.gotoPrev && event.detail.reason === "prev" ) {
+            var newTarget = document.getElementById( data.gotoPrev ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
                 event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
-                console.log( "impress goto plugin: " + data.gotoPrev + " is not a step in this impress presentation.");
+                window.console.log( "impress goto plugin: " + data.gotoPrev + " is not a step in this impress presentation.");
             }
         }
 
@@ -1634,14 +1655,14 @@
             return;
         }
         if ( data.goto ) {
-            var newTarget = document.getElementById( data.goto );
+            var newTarget = document.getElementById( data.goto ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains("step") ) {
                 event.detail.next = newTarget;
                 event.detail.transitionDuration = toNumber( event.detail.next.dataset.transitionDuration, event.detail.transitionDuration);
                 return;
             }
             else {
-                console.log( "impress goto plugin: " + data.goto + " is not a step in this impress presentation.");
+                window.console.log( "impress goto plugin: " + data.goto + " is not a step in this impress presentation.");
             }
         }
     };
@@ -1657,7 +1678,7 @@
  *
  * Example:
  * 
- *     <!-- Show a help popup at start, or if user presses 'H' -->
+ *     <!-- Show a help popup at start, or if user presses "H" -->
  *     <div id="impress-help"></div>
  *
  * For developers:
@@ -1668,8 +1689,10 @@
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+/* global window, document */
+
 (function ( document, window ) {
-    'use strict';
+    "use strict";
     var rows = [];
     var timeoutHandle;
 
@@ -1679,7 +1702,7 @@
         el.dispatchEvent(event);
     };
 
-    var renderHelpDiv = function( e ){
+    var renderHelpDiv = function(){
         var helpDiv = document.getElementById("impress-help");
         if(helpDiv){
             var html = [];
@@ -1696,21 +1719,23 @@
     
     var toggleHelp = function() {
         var helpDiv = document.getElementById("impress-help");
-        if (!helpDiv) return;
+        if (!helpDiv) {
+            return;
+        }
  
-        if(helpDiv.style.display == 'block') {
-            helpDiv.style.display = 'none';
+        if(helpDiv.style.display === "block") {
+            helpDiv.style.display = "none";
         }
         else {
-            helpDiv.style.display = 'block';
-            clearTimeout( timeoutHandle );
+            helpDiv.style.display = "block";
+            window.clearTimeout( timeoutHandle );
         }
     };
 
     document.addEventListener("keyup", function ( event ) {
         // Check that event target is html or body element.
-        if ( event.target.nodeName == "BODY" || event.target.nodeName == "HTML" ) {
-            if ( event.keyCode == 72 ) { // 'h'
+        if ( event.target.nodeName === "BODY" || event.target.nodeName === "HTML" ) {
+            if ( event.keyCode === 72 ) { // "h"
                 event.preventDefault();
                 toggleHelp();
             }
@@ -1732,7 +1757,7 @@
         // its own array. If there are more than one entry for the same index, they are shown in
         // first come, first serve ordering.
         var rowIndex = e.detail.row;
-        if ( typeof rows[rowIndex] != 'object' || !rows[rowIndex].isArray ) {
+        if ( typeof rows[rowIndex] !== "object" || !rows[rowIndex].isArray ) {
             rows[rowIndex] = [];
         }
         rows[e.detail.row].push( "<tr><td><strong>" + e.detail.command + "</strong></td><td>" + e.detail.text + "</td></tr>" );
@@ -1745,20 +1770,20 @@
         var helpDiv = document.getElementById("impress-help");
         if( helpDiv ) {
             helpDiv.style.display = "block";
-            timeoutHandle = setTimeout(function () {
-                var helpDiv = window.document.getElementById("impress-help");
+            timeoutHandle = window.setTimeout(function () {
+                var helpDiv = document.getElementById("impress-help");
                 helpDiv.style.display = "none";
             }, 7000);
             // Regster callback to empty the help div on teardown
             var api = e.detail.api;
             api.lib.gc.addCallback( function(){
-                clearTimeout(timeoutHandle);
-                helpDiv.style.display = '';
-                helpDiv.innerHTML = '';
+                window.clearTimeout(timeoutHandle);
+                helpDiv.style.display = "";
+                helpDiv.innerHTML = "";
                 rows = [];
             });
         }
-        // Use our own API to register the help text for 'h'
+        // Use our own API to register the help text for "h"
         triggerEvent(document, "impress:help:add", { command : "H", text : "Show this help", row : 0} );
     });
     

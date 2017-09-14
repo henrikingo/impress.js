@@ -1,5 +1,6 @@
-(function ( document, window ) {
-    'use strict';
+/* global document */
+(function ( document ) {
+    "use strict";
 	var root;
 	var stepids = [];
 	// Get stepids from the steps under impress root
@@ -10,7 +11,7 @@
 		{
 		  stepids[i+1] = steps[i].id;
 		}
-        }
+        };
 	// wait for impress.js to be initialized
 	document.addEventListener("impress:init", function (event) {
         	root = event.target;
@@ -18,13 +19,17 @@
 		var gc = event.detail.api.lib.gc;
 		gc.addCallback( function(){
 			stepids = [];
-			if (progressbar) progressbar.style.width = '';
-			if (progress) progress.innerHTML = '';
+			if (progressbar) {
+				progressbar.style.width = "";
+                        }
+			if (progress) {
+				progress.innerHTML = "";
+                        }
 		});
 	});
 
-	var progressbar = document.querySelector('div.impress-progressbar div');
-	var progress = document.querySelector('div.impress-progress');
+	var progressbar = document.querySelector("div.impress-progressbar div");
+	var progress = document.querySelector("div.impress-progress");
 	
 	if (null !== progressbar || null !== progress) {      
 		document.addEventListener("impress:stepleave", function (event) {
@@ -41,10 +46,10 @@
 	function updateProgressbar(slideId) {
 		var slideNumber = stepids.indexOf(slideId);
 		if (null !== progressbar) {
-			progressbar.style.width = (100 / (stepids.length - 1) * (slideNumber)).toFixed(2) + '%';
+			progressbar.style.width = (100 / (stepids.length - 1) * (slideNumber)).toFixed(2) + "%";
 		}
 		if (null !== progress) {
-			progress.innerHTML = slideNumber + '/' + (stepids.length-1);
+			progress.innerHTML = slideNumber + "/" + (stepids.length-1);
 		}
 	}
-})(document, window);
+})(document);

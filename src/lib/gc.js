@@ -11,8 +11,10 @@
  * Henrik Ingo (c) 2016
  * MIT License
  */
+/* global document, window */
+
 (function ( document, window ) {
-    'use strict';
+    "use strict";
     var roots = [];
     var rootsCount = 0;
     var startingState = { roots : [] };
@@ -56,19 +58,20 @@
         var addCallback = function ( callback ) {
             callbackList.push(callback);
         };
-        addCallback(function(rootId){ resetStartingState(rootId)} );
+        addCallback( function(rootId){ resetStartingState(rootId); } );
         
         var teardown = function () {
             // Execute the callbacks in LIFO order
-            for ( var i = callbackList.length-1; i >= 0; i-- ) {
+            var i; // Needed by jshint
+            for ( i = callbackList.length-1; i >= 0; i-- ) {
                 callbackList[i](rootId);
             }
             callbackList = [];
-            for ( var i in elementList ) {
+            for ( i = 0; i < elementList.length; i++ ) {
                 elementList[i].parentElement.removeChild(elementList[i]);
             }
             elementList = [];
-            for ( var i in eventListenerList ) {
+            for ( i = 0; i < eventListenerList.length; i++ ) {
                 var target   = eventListenerList[i].target;
                 var type     = eventListenerList[i].type;
                 var listener = eventListenerList[i].listener;
@@ -83,7 +86,7 @@
             addEventListener: addEventListener,
             addCallback: addCallback,
             teardown: teardown
-        }
+        };
         roots[rootId] = lib;
         rootsCount++;
         return lib;
@@ -116,7 +119,7 @@
         
         // In the rare case of multiple roots, the following is changed on first init() and
         // reset at last tear().
-        if ( rootsCount == 0 ) {
+        if ( rootsCount === 0 ) {
             startingState.body = {};
             // It is customary for authors to set body.class="impress-not-supported" as a starting
             // value, which can then be removed by impress().init(). But it is not required.
@@ -129,12 +132,12 @@
             }
             // If there's a <meta name="viewport"> element, its contents will be overwritten by init
             var metas = document.head.querySelectorAll("meta");
-            for (var i = 0; i < metas.length; i++){
+            for (i = 0; i < metas.length; i++){
                 var m = metas[i];
-                if( m.name == "viewport" ) {
+                if( m.name === "viewport" ) {
                     startingState.meta = m.content;
                 }
-            };
+            }
         }
     };
     
@@ -148,9 +151,9 @@
         var activeId = root.querySelector(".active").id;
         document.body.classList.remove("impress-on-" + activeId);
         
-        document.documentElement.style["height"] = '';
-        document.body.style["height"] = '';
-        document.body.style["overflow"] = '';
+        document.documentElement.style.height = "";
+        document.body.style.height = "";
+        document.body.style.overflow = "";
         // Remove style values from the root and step elements
         // Note: We remove the ones set by impress.js core. Otoh, we didn't preserve any original
         // values. A more sophisticated implementation could keep track of original values and then
@@ -161,20 +164,20 @@
             steps[i].classList.remove("past");
             steps[i].classList.remove("present");
             steps[i].classList.remove("active");
-            steps[i].style["position"] = '';
-            steps[i].style["transform"] = '';
-            steps[i].style["transform-style"] = '';
+            steps[i].style.position = "";
+            steps[i].style.transform = "";
+            steps[i].style["transform-style"] = "";
         }
-        root.style["position"] = '';
-        root.style["transform-origin"] = '';
-        root.style["transition"] = '';
-        root.style["transform-style"] = '';
-        root.style["top"] = '';
-        root.style["left"] = '';
-        root.style["transform"] = '';
+        root.style.position = "";
+        root.style["transform-origin"] = "";
+        root.style.transition = "";
+        root.style["transform-style"] = "";
+        root.style.top = "";
+        root.style.left = "";
+        root.style.transform = "";
 
         // Reset id of steps ("step-1" id's are auto generated)
-        var steps = startingState.roots[rootId].steps;
+        steps = startingState.roots[rootId].steps;
         var step;
         while( step = steps.pop() ){
             if( step.id === null ) {
@@ -197,20 +200,19 @@
             delete roots[rootId];
             rootsCount--;
         }
-        if( rootsCount == 0 ) {
+        if( rootsCount === 0 ) {
             // In the rare case that more than one impress root elements were initialized, these
             // are only reset when all are uninitialized.
             document.body.classList.remove("impress-supported");
             if (startingState.body.impressNotSupported) {
                 document.body.classList.add("impress-not-supported");
-            };
+            }
             
             // We need to remove or reset the meta element inserted by impress.js
-            var meta = null;
             var metas = document.head.querySelectorAll("meta");
-            for (var i = 0; i < metas.length; i++){
+            for (i = 0; i < metas.length; i++){
                 var m = metas[i];
-                if( m.name == "viewport" ) {
+                if( m.name === "viewport" ) {
                     if ( startingState.meta !== undefined ) {
                         m.content = startingState.meta;
                     }

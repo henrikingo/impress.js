@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "node build.js",
-    "lint": "jshint js/impress.js *.js test/bootstrap.js && jscs js/impress.js *.js test/bootstrap.js --preset=jquery",
+    "lint": "jshint --exclude 'test/*/*.js' src test && jscs src test --preset=jquery",
     "test": "karma start --single-run",
     "test:dev": "karma start"
   },

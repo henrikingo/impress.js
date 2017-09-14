@@ -3,11 +3,12 @@
  *
  * Released under the MIT license. See LICENSE file.
  */
+/* global QUnit, loadIframe, initPresentation, document, window */
 
 QUnit.module( "Navigation plugin" );
 
 QUnit.test( "Navigation Plugin", function( assert ) {
-  console.log("Begin navigation plugin");
+  window.console.log("Begin navigation plugin");
   var done = assert.async();
 
   loadIframe( "test/core_tests_presentation.html", assert, function() {
@@ -77,39 +78,39 @@ QUnit.test( "Navigation Plugin", function( assert ) {
       var readyCount = 0;
       var readyForNext = function(){
         readyCount++;
-        if( readyCount % 2 == 0 ) {
+        if( readyCount % 2 === 0 ) {
           if( sequence[i].next ) {
             assert.ok( sequence[i].next(), sequence[i].text );
             i++;
           } else {
-            console.log("End navigation plugin");
+            window.console.log("End navigation plugin");
             done();
           }
         }
       };
       
       // Things to check on impress:stepenter event -----------------------------//
-      var assertStepEnter = function( event, registeredListener ) {
+      var assertStepEnter = function( event ) {
         assert.equal( event.target, sequence[i].entered,
                       event.target.id + " triggered impress:stepenter event." );
         readyForNext();
       };
 
       var assertStepEnterWrapper = function( event ) {
-        setTimeout( function() { assertStepEnter( event ) }, wait ); 
+        window.setTimeout( function() { assertStepEnter( event ); }, wait ); 
       };
       root.addEventListener( "impress:stepenter", assertStepEnterWrapper );
 
 
       // Things to check on impress:stepleave event -----------------------------//
-      var assertStepLeave = function( event, registeredListener ) {
+      var assertStepLeave = function( event ) {
         assert.equal( event.target, sequence[i].left,
                       event.target.id + " triggered impress:stepleave event." );
         readyForNext();
       };
 
       var assertStepLeaveWrapper = function( event ) {
-        setTimeout( function() { assertStepLeave( event ) }, wait );
+        window.setTimeout( function() { assertStepLeave( event ); }, wait );
       };
       root.addEventListener( "impress:stepleave", assertStepLeaveWrapper );
       
@@ -119,7 +120,7 @@ QUnit.test( "Navigation Plugin", function( assert ) {
 });
 
 QUnit.test( "Navigation Plugin - No-op tests", function( assert ) {
-  console.log("Begin navigation no-op");
+  window.console.log("Begin navigation no-op");
   var done = assert.async();
 
   loadIframe( "test/core_tests_presentation.html", assert, function() {
@@ -130,32 +131,28 @@ QUnit.test( "Navigation Plugin - No-op tests", function( assert ) {
 
       var wait = 5; // milliseconds
 
-      var step1 = iframeDoc.querySelector( "div#step-1" );
-      var step2 = iframeDoc.querySelector( "div#step-2" );
-      var step3 = iframeDoc.querySelector( "div#step-3" );
-      var step4 = iframeDoc.querySelector( "div#fourth" );
       var root  = iframeDoc.querySelector( "div#impress" );
 
       // This should never happen -----------------------------//
-      var assertStepEnter = function( event, registeredListener ) {
+      var assertStepEnter = function( event ) {
         assert.ok( false,
                    event.target.id + " triggered impress:stepenter event." );
       };
 
       var assertStepEnterWrapper = function( event ) {
-        setTimeout( function() { assertStepEnter( event ) }, wait ); 
+        window.setTimeout( function() { assertStepEnter( event ); }, wait ); 
       };
       root.addEventListener( "impress:stepenter", assertStepEnterWrapper );
 
 
       // This should never happen -----------------------------//
-      var assertStepLeave = function( event, registeredListener ) {
+      var assertStepLeave = function( event ) {
         assert.ok( false,
                    event.target.id + " triggered impress:stepleave event." );
       };
 
       var assertStepLeaveWrapper = function( event ) {
-        setTimeout( function() { assertStepLeave( event ) }, wait );
+        window.setTimeout( function() { assertStepLeave( event ); }, wait );
       };
       root.addEventListener( "impress:stepleave", assertStepLeaveWrapper );
       
@@ -166,7 +163,7 @@ QUnit.test( "Navigation Plugin - No-op tests", function( assert ) {
                  "Click on link pointing to step that is currently active, should do nothing." );
       
       // After delay, if no event triggers are called. We're done.
-      setTimeout( function() { console.log("End navigation no-op"); done(); }, 3000 );
+      window.setTimeout( function() { window.console.log("End navigation no-op"); done(); }, 3000 );
     }); // initPresentation()
   }); // loadIframe()
 });

@@ -23,8 +23,9 @@
  * Copyright 2016 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
+/* global window, document */
 (function ( document, window ) {
-    'use strict';
+    "use strict";
     var timeout = 3;
     var timeoutHandle;
 
@@ -35,12 +36,12 @@
 
     var show = function(){
         if ( timeoutHandle ) {
-            clearTimeout(timeoutHandle);
+            window.clearTimeout(timeoutHandle);
         }
         // Mouse is now active
         document.body.classList.remove("impress-mouse-timeout");
         // Then set new timeout after which it is considered inactive again
-        timeoutHandle = setTimeout( hide, timeout*1000 );
+        timeoutHandle = window.setTimeout( hide, timeout*1000 );
     };
 
     document.addEventListener("impress:init", function (event) {
@@ -53,7 +54,7 @@
         show();
         // Unset all this on teardown
         gc.addCallback( function(){
-            clearTimeout(timeoutHandle);
+            window.clearTimeout(timeoutHandle);
             document.body.classList.remove("impress-mouse-timeout");
         });
     }, false);

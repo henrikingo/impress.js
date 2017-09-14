@@ -8,8 +8,13 @@
 
 // That's annoying: karma-qunit doesn't provide the qunit-fixture element
 // https://github.com/karma-runner/karma-qunit/issues/18
-var fix = document.createElement( "div" );
-fix.id = "qunit-fixture";
+
+// This file contains so much HTML, that we will just respectfully disagree about js
+/* jshint quotmark:single */
+/* global document */
+
+var fix = document.createElement( 'div' );
+fix.id = 'qunit-fixture';
 fix.innerHTML = [
 '\n',
 '    <iframe id="presentation-iframe"\n',
@@ -18,5 +23,5 @@ fix.innerHTML = [
 '            frameborder="0" marginwidth="0" marginheight="0" scrolling="no"\n',
 '            style="border:1px solid #CCC; max-width: 100%;">\n',
 '    </iframe>'
-].join( "" );
+].join( '' );
 //document.body.appendChild( fix );
