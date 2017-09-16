@@ -4,5 +4,5 @@ machine:
 
 test:
   override:
-#    - npm run lint -s
+    - npm run lint -s
     - npm run test -s
