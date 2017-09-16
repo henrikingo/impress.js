@@ -22,20 +22,21 @@
  *
  */
 /* global document */
-(function ( document ) {
+( function( document ) {
     "use strict";
-    
-    var triggerEvent = function (el, eventName, detail) {
-        var event = document.createEvent("CustomEvent");
-        event.initCustomEvent(eventName, true, true, detail);
-        el.dispatchEvent(event);
+
+    var triggerEvent = function( el, eventName, detail ) {
+        var event = document.createEvent( "CustomEvent" );
+        event.initCustomEvent( eventName, true, true, detail );
+        el.dispatchEvent( event );
     };
 
-    // wait for impress.js to be initialized
-    document.addEventListener("impress:init", function (event) {
+    // Wait for impress.js to be initialized
+    document.addEventListener( "impress:init", function( event ) {
+
         // Getting API from event data.
         // So you don't event need to know what is the id of the root element
-        // or anything. `impress:init` event data gives you everything you 
+        // or anything. `impress:init` event data gives you everything you
         // need to control the presentation that was just initialized.
         var api = event.detail.api;
         var gc = api.lib.gc;
@@ -53,117 +54,122 @@
         //   positioning. I didn't want to just prevent this default action, so I used [tab]
         //   as another way to moving to next step... And yes, I know that for the sake of
         //   consistency I should add [shift+tab] as opposite action...
-        var isNavigationEvent = function (event) {
+        var isNavigationEvent = function( event ) {
+
             // Don't trigger navigation for example when user returns to browser window with ALT+TAB
-            if ( event.altKey || event.ctrlKey || event.metaKey ){
-                return false;
-            }
-            
-            // In the case of TAB, we force step navigation always, overriding the browser navigation between
-            // input elements, buttons and links.
-            if ( event.keyCode === 9 ) {
-                return true;
-            }
-            
-            // With the sole exception of TAB, we also ignore keys pressed if shift is down.
-            if ( event.shiftKey ){
+            if ( event.altKey || event.ctrlKey || event.metaKey ) {
                 return false;
             }
 
-            // For arrows, etc, check that event target is html or body element. This is to allow presentations to have,
-            // for example, forms with input elements where user can type text, including space, and not move to next step.
+            // In the case of TAB, we force step navigation always, overriding the browser
+            // navigation between input elements, buttons and links.
+            if ( event.keyCode === 9 ) {
+                return true;
+            }
+
+            // With the sole exception of TAB, we also ignore keys pressed if shift is down.
+            if ( event.shiftKey ) {
+                return false;
+            }
+
+            // For arrows, etc, check that event target is html or body element. This is to allow
+            // presentations to have, for example, forms with input elements where user can type
+            // text, including space, and not move to next step.
             if ( event.target.nodeName !== "BODY" && event.target.nodeName !== "HTML" ) {
                 return false;
             }
 
-            if ( ( event.keyCode >= 32 && event.keyCode <= 34 ) || (event.keyCode >= 37 && event.keyCode <= 40 ) ) {
+            if ( ( event.keyCode >= 32 && event.keyCode <= 34 ) ||
+                 ( event.keyCode >= 37 && event.keyCode <= 40 ) ) {
                 return true;
             }
         };
-        
-        
+
         // KEYBOARD NAVIGATION HANDLERS
-        
+
         // Prevent default keydown action when one of supported key is pressed.
-        gc.addEventListener(document, "keydown", function ( event ) {
-            if ( isNavigationEvent(event) ) {
+        gc.addEventListener( document, "keydown", function( event ) {
+            if ( isNavigationEvent( event ) ) {
                 event.preventDefault();
             }
-        }, false);
-        
+        }, false );
+
         // Trigger impress action (next or prev) on keyup.
-        gc.addEventListener(document, "keyup", function ( event ) {
-            if ( isNavigationEvent(event) ) {
+        gc.addEventListener( document, "keyup", function( event ) {
+            if ( isNavigationEvent( event ) ) {
                 if ( event.shiftKey ) {
-                    switch( event.keyCode ) {
-                        case 9: // shift+tab
+                    switch ( event.keyCode ) {
+                        case 9: // Shift+tab
                             api.prev();
                             break;
                     }
-                }
-                else {
-                    switch( event.keyCode ) {
-                        case 33: // pg up
-                        case 37: // left
-                        case 38: // up
-                                 api.prev(event);
+                } else {
+                    switch ( event.keyCode ) {
+                        case 33: // Pg up
+                        case 37: // Left
+                        case 38: // Up
+                                 api.prev( event );
                                  break;
-                        case 9:  // tab
-                        case 32: // space
-                        case 34: // pg down
-                        case 39: // right
-                        case 40: // down
-                                 api.next(event);
+                        case 9:  // Tab
+                        case 32: // Space
+                        case 34: // Pg down
+                        case 39: // Right
+                        case 40: // Down
+                                 api.next( event );
                                  break;
                     }
                 }
                 event.preventDefault();
             }
-        }, false);
-        
-        // delegated handler for clicking on the links to presentation steps
-        gc.addEventListener(document, "click", function ( event ) {
-            // event delegation with "bubbling"
+        }, false );
+
+        // Delegated handler for clicking on the links to presentation steps
+        gc.addEventListener( document, "click", function( event ) {
+
+            // Event delegation with "bubbling"
             // check if event target (or any of its parents is a link)
             var target = event.target;
-            while ( (target.tagName !== "A") &&
-                    (target !== document.documentElement) ) {
+            while ( ( target.tagName !== "A" ) &&
+                    ( target !== document.documentElement ) ) {
                 target = target.parentNode;
             }
-            
+
             if ( target.tagName === "A" ) {
-                var href = target.getAttribute("href");
-                
-                // if it's a link to presentation step, target this step
-                if ( href && href[0] === "#" ) {
-                    target = document.getElementById( href.slice(1) );
+                var href = target.getAttribute( "href" );
+
+                // If it's a link to presentation step, target this step
+                if ( href && href[ 0 ] === "#" ) {
+                    target = document.getElementById( href.slice( 1 ) );
                 }
             }
-            
-            if ( api.goto(target) ) {
+
+            if ( api.goto( target ) ) {
                 event.stopImmediatePropagation();
                 event.preventDefault();
             }
-        }, false);
-        
-        // delegated handler for clicking on step elements
-        gc.addEventListener(document, "click", function ( event ) {
+        }, false );
+
+        // Delegated handler for clicking on step elements
+        gc.addEventListener( document, "click", function( event ) {
             var target = event.target;
-            // find closest step element that is not active
-            while ( !(target.classList.contains("step") && !target.classList.contains("active")) &&
-                    (target !== document.documentElement) ) {
+
+            // Find closest step element that is not active
+            while ( !( target.classList.contains( "step" ) &&
+                       !target.classList.contains( "active" ) ) &&
+                    ( target !== document.documentElement ) ) {
                 target = target.parentNode;
             }
-            
-            if ( api.goto(target) ) {
+
+            if ( api.goto( target ) ) {
                 event.preventDefault();
             }
-        }, false);
-        
+        }, false );
+
         // Add a line to the help popup
-        triggerEvent(document, "impress:help:add", { command : "Left &amp; Right", text : "Previous &amp; Next step", row : 1} );
-        
-    }, false);
-        
-})(document);
+        triggerEvent( document, "impress:help:add",
+                      { command: "Left &amp; Right", text: "Previous &amp; Next step", row: 1 } );
+
+    }, false );
+
+} )( document );
 

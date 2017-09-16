@@ -1,6 +1,4 @@
 /**
- * impressConsole.js
- *
  * Adds a presenter console to impress.js
  *
  * MIT Licensed, see license.txt.
@@ -15,44 +13,44 @@
 /* jshint quotmark:single */
 /* global navigator, top, setInterval, clearInterval, document, window */
 
-(function ( document, window ) {
+( function( document, window ) {
     'use strict';
 
     // TODO: Move this to src/lib/util.js
-    var triggerEvent = function (el, eventName, detail) {
-        var event = document.createEvent('CustomEvent');
-        event.initCustomEvent(eventName, true, true, detail);
-        el.dispatchEvent(event);
+    var triggerEvent = function( el, eventName, detail ) {
+        var event = document.createEvent( 'CustomEvent' );
+        event.initCustomEvent( eventName, true, true, detail );
+        el.dispatchEvent( event );
     };
 
-    // create Language object depending on browsers language setting
+    // Create Language object depending on browsers language setting
     var lang;
-    switch (navigator.language) {
+    switch ( navigator.language ) {
     case 'de':
         lang = {
-            'noNotes' : '<div class="noNotes">Keine Notizen hierzu</div>',
-            'restart' : 'Neustart',
-            'clickToOpen' : 'Klicken um Sprecherkonsole zu öffnen',
-            'prev' : 'zurück',
-            'next' : 'weiter',
-            'loading' : 'initalisiere',
-            'ready' : 'Bereit',
-            'moving' : 'in Bewegung',
-            'useAMPM' : false
+            'noNotes': '<div class="noNotes">Keine Notizen hierzu</div>',
+            'restart': 'Neustart',
+            'clickToOpen': 'Klicken um Sprecherkonsole zu öffnen',
+            'prev': 'zurück',
+            'next': 'weiter',
+            'loading': 'initalisiere',
+            'ready': 'Bereit',
+            'moving': 'in Bewegung',
+            'useAMPM': false
         };
         break;
     case 'en': // jshint ignore:line
     default : // jshint ignore:line
         lang = {
-            'noNotes' : '<div class="noNotes">No notes for this step</div>',
-            'restart' : 'Restart',
-            'clickToOpen' : 'Click to open speaker console',
-            'prev' : 'Prev',
-            'next' : 'Next',
-            'loading' : 'Loading',
-            'ready' : 'Ready',
-            'moving' : 'Moving',
-            'useAMPM' : false
+            'noNotes': '<div class="noNotes">No notes for this step</div>',
+            'restart': 'Restart',
+            'clickToOpen': 'Click to open speaker console',
+            'prev': 'Prev',
+            'next': 'Next',
+            'loading': 'Loading',
+            'ready': 'Ready',
+            'moving': 'Moving',
+            'useAMPM': false
         };
         break;
     }
@@ -65,7 +63,8 @@
     // This is the default template for the speaker console window
     const consoleTemplate = '<!DOCTYPE html>' +
         '<html id="impressconsole"><head>' +
-          // order is important: If user provides a cssFile, those will win, because they're later
+
+          // Order is important: If user provides a cssFile, those will win, because they're later
           '{{cssStyle}}' +
           '{{cssLink}}' +
         '</head><body>' +
@@ -78,8 +77,10 @@
           '<div id="notes"></div>' +
         '</div>' +
         '<div id="controls"> ' +
-          '<div id="prev"><a  href="#" onclick="impress().prev(); return false;" />{{prev}}</a></div>' +
-          '<div id="next"><a  href="#" onclick="impress().next(); return false;" />{{next}}</a></div>' +
+          '<div id="prev"><a  href="#" onclick="impress().prev(); return false;" />' +
+            '{{prev}}</a></div>' +
+          '<div id="next"><a  href="#" onclick="impress().next(); return false;" />' +
+            '{{next}}</a></div>' +
           '<div id="clock">--:--</div>' +
           '<div id="timer" onclick="timerReset()">00m 00s</div>' +
           '<div id="status">{{loading}}</div>' +
@@ -90,7 +91,7 @@
     var cssFileOldDefault = 'css/impressConsole.css';
     var cssFile = undefined; // jshint ignore:line
 
-    // css for styling iframs on the console
+    // Css for styling iframs on the console
     var cssFileIframeOldDefault = 'css/iframe.css';
     var cssFileIframe = undefined; // jshint ignore:line
 
@@ -98,122 +99,130 @@
     var allConsoles = {};
 
     // Zero padding helper function:
-    var zeroPad = function(i) {
-        return (i < 10 ? '0' : '') + i;
+    var zeroPad = function( i ) {
+        return ( i < 10 ? '0' : '' ) + i;
     };
 
     // The console object
-    var impressConsole = window.impressConsole = function (rootId) {
+    var impressConsole = window.impressConsole = function( rootId ) {
 
         rootId = rootId || 'impress';
 
-        if (allConsoles[rootId]) {
-            return allConsoles[rootId];
+        if ( allConsoles[ rootId ] ) {
+            return allConsoles[ rootId ];
         }
 
-        // root presentation elements
+        // Root presentation elements
         var root = document.getElementById( rootId );
 
         var consoleWindow = null;
 
         var nextStep = function() {
             var classes = '';
-            var nextElement = document.querySelector('.active');
-            // return to parents as long as there is no next sibling
-            while (!nextElement.nextElementSibling && nextElement.parentNode) {
+            var nextElement = document.querySelector( '.active' );
+
+            // Return to parents as long as there is no next sibling
+            while ( !nextElement.nextElementSibling && nextElement.parentNode ) {
                 nextElement = nextElement.parentNode;
             }
             nextElement = nextElement.nextElementSibling;
-            while (nextElement) {
-                classes = nextElement.attributes['class'];
-                if (classes && classes.value.indexOf('step') !== -1) {
-                    consoleWindow.document.getElementById('blocker').innerHTML = lang.next;
+            while ( nextElement ) {
+                classes = nextElement.attributes[ 'class' ];
+                if ( classes && classes.value.indexOf( 'step' ) !== -1 ) {
+                    consoleWindow.document.getElementById( 'blocker' ).innerHTML = lang.next;
                     return nextElement;
                 }
 
-                if (nextElement.firstElementChild) { // first go into deep
+                if ( nextElement.firstElementChild ) { // First go into deep
                     nextElement = nextElement.firstElementChild;
-                }
-                else {
-                    // go to next sibling or through parents until there is a next sibling
-                    while (!nextElement.nextElementSibling && nextElement.parentNode) {
+                } else {
+
+                    // Go to next sibling or through parents until there is a next sibling
+                    while ( !nextElement.nextElementSibling && nextElement.parentNode ) {
                         nextElement = nextElement.parentNode;
                     }
                     nextElement = nextElement.nextElementSibling;
                 }
             }
+
             // No next element. Pick the first
-            consoleWindow.document.getElementById('blocker').innerHTML = lang.restart;
-            return document.querySelector('.step');
+            consoleWindow.document.getElementById( 'blocker' ).innerHTML = lang.restart;
+            return document.querySelector( '.step' );
         };
 
         // Sync the notes to the step
-        var onStepLeave = function(){
-            if(consoleWindow) {
+        var onStepLeave = function() {
+            if ( consoleWindow ) {
+
                 // Set notes to next steps notes.
-                var newNotes = document.querySelector('.active').querySelector('.notes');
-                if (newNotes) {
+                var newNotes = document.querySelector( '.active' ).querySelector( '.notes' );
+                if ( newNotes ) {
                     newNotes = newNotes.innerHTML;
                 } else {
                     newNotes = lang.noNotes;
                 }
-                consoleWindow.document.getElementById('notes').innerHTML = newNotes;
+                consoleWindow.document.getElementById( 'notes' ).innerHTML = newNotes;
 
                 // Set the views
-                var baseURL = document.URL.substring(0, document.URL.search('#/'));
-                var slideSrc = baseURL + '#' + document.querySelector('.active').id;
+                var baseURL = document.URL.substring( 0, document.URL.search( '#/' ) );
+                var slideSrc = baseURL + '#' + document.querySelector( '.active' ).id;
                 var preSrc = baseURL + '#' + nextStep().id;
-                var slideView = consoleWindow.document.getElementById('slideView');
-                // Setting them when they are already set causes glithes in Firefox, so we check first:
-                if (slideView.src !== slideSrc) {
+                var slideView = consoleWindow.document.getElementById( 'slideView' );
+
+                // Setting them when they are already set causes glithes in Firefox, so check first:
+                if ( slideView.src !== slideSrc ) {
                     slideView.src = slideSrc;
                 }
-                var preView = consoleWindow.document.getElementById('preView');
-                if (preView.src !== preSrc) {
+                var preView = consoleWindow.document.getElementById( 'preView' );
+                if ( preView.src !== preSrc ) {
                     preView.src = preSrc;
                 }
 
-                consoleWindow.document.getElementById('status').innerHTML = '<span class="moving">' + lang.moving + '</span>';
+                consoleWindow.document.getElementById( 'status' ).innerHTML =
+                    '<span class="moving">' + lang.moving + '</span>';
             }
         };
 
         // Sync the previews to the step
-        var onStepEnter = function(){
-            if(consoleWindow) {
+        var onStepEnter = function() {
+            if ( consoleWindow ) {
+
                 // We do everything here again, because if you stopped the previos step to
                 // early, the onstepleave trigger is not called for that step, so
                 // we need this to sync things.
-                var newNotes = document.querySelector('.active').querySelector('.notes');
-                if (newNotes) {
+                var newNotes = document.querySelector( '.active' ).querySelector( '.notes' );
+                if ( newNotes ) {
                     newNotes = newNotes.innerHTML;
                 } else {
                     newNotes = lang.noNotes;
                 }
-                var notes = consoleWindow.document.getElementById('notes');
+                var notes = consoleWindow.document.getElementById( 'notes' );
                 notes.innerHTML = newNotes;
                 notes.scrollTop = 0;
 
                 // Set the views
-                var baseURL = document.URL.substring(0, document.URL.search('#/'));
-                var slideSrc = baseURL + '#' + document.querySelector('.active').id;
+                var baseURL = document.URL.substring( 0, document.URL.search( '#/' ) );
+                var slideSrc = baseURL + '#' + document.querySelector( '.active' ).id;
                 var preSrc = baseURL + '#' + nextStep().id;
-                var slideView = consoleWindow.document.getElementById('slideView');
-                // Setting them when they are already set causes glithes in Firefox, so we check first:
-                if (slideView.src !== slideSrc) {
+                var slideView = consoleWindow.document.getElementById( 'slideView' );
+
+                // Setting them when they are already set causes glithes in Firefox, so check first:
+                if ( slideView.src !== slideSrc ) {
                     slideView.src = slideSrc;
                 }
-                var preView = consoleWindow.document.getElementById('preView');
-                if (preView.src !== preSrc) {
+                var preView = consoleWindow.document.getElementById( 'preView' );
+                if ( preView.src !== preSrc ) {
                     preView.src = preSrc;
                 }
 
-                consoleWindow.document.getElementById('status').innerHTML = '<span  class="ready">' + lang.ready + '</span>';
+                consoleWindow.document.getElementById( 'status' ).innerHTML =
+                    '<span  class="ready">' + lang.ready + '</span>';
             }
         };
 
         // Sync substeps
-        var onSubstep = function(event){
-            if(consoleWindow) {
+        var onSubstep = function( event ) {
+            if ( consoleWindow ) {
                 if ( event.detail.reason === 'next' ) {
                     onSubstepShow();
                 }
@@ -223,136 +232,154 @@
             }
         };
 
-        var onSubstepShow = function(){
-            var slideView = consoleWindow.document.getElementById('slideView');
+        var onSubstepShow = function() {
+            var slideView = consoleWindow.document.getElementById( 'slideView' );
             triggerEventInView( slideView, 'impress:substep:show' );
         };
 
-        var onSubstepHide = function(){
-            var slideView = consoleWindow.document.getElementById('slideView');
+        var onSubstepHide = function() {
+            var slideView = consoleWindow.document.getElementById( 'slideView' );
             triggerEventInView( slideView, 'impress:substep:hide' );
         };
 
-        var triggerEventInView = function (frame, eventName, detail) {
-            // Note: Unfortunately Chrome does not allow createEvent on file:// URLs, so this won't work.
-            // This does work on Firefox, and should work if viewing the presentation on a http:// URL on Chrome.
-            var event = frame.contentDocument.createEvent('CustomEvent');
-            event.initCustomEvent(eventName, true, true, detail);
-            frame.contentDocument.dispatchEvent(event);
+        var triggerEventInView = function( frame, eventName, detail ) {
+
+            // Note: Unfortunately Chrome does not allow createEvent on file:// URLs, so this won't
+            // work. This does work on Firefox, and should work if viewing the presentation on a
+            // http:// URL on Chrome.
+            var event = frame.contentDocument.createEvent( 'CustomEvent' );
+            event.initCustomEvent( eventName, true, true, detail );
+            frame.contentDocument.dispatchEvent( event );
         };
 
-
-
-
-        var spaceHandler = function () {
-            var notes = consoleWindow.document.getElementById('notes');
-            if (notes.scrollTopMax - notes.scrollTop > 20) {
+        var spaceHandler = function() {
+            var notes = consoleWindow.document.getElementById( 'notes' );
+            if ( notes.scrollTopMax - notes.scrollTop > 20 ) {
                notes.scrollTop = notes.scrollTop + notes.clientHeight * 0.8;
             } else {
                window.impress().next();
             }
         };
 
-        var timerReset = function () {
+        var timerReset = function() {
             consoleWindow.timerStart = new Date();
         };
 
         // Show a clock
-        var clockTick = function () {
+        var clockTick = function() {
             var now = new Date();
             var hours = now.getHours();
             var minutes = now.getMinutes();
             var seconds = now.getSeconds();
             var ampm = '';
 
-            if (lang.useAMPM) {
+            if ( lang.useAMPM ) {
                 ampm = ( hours < 12 ) ? 'AM' : 'PM';
                 hours = ( hours > 12 ) ? hours - 12 : hours;
                 hours = ( hours === 0 ) ? 12 : hours;
             }
 
             // Clock
-            var clockStr = zeroPad(hours) + ':' + zeroPad(minutes) + ':' + zeroPad(seconds) + ' ' + ampm;
-            consoleWindow.document.getElementById('clock').firstChild.nodeValue = clockStr;
+            var clockStr = zeroPad( hours ) + ':' + zeroPad( minutes ) + ':' + zeroPad( seconds ) +
+                           ' ' + ampm;
+            consoleWindow.document.getElementById( 'clock' ).firstChild.nodeValue = clockStr;
 
             // Timer
-            seconds = Math.floor((now - consoleWindow.timerStart) / 1000);
-            minutes = Math.floor(seconds / 60);
-            seconds = Math.floor(seconds % 60);
-            consoleWindow.document.getElementById('timer').firstChild.nodeValue = zeroPad(minutes) + 'm ' + zeroPad(seconds) + 's';
+            seconds = Math.floor( ( now - consoleWindow.timerStart ) / 1000 );
+            minutes = Math.floor( seconds / 60 );
+            seconds = Math.floor( seconds % 60 );
+            consoleWindow.document.getElementById( 'timer' ).firstChild.nodeValue =
+                zeroPad( minutes ) + 'm ' + zeroPad( seconds ) + 's';
 
-            if (!consoleWindow.initialized) {
+            if ( !consoleWindow.initialized ) {
+
                 // Nudge the slide windows after load, or they will scrolled wrong on Firefox.
-                consoleWindow.document.getElementById('slideView').contentWindow.scrollTo(0,0);
-                consoleWindow.document.getElementById('preView').contentWindow.scrollTo(0,0);
+                consoleWindow.document.getElementById( 'slideView' ).contentWindow.scrollTo( 0, 0 );
+                consoleWindow.document.getElementById( 'preView' ).contentWindow.scrollTo( 0, 0 );
                 consoleWindow.initialized = true;
             }
         };
 
-        var registerKeyEvent = function(keyCodes, handler, window) {
-            if (window === undefined) {
+        var registerKeyEvent = function( keyCodes, handler, window ) {
+            if ( window === undefined ) {
                 window = consoleWindow;
             }
 
-            // prevent default keydown action when one of supported key is pressed
-            window.document.addEventListener('keydown', function ( event ) {
-                if ( !event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey && keyCodes.indexOf(event.keyCode) !== -1) {
+            // Prevent default keydown action when one of supported key is pressed
+            window.document.addEventListener( 'keydown', function( event ) {
+                if ( !event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey &&
+                     keyCodes.indexOf( event.keyCode ) !== -1 ) {
                     event.preventDefault();
                 }
-            }, false);
+            }, false );
 
-            // trigger impress action on keyup
-            window.document.addEventListener('keyup', function ( event ) {
-                if ( !event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey && keyCodes.indexOf(event.keyCode) !== -1) {
+            // Trigger impress action on keyup
+            window.document.addEventListener( 'keyup', function( event ) {
+                if ( !event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey &&
+                     keyCodes.indexOf( event.keyCode ) !== -1 ) {
                         handler();
                         event.preventDefault();
                 }
-            }, false);
+            }, false );
         };
 
         var consoleOnLoad = function() {
-                var slideView = consoleWindow.document.getElementById('slideView');
-                var preView = consoleWindow.document.getElementById('preView');
+                var slideView = consoleWindow.document.getElementById( 'slideView' );
+                var preView = consoleWindow.document.getElementById( 'preView' );
 
                 // Firefox:
-                slideView.contentDocument.body.classList.add('impress-console');
-                preView.contentDocument.body.classList.add('impress-console');
-                if(cssFileIframe !== undefined) {
-                    slideView.contentDocument.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" type="text/css" href="' + cssFileIframe + '">');
-                    preView.contentDocument.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" type="text/css" href="' + cssFileIframe + '">');
+                slideView.contentDocument.body.classList.add( 'impress-console' );
+                preView.contentDocument.body.classList.add( 'impress-console' );
+                if ( cssFileIframe !== undefined ) {
+                    slideView.contentDocument.head.insertAdjacentHTML(
+                        'beforeend',
+                        '<link rel="stylesheet" type="text/css" href="' + cssFileIframe + '">'
+                    );
+                    preView.contentDocument.head.insertAdjacentHTML(
+                        'beforeend',
+                        '<link rel="stylesheet" type="text/css" href="' + cssFileIframe + '">'
+                    );
                 }
 
                 // Chrome:
-                slideView.addEventListener('load', function() {
-                        slideView.contentDocument.body.classList.add('impress-console');
-                        if(cssFileIframe !== undefined) {
-                            slideView.contentDocument.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" type="text/css" href="' + cssFileIframe + '">');
+                slideView.addEventListener( 'load', function() {
+                        slideView.contentDocument.body.classList.add( 'impress-console' );
+                        if ( cssFileIframe !== undefined ) {
+                            slideView.contentDocument.head.insertAdjacentHTML(
+                                'beforeend',
+                                '<link rel="stylesheet" type="text/css" href="' +
+                                    cssFileIframe + '">'
+                            );
                         }
-                });
-                preView.addEventListener('load', function() {
-                        preView.contentDocument.body.classList.add('impress-console');
-                        if(cssFileIframe !== undefined) {
-                            preView.contentDocument.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" type="text/css" href="' + cssFileIframe + '">');
+                } );
+                preView.addEventListener( 'load', function() {
+                        preView.contentDocument.body.classList.add( 'impress-console' );
+                        if ( cssFileIframe !== undefined ) {
+                            preView.contentDocument.head.insertAdjacentHTML(
+                                'beforeend',
+                                '<link rel="stylesheet" type="text/css" href="' +
+                                    cssFileIframe + '">' );
                         }
-                });
+                } );
         };
 
         var open = function() {
-            if(top.isconsoleWindow){
+            if ( top.isconsoleWindow ) {
                 return;
             }
 
-            if (consoleWindow && !consoleWindow.closed) {
+            if ( consoleWindow && !consoleWindow.closed ) {
                 consoleWindow.focus();
             } else {
-                consoleWindow = window.open('', 'impressConsole');
+                consoleWindow = window.open( '', 'impressConsole' );
 
-                // if opening failes this may be because the browser prevents this from
+                // If opening failes this may be because the browser prevents this from
                 // not (or less) interactive JavaScript...
-                if (consoleWindow == null) {
+                if ( consoleWindow == null ) {
+
                     // ... so I add a button to klick.
                     // workaround on firefox
-                    var message = document.createElement('div');
+                    var message = document.createElement( 'div' );
                     message.id = 'consoleWindowError';
                     message.style.position = 'fixed';
                     message.style.left = 0;
@@ -360,48 +387,67 @@
                     message.style.right = 0;
                     message.style.bottom = 0;
                     message.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-                    message.innerHTML = '<button style="margin: 25vh 25vw;width:50vw;height:50vh;" onclick="var x = document.getElementById(\'consoleWindowError\');x.parentNode.removeChild(x);impressConsole().open();">' + lang.clickToOpen + '</button>';
-                    document.body.appendChild(message);
+                    var onClickStr = 'var x = document.getElementById(\'consoleWindowError\');' +
+                                     'x.parentNode.removeChild(x);impressConsole().open();';
+                    message.innerHTML = '<button style="margin: 25vh 25vw;width:50vw;height:50vh;' +
+                                                 'onclick="' + onClickStr + '">' +
+                                        lang.clickToOpen +
+                                        '</button>';
+                    document.body.appendChild( message );
                     return;
                 }
 
                 var cssLink = '';
-                if( cssFile !== undefined ){
-                    cssLink = '<link rel="stylesheet" type="text/css" media="screen" href="' + cssFile + '">';
+                if ( cssFile !== undefined ) {
+                    cssLink = '<link rel="stylesheet" type="text/css" media="screen" href="' +
+                              cssFile + '">';
                 }
 
                 // This sets the window location to the main window location, so css can be loaded:
                 consoleWindow.document.open();
+
                 // Write the template:
-                consoleWindow.document.write(consoleTemplate
-                                                 .replace('{{cssStyle}}', cssStyleStr()) // cssStyleStr is lots of inline <style></style> defined at the end of this file
-                                                 .replace('{{cssLink}}', cssLink)
-                                                 .replace(/{{.*?}}/gi, function (x){ return lang[x.substring(2, x.length-2)]; }));
+                consoleWindow.document.write(
+
+                    // CssStyleStr is lots of inline <style></style> defined at the end of this file
+                    consoleTemplate.replace( '{{cssStyle}}', cssStyleStr() )
+                                   .replace( '{{cssLink}}', cssLink )
+                                   .replace( /{{.*?}}/gi, function( x ) {
+                                       return lang[ x.substring( 2, x.length - 2 ) ]; }
+                                   )
+                );
                 consoleWindow.document.title = 'Speaker Console (' + document.title + ')';
                 consoleWindow.impress = window.impress;
+
                 // We set this flag so we can detect it later, to prevent infinite popups.
                 consoleWindow.isconsoleWindow = true;
+
                 // Set the onload function:
                 consoleWindow.onload = consoleOnLoad;
+
                 // Add clock tick
                 consoleWindow.timerStart = new Date();
                 consoleWindow.timerReset = timerReset;
-                consoleWindow.clockInterval = setInterval(allConsoles[rootId].clockTick, 1000 );
+                consoleWindow.clockInterval = setInterval( allConsoles[ rootId ].clockTick, 1000 );
 
-                // keyboard navigation handlers
+                // Keyboard navigation handlers
                 // 33: pg up, 37: left, 38: up
-                registerKeyEvent([33, 37, 38], window.impress().prev);
+                registerKeyEvent( [ 33, 37, 38 ], window.impress().prev );
+
                 // 34: pg down, 39: right, 40: down
-                registerKeyEvent([34, 39, 40], window.impress().next);
+                registerKeyEvent( [ 34, 39, 40 ], window.impress().next );
+
                 // 32: space
-                registerKeyEvent([32], spaceHandler);
+                registerKeyEvent( [ 32 ], spaceHandler );
+
                 // 82: R
-                registerKeyEvent([82], timerReset);
+                registerKeyEvent( [ 82 ], timerReset );
 
                 // Cleanup
                 consoleWindow.onbeforeunload = function() {
+
                     // I don't know why onunload doesn't work here.
-                    clearInterval(consoleWindow.clockInterval);
+                    clearInterval( consoleWindow.clockInterval );
                 };
 
                 // It will need a little nudge on Firefox, but only after loading:
@@ -409,7 +455,7 @@
                 consoleWindow.initialized = false;
                 consoleWindow.document.close();
 
-                //catch any window resize to pass size on
+                //Catch any window resize to pass size on
                 window.onresize = resize;
                 consoleWindow.onresize = resize;
 
@@ -418,47 +464,47 @@
         };
 
         var resize = function() {
-            var slideView = consoleWindow.document.getElementById('slideView');
-            var preView = consoleWindow.document.getElementById('preView');
+            var slideView = consoleWindow.document.getElementById( 'slideView' );
+            var preView = consoleWindow.document.getElementById( 'preView' );
 
-            // get ratio of presentation
+            // Get ratio of presentation
             var ratio = window.innerHeight / window.innerWidth;
 
-            // get size available for views
-            var views = consoleWindow.document.getElementById('views');
+            // Get size available for views
+            var views = consoleWindow.document.getElementById( 'views' );
 
-            // slideView may have a border or some padding:
+            // SlideView may have a border or some padding:
             // asuming same border width on both direktions
             var delta = slideView.offsetWidth - slideView.clientWidth;
 
-            // set views
-            var slideViewWidth = (views.clientWidth - delta);
-            var slideViewHeight = Math.floor(slideViewWidth * ratio);
+            // Set views
+            var slideViewWidth = ( views.clientWidth - delta );
+            var slideViewHeight = Math.floor( slideViewWidth * ratio );
 
             var preViewTop = slideViewHeight + preViewGap;
 
-            var preViewWidth = Math.floor(slideViewWidth * preViewDefaultFactor);
-            var preViewHeight = Math.floor(slideViewHeight * preViewDefaultFactor);
+            var preViewWidth = Math.floor( slideViewWidth * preViewDefaultFactor );
+            var preViewHeight = Math.floor( slideViewHeight * preViewDefaultFactor );
 
-
-            // shrink preview to fit into space available
-            if (views.clientHeight - delta < preViewTop + preViewHeight) {
+            // Shrink preview to fit into space available
+            if ( views.clientHeight - delta < preViewTop + preViewHeight ) {
                 preViewHeight = views.clientHeight - delta - preViewTop;
-                preViewWidth = Math.floor(preViewHeight / ratio);
+                preViewWidth = Math.floor( preViewHeight / ratio );
             }
 
-            // if preview is not high enough forget ratios!
-            if (preViewWidth <= Math.floor(slideViewWidth * preViewMinimumFactor)) {
-                slideViewWidth = (views.clientWidth - delta);
-                slideViewHeight = Math.floor((views.clientHeight - delta - preViewGap) / (1 + preViewMinimumFactor));
+            // If preview is not high enough forget ratios!
+            if ( preViewWidth <= Math.floor( slideViewWidth * preViewMinimumFactor ) ) {
+                slideViewWidth = ( views.clientWidth - delta );
+                slideViewHeight = Math.floor( ( views.clientHeight - delta - preViewGap ) /
+                                             ( 1 + preViewMinimumFactor ) );
 
                 preViewTop = slideViewHeight + preViewGap;
 
-                preViewWidth = Math.floor(slideViewWidth * preViewMinimumFactor);
+                preViewWidth = Math.floor( slideViewWidth * preViewMinimumFactor );
                 preViewHeight = views.clientHeight - delta - preViewTop;
             }
 
-            // set the calculated into styles
+            // Set the calculated into styles
             slideView.style.width = slideViewWidth + 'px';
             slideView.style.height = slideViewHeight + 'px';
 
@@ -468,89 +514,91 @@
             preView.style.height = preViewHeight + 'px';
         };
 
-        var _init = function(cssConsole, cssIframe) {
-            if (cssConsole !== undefined) {
+        var _init = function( cssConsole, cssIframe ) {
+            if ( cssConsole !== undefined ) {
                 cssFile = cssConsole;
             }
+
             // You can also specify the css in the presentation root div:
             // <div id="impress" data-console-css=..." data-console-css-iframe="...">
-            else if (root.dataset.consoleCss !== undefined) {
+            else if ( root.dataset.consoleCss !== undefined ) {
                 cssFile = root.dataset.consoleCss;
             }
 
-            if (cssIframe !== undefined) {
+            if ( cssIframe !== undefined ) {
                 cssFileIframe = cssIframe;
-            }
-            else if (root.dataset.consoleCssIframe !== undefined) {
+            } else if ( root.dataset.consoleCssIframe !== undefined ) {
                 cssFileIframe = root.dataset.consoleCssIframe;
             }
 
-
             // Register the event
-            root.addEventListener('impress:stepleave', onStepLeave);
-            root.addEventListener('impress:stepenter', onStepEnter);
-            root.addEventListener('impress:substep:stepleaveaborted', onSubstep);
-            root.addEventListener('impress:substep:show', onSubstepShow);
-            root.addEventListener('impress:substep:hide', onSubstepHide);
+            root.addEventListener( 'impress:stepleave', onStepLeave );
+            root.addEventListener( 'impress:stepenter', onStepEnter );
+            root.addEventListener( 'impress:substep:stepleaveaborted', onSubstep );
+            root.addEventListener( 'impress:substep:show', onSubstepShow );
+            root.addEventListener( 'impress:substep:hide', onSubstepHide );
 
             //When the window closes, clean up after ourselves.
-            window.onunload = function(){
-                if (consoleWindow && !consoleWindow.closed) {
+            window.onunload = function() {
+                if ( consoleWindow && !consoleWindow.closed ) {
                     consoleWindow.close();
                 }
             };
 
             //Open speaker console when they press 'p'
-            registerKeyEvent([80], open, window);
+            registerKeyEvent( [ 80 ], open, window );
 
             //Btw, you can also launch console automatically:
             //<div id="impress" data-console-autolaunch="true">
-            if (root.dataset.consoleAutolaunch === 'true'){
+            if ( root.dataset.consoleAutolaunch === 'true' ) {
                 window.open();
             }
         };
 
-        var init = function(cssConsole, cssIframe) {
-            if ( (cssConsole === undefined || cssConsole === cssFileOldDefault) &&
-                 (cssIframe === undefined  || cssIframe === cssFileIframeOldDefault) ){
-                window.console.log('impressConsole.init() is deprecated. impressConsole is now initialized automatically when you call impress().init().');
+        var init = function( cssConsole, cssIframe ) {
+            if ( ( cssConsole === undefined || cssConsole === cssFileOldDefault ) &&
+                 ( cssIframe === undefined  || cssIframe === cssFileIframeOldDefault ) ) {
+                window.console.log( 'impressConsole.init() is deprecated. ' +
+                                   'impressConsole is now initialized automatically when you ' +
+                                   'call impress().init().' );
             }
-            _init(cssConsole, cssIframe);
+            _init( cssConsole, cssIframe );
         };
 
-        document.addEventListener('impress:init', function() {
+        document.addEventListener( 'impress:init', function() {
             _init();
 
             // Add 'P' to the help popup
-            triggerEvent(document, 'impress:help:add', { command : 'P', text : 'Presenter console', row : 10} );
-        });
+            triggerEvent( document, 'impress:help:add',
+                         { command: 'P', text: 'Presenter console', row: 10 } );
+        } );
 
         // New API for impress.js plugins is based on using events
-        root.addEventListener('impress:console:open', function(){
+        root.addEventListener( 'impress:console:open', function() {
             window.open();
-        });
+        } );
 
         /**
          * Register a key code to an event handler
-         * 
+         *
          * :param: event.detail.keyCodes    List of key codes
          * :param: event.detail.handler     A function registered as the event handler
          * :param: event.detail.window      The console window to register the keycode in
          */
-        root.addEventListener('impress:console:registerKeyEvent', function(event){
-            registerKeyEvent(event.detail.keyCodes, event.detail.handler, event.detail.window);
-        });
+        root.addEventListener( 'impress:console:registerKeyEvent', function( event ) {
+            registerKeyEvent( event.detail.keyCodes, event.detail.handler, event.detail.window );
+        } );
 
         // Return the object
-        allConsoles[rootId] = {init: init, open: open, clockTick: clockTick, registerKeyEvent: registerKeyEvent};
-        return allConsoles[rootId];
+        allConsoles[ rootId ] = { init: init, open: open, clockTick: clockTick,
+                               registerKeyEvent: registerKeyEvent };
+        return allConsoles[ rootId ];
 
     };
 
-
     // Returns a string to be used inline as a css <style> element in the console window.
     // Apologies for length, but hiding it here at the end to keep it away from rest of the code.
-    var cssStyleStr = function(){
+    var cssStyleStr = function() {
         return `<style>
             #impressconsole body {
                 background-color: rgb(255, 255, 255);
@@ -696,4 +744,4 @@
 
     impressConsole();
 
-})(document, window);
+} )( document, window );

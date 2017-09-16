@@ -11,33 +11,37 @@
  */
 /* global markdown, hljs, mermaid, impress, document, window */
 
-(function ( document, window ) {
+( function( document, window ) {
     "use strict";
 
     var preInit = function() {
-        if( window.markdown ){
+        if ( window.markdown ) {
+
             // Unlike the other extras, Markdown.js doesn't by default do anything in
-            // particular. We do it ourselves here. In addition, we use "-----" as a delimiter for new slide.
+            // particular. We do it ourselves here.
+            // In addition, we use "-----" as a delimiter for new slide.
 
             // Query all .markdown elements and translate to HTML
-            var markdownDivs = document.querySelectorAll(".markdown");
-            for (var idx=0; idx < markdownDivs.length; idx++) {
-              var element = markdownDivs[idx];
+            var markdownDivs = document.querySelectorAll( ".markdown" );
+            for ( var idx = 0; idx < markdownDivs.length; idx++ ) {
+              var element = markdownDivs[ idx ];
 
-              var slides = element.textContent.split(/^-----$/m);
+              var slides = element.textContent.split( /^-----$/m );
               var i = slides.length - 1;
-              element.innerHTML = markdown.toHTML(slides[i]);
-              // If there's an id, unset it for last, and all other, elements, and then set it for the first.
+              element.innerHTML = markdown.toHTML( slides[ i ] );
+
+              // If there's an id, unset it for last, and all other, elements,
+              // and then set it for the first.
               var id = null;
-              if( element.id ){
+              if ( element.id ) {
                 id = element.id;
                 element.id = "";
               }
               i--;
-              while (i >= 0){
-                var newElement = element.cloneNode(false);
-                newElement.innerHTML = markdown.toHTML(slides[i]);
-                element.parentNode.insertBefore(newElement, element);
+              while ( i >= 0 ) {
+                var newElement = element.cloneNode( false );
+                newElement.innerHTML = markdown.toHTML( slides[ i ] );
+                element.parentNode.insertBefore( newElement, element );
                 element = newElement;
                 i--;
               }
@@ -45,14 +49,14 @@
                 element.id = id;
               }
             }
-        } // markdown
-        
-        if(window.hljs){
-            hljs.initHighlightingOnLoad();        
+        } // Markdown
+
+        if ( window.hljs ) {
+            hljs.initHighlightingOnLoad();
         }
-        
-        if(window.mermaid){
-            mermaid.initialize({startOnLoad:true});
+
+        if ( window.mermaid ) {
+            mermaid.initialize( { startOnLoad:true } );
         }
     };
 
@@ -61,5 +65,5 @@
     // So add this with a lower-than-default weight.
     impress.addPreInitPlugin( preInit, 0 );
 
-})(document, window);
+} )( document, window );
 

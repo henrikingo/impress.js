@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "node build.js",
-    "lint": "jshint --exclude 'test/*/*.js' src test && jscs src test --preset=jquery",
+    "lint": "jshint src test/*.js && jscs src test/*.js",
     "test": "karma start --single-run",
     "test:dev": "karma start"
   },

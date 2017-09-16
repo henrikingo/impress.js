@@ -2,7 +2,7 @@
  * Help popup plugin
  *
  * Example:
- * 
+ *
  *     <!-- Show a help popup at start, or if user presses "H" -->
  *     <div id="impress-help"></div>
  *
@@ -16,48 +16,48 @@
  */
 /* global window, document */
 
-(function ( document, window ) {
+( function( document, window ) {
     "use strict";
     var rows = [];
     var timeoutHandle;
 
-    var triggerEvent = function (el, eventName, detail) {
-        var event = document.createEvent("CustomEvent");
-        event.initCustomEvent(eventName, true, true, detail);
-        el.dispatchEvent(event);
+    var triggerEvent = function( el, eventName, detail ) {
+        var event = document.createEvent( "CustomEvent" );
+        event.initCustomEvent( eventName, true, true, detail );
+        el.dispatchEvent( event );
     };
 
-    var renderHelpDiv = function(){
-        var helpDiv = document.getElementById("impress-help");
-        if(helpDiv){
+    var renderHelpDiv = function() {
+        var helpDiv = document.getElementById( "impress-help" );
+        if ( helpDiv ) {
             var html = [];
-            for( var row in rows ){
-                for( var arrayItem in row ){
-                    html.push(rows[row][arrayItem]);
+            for ( var row in rows ) {
+                for ( var arrayItem in row ) {
+                    html.push( rows[ row ][ arrayItem ] );
                 }
             }
-            if( html ) {
-                helpDiv.innerHTML = "<table>\n" + html.join("\n") + "</table>\n";
+            if ( html ) {
+                helpDiv.innerHTML = "<table>\n" + html.join( "\n" ) + "</table>\n";
             }
         }
     };
-    
+
     var toggleHelp = function() {
-        var helpDiv = document.getElementById("impress-help");
-        if (!helpDiv) {
+        var helpDiv = document.getElementById( "impress-help" );
+        if ( !helpDiv ) {
             return;
         }
- 
-        if(helpDiv.style.display === "block") {
+
+        if ( helpDiv.style.display === "block" ) {
             helpDiv.style.display = "none";
-        }
-        else {
+        } else {
             helpDiv.style.display = "block";
             window.clearTimeout( timeoutHandle );
         }
     };
 
-    document.addEventListener("keyup", function ( event ) {
+    document.addEventListener( "keyup", function( event ) {
+
         // Check that event target is html or body element.
         if ( event.target.nodeName === "BODY" || event.target.nodeName === "HTML" ) {
             if ( event.keyCode === 72 ) { // "h"
@@ -65,7 +65,7 @@
                 toggleHelp();
             }
         }
-    }, false);
+    }, false );
 
     // API
     // Other plugins can add help texts, typically if they support an action on a keypress.
@@ -76,42 +76,47 @@
      * :param: e.detail.text     Example: "Show this help."
      * :param: e.detail.row      Row index from 0 to 9 where to place this help text. Example: 0
      */
-    document.addEventListener("impress:help:add", function( e ){
+    document.addEventListener( "impress:help:add", function( e ) {
+
         // The idea is for the sender of the event to supply a unique row index, used for sorting.
         // But just in case two plugins would ever use the same row index, we wrap each row into
         // its own array. If there are more than one entry for the same index, they are shown in
         // first come, first serve ordering.
         var rowIndex = e.detail.row;
-        if ( typeof rows[rowIndex] !== "object" || !rows[rowIndex].isArray ) {
-            rows[rowIndex] = [];
+        if ( typeof rows[ rowIndex ] !== "object" || !rows[ rowIndex ].isArray ) {
+            rows[ rowIndex ] = [];
         }
-        rows[e.detail.row].push( "<tr><td><strong>" + e.detail.command + "</strong></td><td>" + e.detail.text + "</td></tr>" );
+        rows[ e.detail.row ].push( "<tr><td><strong>" + e.detail.command + "</strong></td><td>" +
+                                   e.detail.text + "</td></tr>" );
         renderHelpDiv();
-    });
+    } );
 
-    document.addEventListener("impress:init", function( e ){
+    document.addEventListener( "impress:init", function( e ) {
         renderHelpDiv();
+
         // At start, show the help for 7 seconds.
-        var helpDiv = document.getElementById("impress-help");
-        if( helpDiv ) {
+        var helpDiv = document.getElementById( "impress-help" );
+        if ( helpDiv ) {
             helpDiv.style.display = "block";
-            timeoutHandle = window.setTimeout(function () {
-                var helpDiv = document.getElementById("impress-help");
+            timeoutHandle = window.setTimeout( function() {
+                var helpDiv = document.getElementById( "impress-help" );
                 helpDiv.style.display = "none";
-            }, 7000);
+            }, 7000 );
+
             // Regster callback to empty the help div on teardown
             var api = e.detail.api;
-            api.lib.gc.addCallback( function(){
-                window.clearTimeout(timeoutHandle);
+            api.lib.gc.addCallback( function() {
+                window.clearTimeout( timeoutHandle );
                 helpDiv.style.display = "";
                 helpDiv.innerHTML = "";
                 rows = [];
-            });
+            } );
         }
+
         // Use our own API to register the help text for "h"
-        triggerEvent(document, "impress:help:add", { command : "H", text : "Show this help", row : 0} );
-    });
-    
-    
-})(document, window);
+        triggerEvent( document, "impress:help:add",
+                      { command: "H", text: "Show this help", row: 0 } );
+    } );
+
+} )( document, window );
 

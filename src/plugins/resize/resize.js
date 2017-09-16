@@ -15,31 +15,33 @@
 
 /* global document, window */
 
-(function ( document, window ) {
+( function( document, window ) {
     "use strict";
-    
-    // throttling function calls, by Remy Sharp
+
+    // Throttling function calls, by Remy Sharp
     // http://remysharp.com/2010/07/21/throttling-function-calls/
-    var throttle = function (fn, delay) {
+    var throttle = function( fn, delay ) {
         var timer = null;
-        return function () {
+        return function() {
             var context = this, args = arguments;
-            window.clearTimeout(timer);
-            timer = window.setTimeout(function () {
-                fn.apply(context, args);
-            }, delay);
+            window.clearTimeout( timer );
+            timer = window.setTimeout( function() {
+                fn.apply( context, args );
+            }, delay );
         };
     };
-    
-    // wait for impress.js to be initialized
-    document.addEventListener("impress:init", function (event) {
+
+    // Wait for impress.js to be initialized
+    document.addEventListener( "impress:init", function( event ) {
         var api = event.detail.api;
-        // rescale presentation when window is resized
-        api.lib.gc.addEventListener(window, "resize", throttle(function () {
-            // force going to active step again, to trigger rescaling
-            api.goto( document.querySelector(".step.active"), 500 );
-        }, 250), false);
-    }, false);
-        
-})(document, window);
+
+        // Rescale presentation when window is resized
+        api.lib.gc.addEventListener( window, "resize", throttle( function() {
+
+            // Force going to active step again, to trigger rescaling
+            api.goto( document.querySelector( ".step.active" ), 500 );
+        }, 250 ), false );
+    }, false );
+
+} )( document, window );
 

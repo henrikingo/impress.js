@@ -14,7 +14,7 @@
  * To add/activate the toolbar in your presentation, add this div:
  *
  *     <div id="impress-toolbar"></div>
- * 
+ *
  * Styling the toolbar is left to presentation author. Here's an example CSS:
  *
  *    .impress-enabled div#impress-toolbar {
@@ -41,12 +41,14 @@
  * or `impress:toolbar:insertBefore` events as appropriate. The detail object
  * should contain following parameters:
  *
- *    { group : 1,                       // integer. Widgets with the same group are grouped inside the same <span> element.
+ *    { group : 1,                       // integer. Widgets with the same group are grouped inside
+ *                                       // the same <span> element.
  *      html : "<button>Click</button>", // The html to add.
- *      callback : "mycallback",         // Toolbar plugin will trigger event `impress:toolbar:added:mycallback` when done.
+ *      callback : "mycallback",         // Toolbar plugin will trigger event
+ *                                       // `impress:toolbar:added:mycallback` when done.
  *      before: element }                // The reference element for an insertBefore() call.
  *
- * You should also listen to the `impress:toolbar:added:mycallback` event. At 
+ * You should also listen to the `impress:toolbar:added:mycallback` event. At
  * this point you can find the new widget in the DOM, and for example add an
  * event listener to it.
  *
@@ -62,9 +64,9 @@
 
 /* global document */
 
-(function ( document ) {
+( function( document ) {
     "use strict";
-    var toolbar = document.getElementById("impress-toolbar");
+    var toolbar = document.getElementById( "impress-toolbar" );
     var groups = [];
 
     /**
@@ -77,22 +79,21 @@
      *
      * :param: index   Method will return the element <span id="impress-toolbar-group-{index}">
      */
-    var getGroupElement = function(index){
+    var getGroupElement = function( index ) {
         var id = "impress-toolbar-group-" + index;
-        if(!groups[index]){
-            groups[index] = document.createElement("span");
-            groups[index].id = id;
-            var nextIndex = getNextGroupIndex(index);
-            if ( nextIndex === undefined ){
-                toolbar.appendChild(groups[index]);
-            }
-            else{
-                toolbar.insertBefore(groups[index], groups[nextIndex]);
+        if ( !groups[ index ] ) {
+            groups[ index ] = document.createElement( "span" );
+            groups[ index ].id = id;
+            var nextIndex = getNextGroupIndex( index );
+            if ( nextIndex === undefined ) {
+                toolbar.appendChild( groups[ index ] );
+            } else {
+                toolbar.insertBefore( groups[ index ], groups[ nextIndex ] );
             }
         }
-        return groups[index];
+        return groups[ index ];
     };
-    
+
     /**
      * Get the span element from groups[] that is immediately after given index.
      *
@@ -102,12 +103,12 @@
      *
      * Note that index needn't itself exist in groups[].
      */
-    var getNextGroupIndex = function(index){
-        var i = index+1;
-        while( ! groups[i] && i < groups.length) {
+    var getNextGroupIndex = function( index ) {
+        var i = index + 1;
+        while ( !groups[ i ] && i < groups.length ) {
             i++;
         }
-        if( i < groups.length ){
+        if ( i < groups.length ) {
             return i;
         }
     };
@@ -115,17 +116,17 @@
     // API
     // Other plugins can add and remove buttons by sending them as events.
     // In return, toolbar plugin will trigger events when button was added.
-    if (toolbar) {
+    if ( toolbar ) {
         /**
          * Append a widget inside toolbar span element identified by given group index.
          *
          * :param: e.detail.group    integer specifying the span element where widget will be placed
          * :param: e.detail.element  a dom element to add to the toolbar
          */
-        toolbar.addEventListener("impress:toolbar:appendChild", function( e ){
-            var group = getGroupElement(e.detail.group);
-            group.appendChild(e.detail.element);
-        });
+        toolbar.addEventListener( "impress:toolbar:appendChild", function( e ) {
+            var group = getGroupElement( e.detail.group );
+            group.appendChild( e.detail.element );
+        } );
 
         /**
          * Add a widget to toolbar using insertBefore() DOM method.
@@ -133,24 +134,24 @@
          * :param: e.detail.before   the reference dom element, before which new element is added
          * :param: e.detail.element  a dom element to add to the toolbar
          */
-        toolbar.addEventListener("impress:toolbar:insertBefore", function( e ){
-            toolbar.insertBefore(e.detail.element, e.detail.before);
-        });
+        toolbar.addEventListener( "impress:toolbar:insertBefore", function( e ) {
+            toolbar.insertBefore( e.detail.element, e.detail.before );
+        } );
 
         /**
          * Remove the widget in e.detail.remove.
          */
-        toolbar.addEventListener("impress:toolbar:removeWidget", function( e ){
-            toolbar.removeChild(e.detail.remove);
-        });
+        toolbar.addEventListener( "impress:toolbar:removeWidget", function( e ) {
+            toolbar.removeChild( e.detail.remove );
+        } );
 
-        document.addEventListener("impress:init", function( event ) {
+        document.addEventListener( "impress:init", function( event ) {
             var api = event.detail.api;
             api.lib.gc.addCallback( function() {
                 toolbar.innerHTML = "";
                 groups = [];
-            });
-        });
-    } // if toolbar
+            } );
+        } );
+    } // If toolbar
 
-})(document);
+} )( document );

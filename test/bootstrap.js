@@ -5,7 +5,6 @@
 // unnecessary deviation with upstream.
 // If you just want to run the tests locally, you can open test/index.html in Firefox.
 
-
 // That's annoying: karma-qunit doesn't provide the qunit-fixture element
 // https://github.com/karma-runner/karma-qunit/issues/18
 
@@ -24,4 +23,3 @@ fix.innerHTML = [
 '            style="border:1px solid #CCC; max-width: 100%;">\n',
 '    </iframe>'
 ].join( '' );
-//document.body.appendChild( fix );
