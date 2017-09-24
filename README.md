@@ -16,14 +16,10 @@ HOW TO USE IT
 
 ### Checking out and initializing the git repository
 
-    git clone https://github.com/henrikingo/impress.js.git
+    git clone --recursive https://github.com/henrikingo/impress.js.git
     cd impress.js
-    # Not all presentations need the extra addons, but if you do, then
-    git submodule init
-    git submodule update
 
-(Note: There's actually a simpler way. Just add the `--recursive` option to `git clone` and the
-submodule is automatically cloned too.)
+Note: For a minimal checkout, omit the `--recursive` option. This will leave out extra plugins.
 
 ### Documentation
 
