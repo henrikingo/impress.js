@@ -5,6 +5,7 @@ buildify()
   .load('src/impress.js')
   // Libraries from src/lib
   .concat(['src/lib/gc.js'])
+  .concat(['src/lib/util.js'])
   // Plugins from src/plugins
   .concat(['src/plugins/autoplay/autoplay.js',
            'src/plugins/blackout/blackout.js',
