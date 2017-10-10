@@ -254,8 +254,6 @@
                 prev: empty,
                 next: empty,
                 tear: empty,
-                addPreInitPlugin: empty,
-                addPreStepLeavePlugin: empty,
                 lib: {}
             };
         }
