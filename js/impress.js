@@ -702,8 +702,8 @@
 
                 // To keep the perspective look similar for different scales
                 // we need to 'scale' the perspective, too
-                transform: perspective( config.perspective / interpolatedStep.scale ) +
-                           scale( interpolatedStep.scale ),
+                perspective: config.perspective / interpolatedStep.scale + "px",
+                transform: scale( interpolatedStep.scale ),
                 transitionDuration: "0ms",
                 transitionDelay: "0ms"
             } );
@@ -843,10 +843,10 @@
     // be run (synchronously) at the beginning of init, before
     // impress().init() itself executes.
     impress.addPreInitPlugin = function( plugin, weight ) {
-        weight = parseInt(weight) || 10;
+        weight = parseInt( weight ) || 10;
         if ( weight <= 0 ) {
-            throw "addPreInitPlugin: weight must be a positive integer"
-        };
+            throw "addPreInitPlugin: weight must be a positive integer";
+        }
 
         if ( preInitPlugins[ weight ] === undefined ) {
             preInitPlugins[ weight ] = [];
@@ -869,10 +869,10 @@
     // `addPreStepLeavePlugin` allows plugins to register a function that should
     // be run (synchronously) at the beginning of goto()
     impress.addPreStepLeavePlugin = function( plugin, weight ) { //jshint ignore:line
-        weight = parseInt(weight) || 10;
+        weight = parseInt( weight ) || 10;
         if ( weight <= 0 ) {
-            throw "addPreStepLeavePlugin: weight must be a positive integer"
-        };
+            throw "addPreStepLeavePlugin: weight must be a positive integer";
+        }
 
         if ( preStepLeavePlugins[ weight ] === undefined ) {
             preStepLeavePlugins[ weight ] = [];
