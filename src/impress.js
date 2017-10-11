@@ -263,9 +263,9 @@
             lib.util.triggerEvent( step, "impress:steprefresh" );
         };
 
-        // `onStepLeave` is called whenever the step element is left
-        // but the event is triggered only if the step is the same as
-        // last entered step.
+        // `onStepLeave` is called whenever the currentStep element is left
+        // but the event is triggered only if the currentStep is the same as
+        // lastEntered step.
         var onStepLeave = function( currentStep, nextStep ) {
             if ( lastEntered === currentStep ) {
                 lib.util.triggerEvent( currentStep, "impress:stepleave", { next: nextStep } );
@@ -534,6 +534,8 @@
 
                 // To keep the perspective look similar for different scales
                 // we need to "scale" the perspective, too
+                // For IE 11 support we must specify perspective independent
+                // of transform.
                 perspective: ( config.perspective / targetScale ) + "px",
                 transform: scale( targetScale ),
                 transitionDuration: duration + "ms",
