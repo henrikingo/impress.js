@@ -291,6 +291,9 @@
                         order: validateOrder( data.rotateOrder )
                     },
                     scale: lib.util.toNumber( data.scale, 1 ),
+                    transitionDuration: lib.util.toNumber(
+                        data.transitionDuration, config.transitionDuration
+                    ),
                     el: el
                 };
 
@@ -340,7 +343,7 @@
                 minScale: lib.util.toNumber( rootData.minScale, defaults.minScale ),
                 perspective: lib.util.toNumber( rootData.perspective, defaults.perspective ),
                 transitionDuration: lib.util.toNumber(
-                  rootData.transitionDuration, defaults.transitionDuration
+                    rootData.transitionDuration, defaults.transitionDuration
                 )
             };
 
@@ -445,6 +448,7 @@
             window.scrollTo( 0, 0 );
 
             var step = stepsData[ "impress-" + el.id ];
+            duration = ( duration !== undefined ? duration : step.transitionDuration );
 
             // If we are in fact moving to another step, start with executing the registered
             // preStepLeave plugins.
