@@ -16,10 +16,11 @@
 
 ( function( document, window ) {
     "use strict";
+    var util;
 
-    var toNumber = function( numeric, fallback ) {
-        return isNaN( numeric ) ? ( fallback || 0 ) : Number( numeric );
-    };
+    document.addEventListener( "impress:init", function( event ) {
+        util = event.detail.api.lib.util;
+    }, false );
 
     var getNextStep = function( el ) {
         var steps = document.querySelectorAll( ".step" );
@@ -68,7 +69,7 @@
 
             // If the new next element has its own transitionDuration, we're responsible for setting
             // that on the event as well
-            event.detail.transitionDuration = toNumber(
+            event.detail.transitionDuration = util.toNumber(
                 event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
             );
         }

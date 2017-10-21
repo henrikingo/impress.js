@@ -1254,15 +1254,12 @@
     var api = null;
     var timeoutHandle = null;
     var root = null;
-
-    // Copied from core impress.js. Good candidate for moving to a utilities collection.
-    var toNumber = function( numeric, fallback ) {
-        return isNaN( numeric ) ? ( fallback || 0 ) : Number( numeric );
-    };
+    var util;
 
     // On impress:init, check whether there is a default setting, as well as
     // handle step-1.
     document.addEventListener( "impress:init", function( event ) {
+        util = event.detail.api.lib.util;
 
         // Getting API from event data instead of global impress().init().
         // You don't even need to know what is the id of the root element
@@ -1276,7 +1273,7 @@
         var data = root.dataset;
 
         if ( data.autoplay ) {
-            autoplayDefault = toNumber( data.autoplay, 0 );
+            autoplayDefault = util.toNumber( data.autoplay, 0 );
         }
 
         var toolbar = document.querySelector( "#impress-toolbar" );
@@ -1296,7 +1293,7 @@
     // in this step, set timeout.
     var reloadTimeout = function( event ) {
         var step = event.target;
-        currentStepTimeout = toNumber( step.dataset.autoplay, autoplayDefault );
+        currentStepTimeout = util.toNumber( step.dataset.autoplay, autoplayDefault );
         if ( status === "paused" ) {
             setAutoplayTimeout( 0 );
         } else {
@@ -1581,7 +1578,7 @@
     // Register the plugin to be called in pre-init phase
     // Note: Markdown.js should run early/first, because it creates new div elements.
     // So add this with a lower-than-default weight.
-    impress.addPreInitPlugin( preInit, 0 );
+    impress.addPreInitPlugin( preInit, 1 );
 
 } )( document, window );
 
@@ -1637,6 +1634,9 @@
  *             data-goto-key-list="ArrowUp ArrowDown ArrowRight ArrowLeft"
  *             data-goto-next-list="step-4 step-3 step-2 step-5">
  *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values for a table
+ * of what strings to use for each key.
+ *
  * Copyright 2016-2017 Henrik Ingo (@henrikingo)
  * Released under the MIT license.
  */
@@ -1644,13 +1644,15 @@
 
 ( function( document, window ) {
     "use strict";
+    var util;
+
+    document.addEventListener( "impress:init", function( event ) {
+        util = event.detail.api.lib.util;
+    }, false );
+
 
     var isNumber = function( numeric ) {
         return !isNaN( numeric );
-    };
-
-    var toNumber = function( numeric, fallback ) {
-        return isNaN( numeric ) ? ( fallback || 0 ) : Number( numeric );
     };
 
     var goto = function( event ) {
@@ -1686,7 +1688,7 @@
 
                         // If the new next element has its own transitionDuration, we're responsible
                         // for setting that on the event as well
-                        event.detail.transitionDuration = toNumber(
+                        event.detail.transitionDuration = util.toNumber(
                             event.detail.next.dataset.transitionDuration,
                             event.detail.transitionDuration
                         );
@@ -1695,7 +1697,7 @@
                         var newTarget = document.getElementById( next );
                         if ( newTarget && newTarget.classList.contains( "step" ) ) {
                             event.detail.next = newTarget;
-                            event.detail.transitionDuration = toNumber(
+                            event.detail.transitionDuration = util.toNumber(
                                 event.detail.next.dataset.transitionDuration,
                                 event.detail.transitionDuration
                             );
@@ -1717,7 +1719,7 @@
 
             // If the new next element has its own transitionDuration, we're responsible for setting
             // that on the event as well
-            event.detail.transitionDuration = toNumber(
+            event.detail.transitionDuration = util.toNumber(
                 event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
             );
             return;
@@ -1726,7 +1728,7 @@
             var newTarget = document.getElementById( data.gotoNext ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains( "step" ) ) {
                 event.detail.next = newTarget;
-                event.detail.transitionDuration = toNumber(
+                event.detail.transitionDuration = util.toNumber(
                     event.detail.next.dataset.transitionDuration,
                     event.detail.transitionDuration
                 );
@@ -1740,7 +1742,7 @@
         // Handle event.target data-goto-prev attribute
         if ( isNumber( data.gotoPrev ) && event.detail.reason === "prev" ) {
             event.detail.next = steps[ data.gotoPrev ];
-            event.detail.transitionDuration = toNumber(
+            event.detail.transitionDuration = util.toNumber(
                 event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
             );
             return;
@@ -1749,7 +1751,7 @@
             var newTarget = document.getElementById( data.gotoPrev ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains( "step" ) ) {
                 event.detail.next = newTarget;
-                event.detail.transitionDuration = toNumber(
+                event.detail.transitionDuration = util.toNumber(
                     event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
                 );
                 return;
@@ -1764,7 +1766,7 @@
         // Handle event.target data-goto attribute
         if ( isNumber( data.goto ) ) {
             event.detail.next = steps[ data.goto ];
-            event.detail.transitionDuration = toNumber(
+            event.detail.transitionDuration = util.toNumber(
                 event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
             );
             return;
@@ -1773,7 +1775,7 @@
             var newTarget = document.getElementById( data.goto ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains( "step" ) ) {
                 event.detail.next = newTarget;
-                event.detail.transitionDuration = toNumber(
+                event.detail.transitionDuration = util.toNumber(
                     event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
                 );
                 return;
@@ -3401,10 +3403,11 @@
 
 ( function( document, window ) {
     "use strict";
+    var util;
 
-    var toNumber = function( numeric, fallback ) {
-        return isNaN( numeric ) ? ( fallback || 0 ) : Number( numeric );
-    };
+    document.addEventListener( "impress:init", function( event ) {
+        util = event.detail.api.lib.util;
+    }, false );
 
     var getNextStep = function( el ) {
         var steps = document.querySelectorAll( ".step" );
@@ -3453,7 +3456,7 @@
 
             // If the new next element has its own transitionDuration, we're responsible for setting
             // that on the event as well
-            event.detail.transitionDuration = toNumber(
+            event.detail.transitionDuration = util.toNumber(
                 event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
             );
         }

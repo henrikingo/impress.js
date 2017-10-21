@@ -30,13 +30,15 @@
 
 ( function( document, window ) {
     "use strict";
+    var util;
+
+    document.addEventListener( "impress:init", function( event ) {
+        util = event.detail.api.lib.util;
+    }, false );
+
 
     var isNumber = function( numeric ) {
         return !isNaN( numeric );
-    };
-
-    var toNumber = function( numeric, fallback ) {
-        return isNaN( numeric ) ? ( fallback || 0 ) : Number( numeric );
     };
 
     var goto = function( event ) {
@@ -72,7 +74,7 @@
 
                         // If the new next element has its own transitionDuration, we're responsible
                         // for setting that on the event as well
-                        event.detail.transitionDuration = toNumber(
+                        event.detail.transitionDuration = util.toNumber(
                             event.detail.next.dataset.transitionDuration,
                             event.detail.transitionDuration
                         );
@@ -81,7 +83,7 @@
                         var newTarget = document.getElementById( next );
                         if ( newTarget && newTarget.classList.contains( "step" ) ) {
                             event.detail.next = newTarget;
-                            event.detail.transitionDuration = toNumber(
+                            event.detail.transitionDuration = util.toNumber(
                                 event.detail.next.dataset.transitionDuration,
                                 event.detail.transitionDuration
                             );
@@ -103,7 +105,7 @@
 
             // If the new next element has its own transitionDuration, we're responsible for setting
             // that on the event as well
-            event.detail.transitionDuration = toNumber(
+            event.detail.transitionDuration = util.toNumber(
                 event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
             );
             return;
@@ -112,7 +114,7 @@
             var newTarget = document.getElementById( data.gotoNext ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains( "step" ) ) {
                 event.detail.next = newTarget;
-                event.detail.transitionDuration = toNumber(
+                event.detail.transitionDuration = util.toNumber(
                     event.detail.next.dataset.transitionDuration,
                     event.detail.transitionDuration
                 );
@@ -126,7 +128,7 @@
         // Handle event.target data-goto-prev attribute
         if ( isNumber( data.gotoPrev ) && event.detail.reason === "prev" ) {
             event.detail.next = steps[ data.gotoPrev ];
-            event.detail.transitionDuration = toNumber(
+            event.detail.transitionDuration = util.toNumber(
                 event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
             );
             return;
@@ -135,7 +137,7 @@
             var newTarget = document.getElementById( data.gotoPrev ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains( "step" ) ) {
                 event.detail.next = newTarget;
-                event.detail.transitionDuration = toNumber(
+                event.detail.transitionDuration = util.toNumber(
                     event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
                 );
                 return;
@@ -150,7 +152,7 @@
         // Handle event.target data-goto attribute
         if ( isNumber( data.goto ) ) {
             event.detail.next = steps[ data.goto ];
-            event.detail.transitionDuration = toNumber(
+            event.detail.transitionDuration = util.toNumber(
                 event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
             );
             return;
@@ -159,7 +161,7 @@
             var newTarget = document.getElementById( data.goto ); // jshint ignore:line
             if ( newTarget && newTarget.classList.contains( "step" ) ) {
                 event.detail.next = newTarget;
-                event.detail.transitionDuration = toNumber(
+                event.detail.transitionDuration = util.toNumber(
                     event.detail.next.dataset.transitionDuration, event.detail.transitionDuration
                 );
                 return;

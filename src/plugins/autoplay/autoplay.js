@@ -14,15 +14,12 @@
     var api = null;
     var timeoutHandle = null;
     var root = null;
-
-    // Copied from core impress.js. Good candidate for moving to a utilities collection.
-    var toNumber = function( numeric, fallback ) {
-        return isNaN( numeric ) ? ( fallback || 0 ) : Number( numeric );
-    };
+    var util;
 
     // On impress:init, check whether there is a default setting, as well as
     // handle step-1.
     document.addEventListener( "impress:init", function( event ) {
+        util = event.detail.api.lib.util;
 
         // Getting API from event data instead of global impress().init().
         // You don't even need to know what is the id of the root element
@@ -36,7 +33,7 @@
         var data = root.dataset;
 
         if ( data.autoplay ) {
-            autoplayDefault = toNumber( data.autoplay, 0 );
+            autoplayDefault = util.toNumber( data.autoplay, 0 );
         }
 
         var toolbar = document.querySelector( "#impress-toolbar" );
@@ -56,7 +53,7 @@
     // in this step, set timeout.
     var reloadTimeout = function( event ) {
         var step = event.target;
-        currentStepTimeout = toNumber( step.dataset.autoplay, autoplayDefault );
+        currentStepTimeout = util.toNumber( step.dataset.autoplay, autoplayDefault );
         if ( status === "paused" ) {
             setAutoplayTimeout( 0 );
         } else {
