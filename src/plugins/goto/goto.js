@@ -36,7 +36,6 @@
         util = event.detail.api.lib.util;
     }, false );
 
-
     var isNumber = function( numeric ) {
         return !isNaN( numeric );
     };

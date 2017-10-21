@@ -196,6 +196,7 @@
                 goto: empty,
                 prev: empty,
                 next: empty,
+                swipe: empty,
                 tear: empty,
                 lib: {}
             };
