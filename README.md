@@ -1,3 +1,11 @@
+THIS FORK IS CLOSED
+===================
+
+I'm glad to announce that all the work in this fork was eventually merged back upstream. It's now
+available at https://github.com/impress/impress.js as of release 1.0.0-beta1. There will be no more
+commits to this fork.
+
+
 impress.js
 ============
 
